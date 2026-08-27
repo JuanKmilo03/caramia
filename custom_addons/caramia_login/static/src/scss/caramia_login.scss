@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&display=swap');
+
+$ink: #14161c;
+$ink-800: #1c1f28;
+$ink-700: #262a36;
+$paper: #f3f0e7;
+$paper-dim: #d9d5c8;
+$gold: #ebad33;
+$gold-dim: #c98f2e;
+$text: #eceae3;
+$text-muted: #8b8d97;
+$line: rgba(236, 234, 227, 0.12);
+$serif: 'Fraunces', serif;
+$sans: 'Inter', sans-serif;
+$mono: 'Space Mono', monospace;
+$ease: cubic-bezier(.16, .8, .24, 1);
+
+html,
+body.py-5 {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+    background: #f3f0e7 !important;
+
+    /* Palo rosa dominante */
+    &::before,
+    &::after {
+        display: none;
+    }
+}
+
+#wrapwrap {
+    display: none !important;
+}
+
+
+.cm-login-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: #f3f0e7;
+    /* Palo rosa de la imagen */
+    overflow: hidden;
+}
+
+// parte donde dice arcamis
+.cm-login-hero {
+    position: absolute !important;
+    left: 0;
+    top: 0 !important;
+    width: 60% !important;
+    height: 100% !important;
+    padding: 4rem !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    z-index: 2 !important;
+
+    clip-path: polygon(0 0, 100% 0, 65% 100%, 0 100%) !important;
+    background: transparent !important;
+
+    .cm-login-logo {
+        position: absolute;
+        top: 1.5rem;
+        left: 4rem;
+        z-index: 10;
+
+        img {
+            width: 120px;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+    }
+}
+
+.cm-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 80%;
+    margin-top: 2rem;
+}
+
+.cm-hero-title {
+    font-weight: 500;
+    font-size: clamp(2.6rem, 8vw, 6.2rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    background-clip: text !important;
+    font-family: $serif;
+    font-style: italic;
+    color: $gold-dim;
+    background: linear-gradient(135deg, #c98f2e 0%, #ebad33 100%);
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+
+    strong {
+        font-weight: 500;
+        -webkit-text-fill-color: rgba($paper-dim, 0.95) !important;
+    }
+
+    animation: slideUpFade 1.2s $ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cm-hero-tagline {
+    font-family: $ease;
+    font-style: normal;    
+    font-weight: 300;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    letter-spacing: 0.35em;
+    margin-top: 10vh;
+    -webkit-text-fill-color: rgba($paper-dim, 0.9) !important;
+
+    &::before {
+        content: '';
+        display: block;
+        width: 28px;
+        height: 1.5px;
+        background: rgba(255, 243, 190, 0.5);
+        border-radius: 2px;
+        margin-bottom: 12px;
+    }
+}
+
+// login odoo
+.cm-login-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6%;
+    z-index: 1;
+}
+
+.cm-login-right .oe_website_login_container,
+.cm-login-right .card.border-0 {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    min-width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    .card-body {
+        background: transparent !important;
+        padding: 3rem 1.5rem !important;
+
+        .oe_login_form {
+            width: 100% !important;
+        }
+
+        .o_user_switch_btn,
+        .btn-link {
+            display: block !important;
+            text-align: right !important;
+            width: auto !important;
+            color: $text-muted !important;
+            text-decoration: none !important;
+            transition: color 0.3s $ease;
+
+            &:hover {
+                color: $paper-dim !important;
+            }
+        }
+
+
+        input.form-control {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            background: rgba($paper-dim, 0.25) !important;
+            border-bottom: $paper-dim;
+            border-radius: 6px !important;
+            color: $ink-700 !important;
+            padding: 14px 18px !important;
+            margin-bottom: 1rem !important;
+            font-size: 1rem !important;
+
+            &::placeholder {
+                color: rgba(#2a3565, 0.4) !important;
+            }
+
+            &:focus {
+                background: rgba($paper-dim, 0.4) !important;
+                box-shadow: none !important;
+                outline: 1px solid rgba(42, 53, 101, 0.2) !important;
+            }
+        }
+
+        .form-label {
+            color: $ink-700;
+        }
+
+        .btn-primary,
+        a[href*="auth_oauth"] {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            max-width: 280px !important;
+            margin: 10px auto !important;
+            border-radius: 30px !important;
+            padding: 10px 20px !important;
+            text-align: center !important;
+            background-color: $ink-800 !important;
+            color: #eceae3 !important;
+            font-family: $sans;
+            font-weight: 200;
+            border: 1px solid rgba(236, 234, 227, 0.12) !important;
+            transition: background-color 0.8s ease, border-color 0.4s ease, color 0.8s ease !important;
+            gap: 12px !important;
+
+            &:hover {
+                background-color: #8d5b05 !important;
+            }
+        }
+    }
+
+    // autocompletar
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #d6d1c2 inset !important;
+        -webkit-text-fill-color: $ink-800 !important;
+        border: 1px solid $line !important;
+        transition: background-color 5000s ease-in-out 0s !important;
+    }
+}
