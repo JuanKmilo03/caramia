@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+<<<<<<< HEAD
 access_caramia_partner_user,caramia.partner.user,base.model_res_partner,base.group_user,1,1,1,1
+=======
+>>>>>>> 7b3cf60954591c2500e070eba99a787916a186fc

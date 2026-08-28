@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+<<<<<<< HEAD
 access_caramia_production_size_line_user,caramia.production.size.line.user,model_caramia_production_size_line,base.group_user,1,1,1,1
+=======
+>>>>>>> 7b3cf60954591c2500e070eba99a787916a186fc

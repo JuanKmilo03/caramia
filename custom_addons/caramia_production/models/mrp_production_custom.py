@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 from odoo import models, fields, api
+=======
+from odoo import models, fields
+>>>>>>> 7b3cf60954591c2500e070eba99a787916a186fc
 
 class MrpProductionCustom(models.Model):
     _inherit = 'mrp.production'
 
     shoe_reference_id = fields.Many2one('caramia.shoe.reference', string='Referencia de Calzado')
+<<<<<<< HEAD
     caramia_client_id = fields.Many2one(
         'res.partner', string='Cliente',
         domain="[('is_caramia_client', '=', True)]",
@@ -52,3 +57,7 @@ class ResPartnerProductionHistory(models.Model):
     production_order_ids = fields.One2many(
         'mrp.production', 'caramia_client_id', string='Órdenes de producción'
     )
+=======
+    barcode_labor = fields.Char(string='Código de Barras para Escaneo de Labor')
+    pairs_count = fields.Integer(string='Total Pares a Fabricar', default=12)
+>>>>>>> 7b3cf60954591c2500e070eba99a787916a186fc
