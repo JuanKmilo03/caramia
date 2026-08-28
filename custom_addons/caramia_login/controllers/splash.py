@@ -1,6 +1,4 @@
 import logging
-import hashlib
-from datetime import date
 from odoo import http
 from odoo.http import request
 from odoo.addons.web.controllers.home import Home
@@ -8,34 +6,18 @@ from odoo.addons.auth_signup.controllers.main import AuthSignupHome
 
 _logger = logging.getLogger(__name__)
 
-_GREETING_TEMPLATES = [
-    "Empecemos a trabajar,",
-    "Hola de nuevo,",
-    "Hola, {name} ¿Qué haremos hoy?",  # esta plantilla lleva el nombre dentro
-]
+SAFE_PREFIXES = ("/odoo", "/web")
 
-def _pick_greeting(name: str) -> str:
-    """
-    Rota entre las frases usando el día + nombre como semilla,
-    así cambia cada día pero es consistente durante la misma sesión.
-    """
-    seed = f"{date.today().isoformat()}-{name}"
-    index = int(hashlib.md5(seed.encode()).hexdigest(), 16) % len(_GREETING_TEMPLATES)
-    template = _GREETING_TEMPLATES[index]
+def _safe_redirect(redirect=None, kw=None):
+    """Busca el redirect en todos los lugares posibles y valida que sea seguro."""
+    url = redirect or (kw or {}).get("redirect") or "/odoo"
+    if any(url.startswith(p) for p in ("/odoo", "/web")):
+        return url
+    return "/odoo"
 
-    # Si la plantilla ya incluye {name} (tercera frase), no lo agregamos aparte
-    if "{name}" in template:
-        return template.replace("{name}", name)
-    return template  # el nombre lo agrega el JS aparte
-
-
-def _add_splash_param(url: str, greeting: str = "") -> str:
-    """Añade ?splash=1&greeting=... a la URL de destino."""
-    if not url:
-        url = "/odoo"
+def _add_splash(url):
     sep = "&" if "?" in url else "?"
-    from urllib.parse import quote
-    return f"{url}{sep}splash=1&greeting={quote(greeting)}"
+    return f"{url}{sep}splash=1"
 
 
 class CaramiaHome(Home):
@@ -43,10 +25,7 @@ class CaramiaHome(Home):
     def web_login(self, redirect=None, **kw):
         response = super().web_login(redirect=redirect, **kw)
         if request.httprequest.method == "POST" and request.session.uid:
-            name = (request.env.user.name or "Usuario").split()[0]
-            greeting = _pick_greeting(name)
-            dest = _add_splash_param(redirect or "/odoo", greeting)
-            return request.redirect(dest)
+            return request.redirect(_add_splash("/odoo"))
         return response
 
 
@@ -55,19 +34,29 @@ class CaramiaAuthSignupHome(AuthSignupHome):
     def web_auth_signup(self, *args, **kw):
         response = super().web_auth_signup(*args, **kw)
         if request.session.uid:
-            name = (request.env.user.name or "Usuario").split()[0]
-            greeting = _pick_greeting(name)
-            return request.redirect(_add_splash_param(kw.get("redirect") or "/odoo", greeting))
+            dest = request.params.get("redirect") or kw.get("redirect") or "/odoo"
+            if not any(dest.startswith(p) for p in ("/odoo", "/web")):
+                dest = "/odoo"
+            return request.redirect(_add_splash(dest))
         return response
 
     def web_auth_reset_password(self, *args, **kw):
         response = super().web_auth_reset_password(*args, **kw)
-        if request.session.uid:
-            name = (request.env.user.name or "Usuario").split()[0]
-            greeting = _pick_greeting(name)
-            return request.redirect(_add_splash_param(kw.get("redirect") or "/odoo", greeting))
-        return response
+        
+        uid = request.session.uid
+        if not uid and request.httprequest.method == "POST":
+            login = kw.get('login') or request.params.get('login')
+            password = kw.get('password') or request.params.get('password')
+            if login and password:
+                uid = request.session.authenticate(request.session.db, login, password)
 
+        if uid:
+            dest = request.params.get("redirect") or kw.get("redirect") or "/odoo"
+            if not any(dest.startswith(p) for p in ("/odoo", "/web")):
+                dest = "/odoo"
+            return request.redirect(_add_splash(dest))
+            
+        return response
 
 try:
     from odoo.addons.auth_oauth.controllers.main import OAuthLogin
@@ -77,10 +66,7 @@ try:
         def signin(self, **kw):
             response = super().signin(**kw)
             if request.session.uid:
-                name = (request.env.user.name or "Usuario").split()[0]
-                greeting = _pick_greeting(name)
-                dest = _add_splash_param(kw.get("redirect") or "/odoo", greeting)
-                return request.redirect(dest)
+                return request.redirect(_add_splash(_safe_redirect(kw.get("redirect"))))
             return response
 
 except ImportError:
