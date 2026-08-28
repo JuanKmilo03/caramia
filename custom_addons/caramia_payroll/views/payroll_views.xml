@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_caramia_production_labor_list" model="ir.ui.view">
+        <field name="name">caramia.production.labor.list</field>
+        <field name="model">caramia.production.labor</field>
+        <field name="arch" type="xml">
+            <list string="Actividades de producción">
+                <field name="work_date"/>
+                <field name="production_id"/>
+                <field name="employee_id"/>
+                <field name="role_id"/>
+                <field name="pairs_qty" sum="Total pares"/>
+                <field name="amount_total" widget="monetary" sum="Total"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_caramia_production_labor_form" model="ir.ui.view">
+        <field name="name">caramia.production.labor.form</field>
+        <field name="model">caramia.production.labor</field>
+        <field name="arch" type="xml">
+            <form string="Actividad de mano de obra">
+                <header>
+                    <button name="action_mark_delivered" type="object" string="Marcar entregada"
+                            invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_reset_draft" type="object" string="Volver a borrador"
+                            invisible="state != 'delivered'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,delivered,settled"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Asignación">
+                            <field name="production_id" readonly="state == 'settled'"/>
+                            <field name="employee_id" readonly="state == 'settled'"/>
+                            <field name="role_id" readonly="state == 'settled'"/>
+                            <field name="work_date" readonly="state == 'settled'"/>
+                        </group>
+                        <group string="Liquidación de la actividad">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="pairs_qty" readonly="state == 'settled'"/>
+                            <field name="price_per_pair" widget="monetary" readonly="state == 'settled'"/>
+                            <field name="extra_amount" widget="monetary" readonly="state == 'settled'"/>
+                            <field name="extra_note" readonly="state == 'settled'"/>
+                            <field name="amount_total" widget="monetary" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Observaciones"><field name="notes" nolabel="1" readonly="state == 'settled'"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caramia_production_labor_search" model="ir.ui.view">
+        <field name="name">caramia.production.labor.search</field>
+        <field name="model">caramia.production.labor</field>
+        <field name="arch" type="xml">
+            <search string="Buscar actividades">
+                <field name="production_id"/>
+                <field name="employee_id"/>
+                <field name="role_id"/>
+                <filter string="Pendientes" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Entregadas" name="delivered" domain="[('state', '=', 'delivered')]"/>
+                <filter string="Liquidadas" name="settled" domain="[('state', '=', 'settled')]"/>
+                <group>
+                    <filter string="Empleado" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Orden" name="group_production" context="{'group_by': 'production_id'}"/>
+                    <filter string="Rol" name="group_role" context="{'group_by': 'role_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_caramia_weekly_paysheet_form" model="ir.ui.view">
+        <field name="name">caramia.weekly.paysheet.form</field>
+        <field name="model">caramia.weekly.paysheet</field>
+        <field name="arch" type="xml">
+            <form string="Liquidación semanal">
+                <header>
+                    <button name="action_load_delivered_activities" type="object" string="Cargar tareas entregadas"
+                            invisible="state != 'draft'"/>
+                    <button name="action_confirm" type="object" string="Confirmar" invisible="state != 'draft'" class="oe_highlight"/>
+                    <button name="action_pay" type="object" string="Marcar como pagado" invisible="state != 'confirmed'" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Empleado y periodo">
+                            <field name="employee_id" readonly="state != 'draft'"/>
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <field name="date_end" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Reserva y descuentos">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="annual_reserve_rate" readonly="state != 'draft'"/>
+                            <field name="material_damage_discount" widget="monetary" readonly="state != 'draft'"/>
+                            <field name="damage_note" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tareas y pares fabricados">
+                            <field name="work_log_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="labor_activity_id" optional="hide"/>
+                                    <field name="production_id" readonly="1" optional="show"/>
+                                    <field name="date"/>
+                                    <field name="pairs_qty"/>
+                                    <field name="price_per_pair" widget="monetary"/>
+                                    <field name="extra_amount" widget="monetary"/>
+                                    <field name="extra_note" optional="show"/>
+                                    <field name="subtotal" widget="monetary" sum="Total" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="total_pairs" class="oe_subtotal_footer_separator"/>
+                        <field name="gross_amount" class="oe_subtotal_footer_separator" widget="monetary"/>
+                        <field name="annual_reserve_amount" class="oe_subtotal_footer_separator" widget="monetary"/>
+                        <field name="net_amount" class="oe_subtotal_footer_separator" widget="monetary"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caramia_weekly_paysheet_list" model="ir.ui.view">
+        <field name="name">caramia.weekly.paysheet.list</field>
+        <field name="model">caramia.weekly.paysheet</field>
+        <field name="arch" type="xml">
+            <list string="Liquidaciones semanales">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="total_pairs" sum="Total pares"/>
+                <field name="gross_amount" widget="monetary" sum="Bruto"/>
+                <field name="annual_reserve_amount" widget="monetary" sum="Reserva"/>
+                <field name="net_amount" widget="monetary" sum="Neto"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_employee_form_caramia_paysheet_summary" model="ir.ui.view">
+        <field name="name">hr.employee.form.caramia.paysheet.summary</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="caramia_employee.view_employee_form_caramia"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_paid_paysheets" type="object" class="oe_stat_button" icon="fa-money">
+                        <field name="paid_paysheet_count" widget="statinfo" string="Liquidaciones pagadas"/>
+                    </button>
+                </div>
+                <group string="Resumen de pagos" class="caramia_employee_section">
+                    <field name="company_currency_id" invisible="1"/>
+                    <field name="paid_amount_accumulated" widget="monetary" readonly="1"/>
+                    <field name="annual_reserve_accumulated" widget="monetary" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_production_form_caramia_labor" model="ir.ui.view">
+        <field name="name">mrp.production.form.caramia.labor</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="caramia_production.view_mrp_production_form_caramia"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Mano de obra">
+                    <field name="labor_activity_ids">
+                        <list editable="bottom">
+                            <field name="work_date"/>
+                            <field name="employee_id"/>
+                            <field name="role_id"/>
+                            <field name="pairs_qty"/>
+                            <field name="price_per_pair" widget="monetary"/>
+                            <field name="extra_amount" widget="monetary"/>
+                            <field name="state" widget="badge" readonly="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_caramia_production_labor" model="ir.actions.act_window">
+        <field name="name">Actividades de producción</field>
+        <field name="res_model">caramia.production.labor</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_caramia_production_labor_search"/>
+    </record>
+
+    <record id="action_caramia_weekly_paysheet" model="ir.actions.act_window">
+        <field name="name">Liquidaciones semanales</field>
+        <field name="res_model">caramia.weekly.paysheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_caramia_payroll_root" name="Nómina Cara Mía" sequence="15"/>
+    <menuitem id="menu_caramia_production_labor" name="Mano de obra entregada" parent="menu_caramia_payroll_root"
+              action="action_caramia_production_labor" sequence="10"/>
+    <menuitem id="menu_caramia_paysheets" name="Liquidaciones semanales" parent="menu_caramia_payroll_root"
+              action="action_caramia_weekly_paysheet" sequence="20"/>
+</odoo>

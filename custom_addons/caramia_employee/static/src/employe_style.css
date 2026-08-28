@@ -1,0 +1,242 @@
+/* =========================================================
+   CARA MIA - EMPLEADOS
+   Estilos aislados para formulario, lista y tarjetas kanban.
+   ========================================================= */
+
+:root {
+    --caramia-wine: #5B6B3A;
+    --caramia-wine-dark: #3f4b29;
+    --caramia-rose: #D7A79E;
+    --caramia-rose-soft: #f8f2f0;
+    --caramia-ink: #303a22;
+    --caramia-muted: #627152;
+    --caramia-border: #A0B092;
+}
+
+/* =========================================================
+   TARJETAS KANBAN
+   No se modifica el display de Odoo: asi se preserva el
+   comportamiento nativo en todas las resoluciones.
+   ========================================================= */
+
+.caramia_employee_kanban .o_kanban_record {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--caramia-border);
+    border-left: 4px solid var(--caramia-wine);
+    border-radius: 10px;
+    box-shadow: 0 2px 7px rgba(91, 107, 58, 0.10);
+    min-height: 0;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.caramia_employee_kanban .o_kanban_record:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 16px rgba(91, 107, 58, 0.18);
+}
+
+/* Imagen lateral compacta: evita las tarjetas altas sin recortar su contenido. */
+.caramia_employee_kanban .o_kanban_record .o_kanban_aside_full {
+    flex: 0 0 104px;
+    width: 104px;
+    min-height: 132px;
+    background: var(--caramia-rose-soft);
+}
+
+.caramia_employee_kanban .o_kanban_record main {
+    min-width: 0;
+    padding: 10px 10px 7px 0;
+    color: var(--caramia-ink);
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.caramia_employee_kanban .o_kanban_record main .fs-5 {
+    display: block;
+    overflow: hidden;
+    color: var(--caramia-wine-dark);
+    font-size: 1rem !important;
+    font-weight: 700;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.caramia_employee_kanban .o_kanban_record main .text-primary {
+    color: var(--caramia-wine) !important;
+}
+
+.caramia_employee_kanban .o_kanban_record footer {
+    min-height: 30px;
+    margin-top: 4px;
+    border-top: 1px solid #e1e8dc;
+}
+
+.caramia_employee_kanban .o_kanban_record footer .o_field_widget {
+    max-height: 28px;
+}
+
+/* =========================================================
+   LISTA
+   ========================================================= */
+
+.caramia_employee_list {
+    border: 1px solid var(--caramia-border);
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.caramia_employee_list thead th {
+    padding-top: 0.72rem;
+    padding-bottom: 0.72rem;
+    background: var(--caramia-wine-dark);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.caramia_employee_list tbody td {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+    border-color: #e1e8dc;
+    color: var(--caramia-ink);
+    vertical-align: middle;
+}
+
+.caramia_employee_list tbody tr:nth-child(even) td {
+    background: #f7f9f4;
+}
+
+.caramia_employee_list tbody tr:hover td {
+    background: var(--caramia-rose);
+}
+
+.caramia_employee_list td[name="name"] {
+    color: var(--caramia-wine-dark);
+    font-weight: 700;
+}
+
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+.caramia_employee_form .o_notebook .nav-link.active {
+    background: var(--caramia-rose-soft);
+    color: var(--caramia-wine);
+    border-color: var(--caramia-wine);
+    font-weight: 700;
+}
+
+/* Cabecera y campos del perfil: integra la paleta en toda la edicion. */
+.caramia_employee_form .oe_title h1,
+.caramia_employee_form .oe_title h1 .o_field_widget {
+    color: var(--caramia-wine-dark);
+}
+
+.caramia_employee_form .o_employee_avatar {
+    border: 3px solid var(--caramia-rose);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(91, 107, 58, 0.12);
+}
+
+.caramia_employee_form .text-primary,
+.caramia_employee_form .fa.text-primary {
+    color: var(--caramia-wine) !important;
+}
+
+.caramia_employee_form .o_field_widget input:focus,
+.caramia_employee_form textarea:focus,
+.caramia_employee_form .o_input:focus {
+    border-color: var(--caramia-wine);
+    box-shadow: 0 0 0 0.18rem rgba(91, 107, 58, 0.15);
+}
+
+.caramia_employee_form .o_notebook {
+    margin-top: 18px;
+    border-top: 1px solid var(--caramia-border);
+}
+
+.caramia_employee_form .o_notebook .nav-tabs {
+    border-bottom-color: var(--caramia-border);
+}
+
+.caramia_employee_form .o_notebook .nav-link {
+    color: var(--caramia-muted);
+}
+
+.caramia_employee_form .caramia_employee_personal_page {
+    padding: 20px;
+    background: linear-gradient(135deg, var(--caramia-rose-soft), #fff 65%);
+    border-radius: 10px;
+}
+
+.caramia_employee_form .caramia_employee_section {
+    padding: 14px 16px 7px;
+    margin-bottom: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--caramia-border);
+    border-radius: 9px;
+}
+
+.caramia_employee_form .caramia_employee_section label {
+    color: var(--caramia-muted);
+    font-weight: 600;
+}
+
+.caramia_employee_form .caramia_employee_section .o_horizontal_separator {
+    color: var(--caramia-wine-dark);
+    font-weight: 700;
+}
+
+.caramia_employee_form .caramia_employee_section input,
+.caramia_employee_form .caramia_employee_section textarea,
+.caramia_employee_form .caramia_employee_section .o_input {
+    border-radius: 6px;
+}
+
+.caramia_employee_form .caramia_employee_emergency {
+    border-left: 3px solid var(--caramia-wine);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+    .caramia_employee_kanban .o_kanban_record .o_kanban_aside_full {
+        flex-basis: 84px;
+        width: 84px;
+        min-height: 116px;
+    }
+
+    .caramia_employee_kanban .o_kanban_record main {
+        padding: 8px 8px 6px 0;
+        font-size: 0.8rem;
+    }
+
+    .caramia_employee_kanban .o_kanban_record main .fs-5 {
+        font-size: 0.92rem !important;
+    }
+
+    .caramia_employee_form .caramia_employee_personal_page {
+        padding: 12px;
+    }
+
+    .caramia_employee_list thead th,
+    .caramia_employee_list tbody td {
+        padding: 0.58rem 0.5rem;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .caramia_employee_kanban .o_kanban_record .o_kanban_aside_full {
+        flex-basis: 70px;
+        width: 70px;
+    }
+
+    .caramia_employee_kanban .o_kanban_record footer {
+        display: none;
+    }
+}

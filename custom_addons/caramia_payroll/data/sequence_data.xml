@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_caramia_weekly_paysheet" model="ir.sequence">
+        <field name="name">Liquidación semanal Cara Mía</field>
+        <field name="code">caramia.weekly.paysheet</field>
+        <field name="prefix">LIQ-%(year)s-</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>
