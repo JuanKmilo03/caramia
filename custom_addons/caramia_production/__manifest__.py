@@ -1,12 +1,16 @@
 {
-    'name': 'Cara Mia - Órdenes de Producción',
-    'version': '1.0',
+    'name': 'Caramia Production',
+    'version': '18.0.1.0.0',
     'category': 'Manufacturing',
-    'depends': ['mrp', 'caramia_catalog', 'caramia_invoicing'],
+    'summary': 'Módulo de producción de calzado con curva de tallas e historial',
+    'depends': ['base', 'product', 'web', 'mail'],
     'data': [
         'security/ir.model.access.csv',
-        'views/mrp_production_views.xml',
+        'data/ir_sequence_data.xml',
+        'views/production_views.xml',
+        'reports/report_caramia_production.xml',
     ],
     'installable': True,
-    'application': False,
+    'application': True,
+    'license': 'LGPL-3',
 }

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_caramia_production" model="ir.actions.report">
+        <field name="name">Orden de Producción</field>
+        <field name="model">caramia.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caramia_production.report_caramia_template</field>
+        <field name="report_file">Orden_Produccion</field>
+        <field name="print_report_name">'Orden_' + object.name</field>
+        <field name="binding_model_id" ref="model_caramia_production"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_caramia_template">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <div class="page" style="font-size: 10px; font-family: Arial, sans-serif;">
+                    
+                    <!-- Encabezado Principal -->
+                    <table class="table table-bordered mb-2">
+                        <tr>
+                            <td style="width: 55%;">
+                                <h4><strong>ORDEN DE PRODUCCIÓN</strong></h4>
+                                <strong>ORDEN N°: </strong> <span t-field="o.name"/><br/>
+                                <strong>FECHA: </strong> <span t-field="o.date"/><br/>
+                                <strong>CLIENTE: </strong> <span t-field="o.partner_id.name"/><br/>
+                                <strong>REFERENCIA: </strong> <span t-field="o.product_id.default_code"/> - <span t-field="o.product_id.name"/>
+                            </td>
+                            <td style="width: 45%; text-align: center; vertical-align: middle;">
+                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 45px;"/>
+                                <div style="font-weight: bold; margin-top: 2px;" t-field="o.name"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Talones individuales por Proceso -->
+                    <t t-foreach="['GUARNICION', 'MONTADA', 'PLANTILLA', 'FORRADA', 'LIMPIADA']" t-as="proceso">
+                        <div style="border: 1px dashed #000; padding: 4px; margin-bottom: 6px; page-break-inside: avoid;">
+                            <table class="table table-sm table-borderless m-0" style="width: 100%;">
+                                <tr>
+                                    <td><strong>PROCESO: </strong> <span t-esc="proceso"/></td>
+                                    <td><strong>COLOR: </strong> <span t-field="o.color"/></td>
+                                    <td><strong>MATERIAL: </strong> <span t-field="o.material"/></td>
+                                    <td><strong>ORDEN: </strong> <span t-field="o.name"/></td>
+                                    <td class="text-end">
+                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 200, 30)" style="max-height: 25px;"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Tabla Resumen de Tallas para el Talón -->
+                            <table class="table table-bordered table-sm text-center m-0" style="font-size: 8.5px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>21</th><th>22</th><th>23</th><th>24</th><th>25</th>
+                                        <th>26</th><th>27</th><th>28</th><th>29</th><th>30</th>
+                                        <th>31</th><th>32</th><th>33</th><th>34</th><th>35</th>
+                                        <th>36</th><th>37</th><th>38</th><th>39</th><th>40</th>
+                                        <th>TOTAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span t-esc="o.talla_21 or ''"/></td>
+                                        <td><span t-esc="o.talla_22 or ''"/></td>
+                                        <td><span t-esc="o.talla_23 or ''"/></td>
+                                        <td><span t-esc="o.talla_24 or ''"/></td>
+                                        <td><span t-esc="o.talla_25 or ''"/></td>
+                                        <td><span t-esc="o.talla_26 or ''"/></td>
+                                        <td><span t-esc="o.talla_27 or ''"/></td>
+                                        <td><span t-esc="o.talla_28 or ''"/></td>
+                                        <td><span t-esc="o.talla_29 or ''"/></td>
+                                        <td><span t-esc="o.talla_30 or ''"/></td>
+                                        <td><span t-esc="o.talla_31 or ''"/></td>
+                                        <td><span t-esc="o.talla_32 or ''"/></td>
+                                        <td><span t-esc="o.talla_33 or ''"/></td>
+                                        <td><span t-esc="o.talla_34 or ''"/></td>
+                                        <td><span t-esc="o.talla_35 or ''"/></td>
+                                        <td><span t-esc="o.talla_36 or ''"/></td>
+                                        <td><span t-esc="o.talla_37 or ''"/></td>
+                                        <td><span t-esc="o.talla_38 or ''"/></td>
+                                        <td><span t-esc="o.talla_39 or ''"/></td>
+                                        <td><span t-esc="o.talla_40 or ''"/></td>
+                                        <td><strong><span t-field="o.total_pares"/></strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

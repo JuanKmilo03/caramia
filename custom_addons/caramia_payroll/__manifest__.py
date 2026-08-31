@@ -1,7 +1,6 @@
 {
     'name': 'Cara Mia - Personal y Destajo',
-<<<<<<< HEAD
-    'version': '1.1',
+    'version': '18.0.1.0.0',
     'category': 'Human Resources',
     'data': [
         'security/ir.model.access.csv',
@@ -16,7 +15,6 @@
     #    ],
     #},
     'depends': ['base', 'hr', 'caramia_employee', 'caramia_production'],
-=======
     'version': '1.0',
     'category': 'Human Resources',
     'depends': ['hr'],
@@ -26,5 +24,4 @@
     ],
     'installable': True,
     'application': False,
->>>>>>> 7b3cf60954591c2500e070eba99a787916a186fc
 }
