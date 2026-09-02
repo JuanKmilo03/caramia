@@ -13,7 +13,7 @@ class CaramiaProduction(models.Model):
     active = fields.Boolean(string='Activo', default=True)
 
     # Relaciones y datos del producto
-    partner_id = fields.Many2one('res.partner', string='Cliente', required=True, tracking=True)
+    customer_id = fields.Many2one('caramia.customer', string='Cliente', required=True, tracking=True)
     product_id = fields.Many2one('product.product', string='Referencia / Producto', required=True, tracking=True)
     color = fields.Char(string='Color')
     material = fields.Char(string='Material')
@@ -71,6 +71,12 @@ class CaramiaProduction(models.Model):
         if self.product_id:
             self.color = getattr(self.product_id, 'color', False) or self.color
             self.material = getattr(self.product_id, 'material', False) or self.material
+
+    @api.onchange('customer_id')
+    def _onchange_customer_id(self):
+        """Autocompleta el sello registrado en la ficha del cliente"""
+        if self.customer_id and self.customer_id.sello:
+            self.sello = self.customer_id.sello
 
     @api.model_create_multi
     def create(self, vals_list):

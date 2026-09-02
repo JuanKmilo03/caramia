@@ -40,7 +40,7 @@
                     </div>
                     <group>
                         <group string="Información General">
-                            <field name="partner_id"/>
+                            <field name="customer_id"/>
                             <field name="product_id"/>
                             <field name="date"/>
                             <field name="factura_nro"/>
@@ -101,7 +101,7 @@
         <field name="arch" type="xml">
             <list string="Órdenes de Producción">
                 <field name="name"/>
-                <field name="partner_id"/>
+                <field name="customer_id"/>
                 <field name="product_id"/>
                 <field name="color"/>
                 <field name="total_pares"/>
@@ -120,7 +120,7 @@
         <field name="arch" type="xml">
             <list string="Historial de Producción" create="false">
                 <field name="name"/>
-                <field name="partner_id"/>
+                <field name="customer_id"/>
                 <field name="product_id"/>
                 <field name="total_pares"/>
                 <field name="date" string="Fecha Creación"/>
