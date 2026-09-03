@@ -1,116 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Personal data integrated in the standard employee form. -->
-    <record id="view_employee_form_caramia" model="ir.ui.view">
-        <field name="name">hr.employee.form.caramia</field>
-        <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr.view_employee_form"/>
-        <field name="priority">99</field>
+    <!-- Formulario Simplificado (Solo pide Nombre y Cargo) -->
+    <record id="view_caramia_employee_form" model="ir.ui.view">
+        <field name="name">caramia.employee.form</field>
+        <field name="model">caramia.employee</field>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="attributes">
-                <attribute name="class" add="caramia_employee_form" separator=" "/>
-            </xpath>
-            <!-- Los datos propios se muestran directamente en el formulario,
-                 sin crear una pestana adicional. -->
-            <xpath expr="//notebook" position="before">
-                <div class="caramia_employee_personal_page">
-                    <group>
-                        <group string="Identificacion" class="caramia_employee_section">
-                            <field name="document_type"/>
-                            <field name="document_number"/>
-                        </group>
-                        <group string="Contacto" class="caramia_employee_section">
-                            <field name="personal_phone" widget="phone"/>
-                            <field name="personal_address"/>
-                        </group>
-                    </group>
-                        <group string="Contacto de emergencia" class="caramia_employee_section caramia_employee_emergency">
-                            <field name="emergency_contact_name"/>
-                            <field name="emergency_contact_phone" widget="phone"/>
-                        </group>
-                    <group string="Información de fábrica" class="caramia_employee_section">
-                        <field name="factory_role_id"/>
-                        <field name="factory_entry_date"/>
-                        <field name="active"/>
-                    </group>
-                    <group string="Observaciones" class="caramia_employee_section">
-                        <field name="personal_notes" placeholder="Anade informacion relevante para la gestion del empleado..." nolabel="1"/>
-                    </group>
-                </div>
-            </xpath>
-            <!-- Se elimina el notebook completo: Trabajo, Curriculum,
-                 Personal, Nomina y Ajustes dejan de existir visualmente. -->
-            <xpath expr="//notebook" position="replace"/>
-        </field>
-    </record>
-
-    <!-- Keep the standard kanban view and attach the Cara Mia visual theme. -->
-    <record id="view_employee_kanban_caramia" model="ir.ui.view">
-        <field name="name">hr.employee.kanban.caramia</field>
-        <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
-        <field name="arch" type="xml">
-            <xpath expr="//kanban" position="attributes">
-                <attribute name="class" add="caramia_employee_kanban" separator=" "/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Clase propia para no afectar las listas de otros modulos. -->
-    <record id="view_employee_list_caramia" model="ir.ui.view">
-        <field name="name">hr.employee.list.caramia</field>
-        <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr.view_employee_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//list" position="attributes">
-                <attribute name="class" add="caramia_employee_list" separator=" "/>
-            </xpath>
-        </field>
-    </record>
-
-    <record id="view_caramia_employee_role_list" model="ir.ui.view">
-        <field name="name">caramia.employee.role.list</field>
-        <field name="model">caramia.employee.role</field>
-        <field name="arch" type="xml">
-            <list string="Roles de fábrica">
-                <field name="name"/>
-                <field name="code"/>
-                <field name="price_per_pair" widget="monetary"/>
-                <field name="active" widget="boolean_toggle"/>
-            </list>
-        </field>
-    </record>
-
-    <record id="view_caramia_employee_role_form" model="ir.ui.view">
-        <field name="name">caramia.employee.role.form</field>
-        <field name="model">caramia.employee.role</field>
-        <field name="arch" type="xml">
-            <form string="Rol de fábrica">
+            <form string="Empleado">
                 <sheet>
+                    <div class="oe_title">
+                        <label for="employee_code" string="ID EMPLEADO"/>
+                        <h1>
+                            <field name="employee_code" readonly="1"/>
+                        </h1>
+                    </div>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="code"/>
-                            <field name="active"/>
-                        </group>
-                        <group>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="price_per_pair" widget="monetary"/>
+                            <field name="name" placeholder="Ej. Juan Pérez" required="1"/>
+                            <field name="job_title" placeholder="Ej. Cortador / Guarnecedor" required="1"/>
                         </group>
                     </group>
-                    <group string="Observaciones"><field name="notes" nolabel="1"/></group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <record id="action_caramia_employee_roles" model="ir.actions.act_window">
-        <field name="name">Roles de fábrica</field>
-        <field name="res_model">caramia.employee.role</field>
-        <field name="view_mode">list,form</field>
+    <!-- Vista de Lista (ID, Nombre, Cargo) -->
+    <record id="view_caramia_employee_list" model="ir.ui.view">
+        <field name="name">caramia.employee.list</field>
+        <field name="model">caramia.employee</field>
+        <field name="arch" type="xml">
+            <list string="Empleados">
+                <field name="employee_code"/>
+                <field name="name"/>
+                <field name="job_title"/>
+            </list>
+        </field>
     </record>
 
-    <menuitem id="menu_caramia_employee_root" name="Personal Cara Mía" sequence="14"/>
-    <menuitem id="menu_caramia_employee_roles" name="Roles y tarifas" parent="menu_caramia_employee_root"
-              action="action_caramia_employee_roles" sequence="20"/>
+    <!-- Vista en Tarjetas / Cards (Kanban) -->
+    <record id="view_caramia_employee_kanban" model="ir.ui.view">
+        <field name="name">caramia.employee.kanban</field>
+        <field name="model">caramia.employee</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge text-bg-primary fs-6">
+                                    <field name="employee_code"/>
+                                </span>
+                            </div>
+                            <div class="fw-bold fs-5 text-dark mb-1">
+                                <field name="name"/>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fa fa-briefcase me-1"/>
+                                <field name="job_title"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Buscador -->
+    <record id="view_caramia_employee_search" model="ir.ui.view">
+        <field name="name">caramia.employee.search</field>
+        <field name="model">caramia.employee</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Empleados">
+                <field name="employee_code"/>
+                <field name="name"/>
+                <field name="job_title"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción de Ventana (Habilita tanto vista Lista como Tarjetas) -->
+    <record id="action_caramia_employee" model="ir.actions.act_window">
+        <field name="name">Empleados</field>
+        <field name="res_model">caramia.employee</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Registrar primer empleado
+            </p>
+        </field>
+    </record>
+
+    <!-- Menús -->
+    <menuitem id="menu_caramia_employee_root"
+              name="Empleados"
+              sequence="20"/>
+
+    <menuitem id="menu_caramia_employee_list"
+              name="Lista de Empleados"
+              parent="menu_caramia_employee_root"
+              action="action_caramia_employee"
+              sequence="10"/>
 </odoo>

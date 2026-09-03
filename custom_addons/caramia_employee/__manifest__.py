@@ -1,24 +1,15 @@
 {
-    'name': 'Cara Mia - Gestión de Empleados',
+    'name': 'Caramia Empleados',
     'version': '18.0.1.0.0',
     'category': 'Human Resources',
-    'summary': 'Personalización de la gestión de empleados de Cara Mia',
-
-    'depends': [
-        'hr',
-    ],
-
+    'summary': 'Gestión simplificada e independiente de empleados',
+    'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
+        'data/ir_sequence_data.xml',
         'views/employee_views.xml',
     ],
-
-    'assets': {
-        'web.assets_backend': [
-            'caramia_employee/static/src/employe_style.css',
-        ],
-    },
-
     'installable': True,
     'application': True,
+    'license': 'LGPL-3',
 }
