@@ -1,10 +1,8 @@
 (function () {
     function init() {
-        // 1. Crear el contenedor principal a pantalla completa
         const wrapper = document.createElement("div");
         wrapper.className = "cm-login-wrapper";
 
-        // 2. Crear el panel izquierdo (Hero)
         const hero = document.createElement("div");
         hero.className = "cm-login-hero";
         const logoElement = document.createElement("div");
@@ -14,7 +12,6 @@
         `;
         hero.appendChild(logoElement);
 
-        // Envolvemos el texto en un div para mantenerlo sobre el canvas usando z-index
         const heroContent = document.createElement("div");
         heroContent.className = "cm-hero-content";
         heroContent.innerHTML = `
@@ -23,14 +20,12 @@
         `;
         hero.appendChild(heroContent);
 
-        // 3. Crear el panel derecho para el formulario
         const rightPanel = document.createElement("div");
         rightPanel.className = "cm-login-right";
 
         wrapper.appendChild(hero);
         wrapper.appendChild(rightPanel);
 
-        // 4. Configurar el Canvas del Shader
         const canvas = document.createElement("canvas");
         canvas.id = "cm-shader-bg";
         canvas.style.cssText = `
@@ -42,10 +37,8 @@
             pointer-events: none;
             border: none;
         `;
-        // Insertamos el canvas DENTRO del panel izquierdo, antes del texto
         hero.insertBefore(canvas, hero.firstChild);
 
-        // 5. Mover el contenedor de Odoo al panel derecho
         const wrapwrap = document.getElementById("wrapwrap");
         if (wrapwrap) {
             document.body.insertBefore(wrapper, wrapwrap);
@@ -56,7 +49,6 @@
             }
         }
 
-        // 6. Lógica del Shader WebGL (Exactamente tu mismo código)
         const gl = canvas.getContext("webgl");
         if (!gl) return;
 

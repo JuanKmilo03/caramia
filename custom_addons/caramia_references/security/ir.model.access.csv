@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cara_mia_referencia,cara.mia.referencia,model_cara_mia_referencia,base.group_user,1,1,1,1
+access_cara_mia_insumo,cara.mia.insumo.referencia,model_cara_mia_insumo_referencia,base.group_user,1,1,1,1
+access_cara_mia_precio_labor_ref,cara.mia.precio.labor.ref,model_cara_mia_precio_labor_ref,base.group_user,1,1,1,1
+access_cara_mia_catalogo,cara.mia.insumo.catalogo,model_cara_mia_insumo_catalogo,base.group_user,1,1,1,1
+

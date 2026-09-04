@@ -112,7 +112,6 @@ class SplashScreen extends Component {
 
         const start = performance.now();
 
-        // ── Barra de progreso ────────────────────────────────
 
         const updateProgress = (now) => {
             if (!this.alive) return;
@@ -135,7 +134,6 @@ class SplashScreen extends Component {
 
         this.animationFrame = requestAnimationFrame(updateProgress);
 
-        // ── Partículas (doradas) ─────────────────────────────
 
         if (!canvas) return;
 
@@ -211,7 +209,6 @@ const splashService = {
         const cleanUrl = window.location.pathname;
         window.history.replaceState(null, "", cleanUrl);
 
-        // ── Datos de sesión ──────────────────────────────────
 
         let uid = null;
         let name = "Usuario";
@@ -241,9 +238,6 @@ const splashService = {
         const { main: greeting, sub: greetingSub } = pickGreeting(name);
 
         console.log("👤 USUARIO:", name, "| SALUDO:", greeting);
-
-        // ── Montar splash ────────────────────────────────────
-
         const mountSplash = () => new Promise((resolve) => {
             const container = document.createElement("div");
             container.id = "caramia-splash-container";
