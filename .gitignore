@@ -10,4 +10,4 @@ __pycache__/
 # Configuración local de IDEs
 .vscode/
 .idea/
-docker-compose.yml
+docker-compose.override.yml
