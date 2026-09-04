@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. VISTA FORMULARIO -->
+    <record id="view_caramia_production_form" model="ir.ui.view">
+        <field name="name">caramia.production.form</field>
+        <field name="model">caramia.production</field>
+        <field name="arch" type="xml">
+            <form string="Orden de Producción">
+                <header>
+                    <button name="action_download_pdf" 
+                            string="Imprimir PDF" 
+                            type="object" 
+                            class="btn-primary" 
+                            icon="fa-print"/>
+
+                    <button name="action_set_in_progress" 
+                            string="Iniciar Proceso" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_set_done" 
+                            string="Finalizar (Mandar a Historial)" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state != 'in_progress'"/>
+
+                    <button name="action_set_draft" 
+                            string="Volver a Borrador" 
+                            type="object" 
+                            invisible="state == 'draft'"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Información General">
+                            <field name="customer_id"/>
+                            <field name="product_id"/>
+                            <field name="date"/>
+                            <field name="factura_nro"/>
+                        </group>
+                        <group string="Detalles de Calzado">
+                            <field name="color"/>
+                            <field name="material"/>
+                            <field name="sello"/>
+                            <field name="date_done" invisible="state != 'done'"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Curva de Tallas (21-40)">
+                            <group string="Tallas Niños / Juvenil (21 a 30)" col="10">
+                                <field name="talla_21"/>
+                                <field name="talla_22"/>
+                                <field name="talla_23"/>
+                                <field name="talla_24"/>
+                                <field name="talla_25"/>
+                                <field name="talla_26"/>
+                                <field name="talla_27"/>
+                                <field name="talla_28"/>
+                                <field name="talla_29"/>
+                                <field name="talla_30"/>
+                            </group>
+                            <group string="Tallas Adultos (31 a 40)" col="10">
+                                <field name="talla_31"/>
+                                <field name="talla_32"/>
+                                <field name="talla_33"/>
+                                <field name="talla_34"/>
+                                <field name="talla_35"/>
+                                <field name="talla_36"/>
+                                <field name="talla_37"/>
+                                <field name="talla_38"/>
+                                <field name="talla_39"/>
+                                <field name="talla_40"/>
+                            </group>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_pares" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Descripción / Notas">
+                            <field name="description" placeholder="Notas adicionales de la orden..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- 2. VISTA LISTA: Producción en Curso -->
+    <record id="view_caramia_production_list" model="ir.ui.view">
+        <field name="name">caramia.production.list</field>
+        <field name="model">caramia.production</field>
+        <field name="arch" type="xml">
+            <list string="Órdenes de Producción">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="product_id"/>
+                <field name="color"/>
+                <field name="total_pares"/>
+                <field name="date"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-warning="state == 'in_progress'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 3. VISTA LISTA: Historial de Producción -->
+    <record id="view_caramia_production_history_list" model="ir.ui.view">
+        <field name="name">caramia.production.history.list</field>
+        <field name="model">caramia.production</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Producción" create="false">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="product_id"/>
+                <field name="total_pares"/>
+                <field name="date" string="Fecha Creación"/>
+                <field name="date_done" string="Fecha Finalización"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 4. ACCIÓN 1: Filtra solo lo que NO está finalizado -->
+    <record id="action_caramia_production_active" model="ir.actions.act_window">
+        <field name="name">Órdenes de Producción</field>
+        <field name="res_model">caramia.production</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '!=', 'done')]</field>
+        <field name="view_ids" eval="[(5, 0, 0), 
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
+    </record>
+
+    <!-- 5. ACCIÓN 2: Filtra SOLO los registros finalizados (Historial) -->
+    <record id="action_caramia_production_history" model="ir.actions.act_window">
+        <field name="name">Historial de Producción</field>
+        <field name="res_model">caramia.production</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'done')]</field>
+        <field name="view_ids" eval="[(5, 0, 0), 
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_history_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
+    </record>
+
+    <!-- 6. MENÚS DE LA APLICACIÓN -->
+    <menuitem id="menu_caramia_production_root" name="Producción" sequence="10"/>
+
+    <menuitem id="menu_caramia_production_active" 
+              name="Órdenes de Producción" 
+              parent="menu_caramia_production_root" 
+              action="action_caramia_production_active" 
+              sequence="10"/>
+
+    <menuitem id="menu_caramia_production_history" 
+              name="Historial de Producción" 
+              parent="menu_caramia_production_root" 
+              action="action_caramia_production_history" 
+              sequence="20"/>
+</odoo>

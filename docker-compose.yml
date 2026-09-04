@@ -30,5 +30,8 @@ services:
     depends_on:
       - odoo
 
+
 volumes:
+
   odoo-db-data:
+  
