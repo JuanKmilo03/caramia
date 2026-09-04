@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_caramia_employee_user,access.caramia.employee.user,model_caramia_employee,base.group_user,1,1,1,1
+access_caramia_employee_job_user,access.caramia.employee.job.user,model_caramia_employee_job,base.group_user,1,1,1,1

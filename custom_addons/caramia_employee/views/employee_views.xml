@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Formulario Simplificado (Solo pide Nombre y Cargo) -->
+    <!-- ==================== VISTAS DE CARGOS / PUESTOS ==================== -->
+    <record id="view_caramia_employee_job_form" model="ir.ui.view">
+        <field name="name">caramia.employee.job.form</field>
+        <field name="model">caramia.employee.job</field>
+        <field name="arch" type="xml">
+            <form string="Cargo / Puesto">
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="Ej. Cortador, Guarnecedor, Montador" required="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caramia_employee_job_list" model="ir.ui.view">
+        <field name="name">caramia.employee.job.list</field>
+        <field name="model">caramia.employee.job</field>
+        <field name="arch" type="xml">
+            <list string="Cargos / Puestos">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_caramia_employee_job" model="ir.actions.act_window">
+        <field name="name">Cargos / Puestos</field>
+        <field name="res_model">caramia.employee.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crear el primer cargo de trabajo
+            </p>
+        </field>
+    </record>
+
+    <!-- ==================== VISTAS DE EMPLEADOS ==================== -->
     <record id="view_caramia_employee_form" model="ir.ui.view">
         <field name="name">caramia.employee.form</field>
         <field name="model">caramia.employee</field>
@@ -16,7 +52,7 @@
                     <group>
                         <group>
                             <field name="name" placeholder="Ej. Juan Pérez" required="1"/>
-                            <field name="job_title" placeholder="Ej. Cortador / Guarnecedor" required="1"/>
+                            <field name="job_id" placeholder="Seleccione un cargo..." required="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -24,7 +60,6 @@
         </field>
     </record>
 
-    <!-- Vista de Lista (ID, Nombre, Cargo) -->
     <record id="view_caramia_employee_list" model="ir.ui.view">
         <field name="name">caramia.employee.list</field>
         <field name="model">caramia.employee</field>
@@ -32,12 +67,11 @@
             <list string="Empleados">
                 <field name="employee_code"/>
                 <field name="name"/>
-                <field name="job_title"/>
+                <field name="job_id"/>
             </list>
         </field>
     </record>
 
-    <!-- Vista en Tarjetas / Cards (Kanban) -->
     <record id="view_caramia_employee_kanban" model="ir.ui.view">
         <field name="name">caramia.employee.kanban</field>
         <field name="model">caramia.employee</field>
@@ -56,7 +90,7 @@
                             </div>
                             <div class="text-muted small">
                                 <i class="fa fa-briefcase me-1"/>
-                                <field name="job_title"/>
+                                <field name="job_id"/>
                             </div>
                         </div>
                     </t>
@@ -65,7 +99,6 @@
         </field>
     </record>
 
-    <!-- Buscador -->
     <record id="view_caramia_employee_search" model="ir.ui.view">
         <field name="name">caramia.employee.search</field>
         <field name="model">caramia.employee</field>
@@ -73,12 +106,14 @@
             <search string="Buscar Empleados">
                 <field name="employee_code"/>
                 <field name="name"/>
-                <field name="job_title"/>
+                <field name="job_id"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Cargo / Puesto" name="group_by_job" context="{'group_by': 'job_id'}"/>
+                </group>
             </search>
         </field>
     </record>
 
-    <!-- Acción de Ventana (Habilita tanto vista Lista como Tarjetas) -->
     <record id="action_caramia_employee" model="ir.actions.act_window">
         <field name="name">Empleados</field>
         <field name="res_model">caramia.employee</field>
@@ -90,7 +125,7 @@
         </field>
     </record>
 
-    <!-- Menús -->
+    <!-- ==================== MENÚS ==================== -->
     <menuitem id="menu_caramia_employee_root"
               name="Empleados"
               sequence="20"/>
@@ -100,4 +135,10 @@
               parent="menu_caramia_employee_root"
               action="action_caramia_employee"
               sequence="10"/>
+
+    <menuitem id="menu_caramia_employee_job_list"
+              name="Cargos / Puestos"
+              parent="menu_caramia_employee_root"
+              action="action_caramia_employee_job"
+              sequence="20"/>
 </odoo>

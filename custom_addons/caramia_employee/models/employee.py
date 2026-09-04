@@ -1,5 +1,12 @@
 from odoo import models, fields, api
 
+class CaramiaEmployeeJob(models.Model):
+    _name = 'caramia.employee.job'
+    _description = 'Cargo / Puesto de Trabajo'
+    _order = 'name'
+
+    name = fields.Char(string='Nombre del Cargo', required=True)
+
 class CaramiaEmployee(models.Model):
     _name = 'caramia.employee'
     _description = 'Empleado Caramia'
@@ -13,7 +20,12 @@ class CaramiaEmployee(models.Model):
         default='Nuevo'
     )
     name = fields.Char(string='Nombre Completo', required=True)
-    job_title = fields.Char(string='Cargo', required=True)
+    job_id = fields.Many2one(
+        'caramia.employee.job', 
+        string='Cargo / Puesto', 
+        required=True,
+        ondelete='restrict'
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
