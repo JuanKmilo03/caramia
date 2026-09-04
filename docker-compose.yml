@@ -31,4 +31,5 @@ services:
       - odoo
 
 volumes:
+
   odoo-db-data:
