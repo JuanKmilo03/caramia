@@ -3,9 +3,15 @@
 venv/
 ENV/
 
+# Ignorar configuraciones locales con datos sensibles
+.env
+config/odoo.conf
+
 # Archivos temporales de Python y caché
-__pycache__/
 *.py[cod]
+*.pyc
+__pycache__/
+.DS_Store
 
 # Configuración local de IDEs
 .vscode/
