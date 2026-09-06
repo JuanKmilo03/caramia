@@ -43,16 +43,12 @@
         <field name="arch" type="xml">
             <form string="Empleado">
                 <sheet>
-                    <div class="oe_title">
-                        <label for="employee_code" string="ID EMPLEADO"/>
-                        <h1>
-                            <field name="employee_code" readonly="1"/>
-                        </h1>
-                    </div>
                     <group>
                         <group>
+                            <field name="employee_code" placeholder="Ej. 1098765432" required="1"/>
                             <field name="name" placeholder="Ej. Juan Pérez" required="1"/>
                             <field name="job_id" placeholder="Seleccione un cargo..." required="1"/>
+                            <field name="phone" placeholder="Ej. 300 123 4567" required="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -68,6 +64,7 @@
                 <field name="employee_code"/>
                 <field name="name"/>
                 <field name="job_id"/>
+                <field name="phone"/>
             </list>
         </field>
     </record>
@@ -81,16 +78,20 @@
                     <t t-name="card">
                         <div class="oe_kanban_global_click p-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge text-bg-primary fs-6">
-                                    <field name="employee_code"/>
+                                <span class="badge text-bg-secondary fs-6">
+                                    CC: <field name="employee_code"/>
                                 </span>
                             </div>
                             <div class="fw-bold fs-5 text-dark mb-1">
                                 <field name="name"/>
                             </div>
-                            <div class="text-muted small">
+                            <div class="text-muted small mb-1">
                                 <i class="fa fa-briefcase me-1"/>
                                 <field name="job_id"/>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fa fa-phone me-1"/>
+                                <field name="phone"/>
                             </div>
                         </div>
                     </t>
@@ -107,6 +108,7 @@
                 <field name="employee_code"/>
                 <field name="name"/>
                 <field name="job_id"/>
+                <field name="phone"/>
                 <group expand="0" string="Agrupar por">
                     <filter string="Cargo / Puesto" name="group_by_job" context="{'group_by': 'job_id'}"/>
                 </group>

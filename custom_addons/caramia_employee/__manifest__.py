@@ -6,7 +6,6 @@
     'depends': ['base'],
     'data': [
         'security/ir.model.access.csv',
-        'data/ir_sequence_data.xml',
         'views/employee_views.xml',
     ],
     'installable': True,
