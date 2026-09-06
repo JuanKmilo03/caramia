@@ -12,3 +12,6 @@ db_password = odoo_password
 # ENTORNOS Y RUTAS
 # ==========================================
 addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
+
+# Cambiar nombre del archivo a odoo.conf y eliminar la extensión .example 
+# para que Odoo lo reconozca como archivo de configuración válido.
