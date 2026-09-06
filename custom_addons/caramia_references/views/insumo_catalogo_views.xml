@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cara_mia_insumo_catalogo_list" model="ir.ui.view">
+        <field name="name">cara.mia.insumo.catalogo.list</field>
+        <field name="model">cara.mia.insumo.catalogo</field>
+        <field name="arch" type="xml">
+            <list string="Catálogo General de Insumos">
+                <field name="name"/>
+                <field name="tipo_componente"/>
+                <field name="unidad_medida"/>
+                <field name="costo_referencia"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cara_mia_insumo_catalogo_form" model="ir.ui.view">
+        <field name="name">cara.mia.insumo.catalogo.form</field>
+        <field name="model">cara.mia.insumo.catalogo</field>
+        <field name="arch" type="xml">
+            <form string="Insumo del Catálogo">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="tipo_componente"/>
+                        </group>
+                        <group>
+                            <field name="unidad_medida"/>
+                            <field name="costo_referencia"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cara_mia_insumo_catalogo" model="ir.actions.act_window">
+        <field name="name">Catálogo de Insumos</field>
+        <field name="res_model">cara.mia.insumo.catalogo</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_cara_mia_insumo_catalogo" 
+              name="Insumos y Materiales" 
+              parent="menu_cara_mia_root" 
+              action="action_cara_mia_insumo_catalogo" 
+              sequence="20"/>
+</odoo>

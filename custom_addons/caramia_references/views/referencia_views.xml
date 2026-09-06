@@ -16,25 +16,29 @@
                         <h3>
                             <field name="codigo_referencia" placeholder="Código de referencia" />
                         </h3>
+                        <h3>
+                            <group>
+                                <field name="costo_total_produccion" readonly="1"
+                                    widget="monetary" />
+                            </group>
+                        </h3>
                     </div>
                     <group>
                     </group>
                     <notebook>
                         <page string="Lista de Materiales e Insumos" name="insumos_page">
-                                <group>
-                                    <field name="costo_total_insumos" readonly="1" widget="monetary" />
-                                    <field name="costo_total_produccion" readonly="1"
-                                        widget="monetary" />
-                                </group>
-                                <field name="insumo_ids">
-                                    <list editable="bottom">
-                                        <field name="insumo_catalogo_id" />
-                                        <field name="tipo_componente" />
-                                        <field name="cantidad" />
-                                        <field name="unidad_medida" />
-                                        <field name="costo_estimado" widget="monetary" />
-                                    </list>
-                                </field>
+                            <group>
+                                <field name="costo_total_insumos" readonly="1" widget="monetary" />
+                            </group>
+                            <field name="insumo_ids">
+                                <list editable="bottom">
+                                    <field name="insumo_catalogo_id" />
+                                    <field name="tipo_componente" />
+                                    <field name="cantidad" />
+                                    <field name="unidad_medida" />
+                                    <field name="costo_estimado" widget="monetary" />
+                                </list>
+                            </field>
                         </page>
                         <page string="Descripción" name="desc_page">
                             <field name="descripcion"
@@ -68,14 +72,12 @@
             </list>
         </field>
     </record>
-
     <record id="action_cara_mia_referencia" model="ir.actions.act_window">
         <field name="name">Gestión de Referencias</field>
         <field name="res_model">cara.mia.referencia</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <menuitem id="menu_cara_mia_root" name="Calzado Cara Mía" sequence="10" />
-    <menuitem id="menu_cara_mia_referencias" name="Referencias y Fichas" parent="menu_cara_mia_root"
+    <menuitem id="menu_cara_mia_root" name="Referencias" sequence="10" />
+    <menuitem id="menu_cara_mia_referencias" name="Ficha Técnica de Referencias" parent="menu_cara_mia_root"
         action="action_cara_mia_referencia" sequence="10" />
 </odoo>

@@ -20,7 +20,7 @@ class InsumoReferencia(models.Model):
         string='Tipo',
         readonly=True
     )
-    cantidad = fields.Float(string='Cantidad Requerida', default=1.0)
+    cantidad = fields.Float(string='Cantidad Requerida', default=0)
     unidad_medida = fields.Selection(
         related='insumo_catalogo_id.unidad_medida',
         string='Unidad',

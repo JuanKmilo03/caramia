@@ -3,8 +3,7 @@ from odoo import models, fields
 class InsumoCatalogo(models.Model):
     _name = 'cara.mia.insumo.catalogo'
     _description = 'Insumo de la Ficha Técnica de Calzado'
-
-    referencia_id = fields.Many2one('cara.mia.referencia', string='Referencia de Calzado', required=True, ondelete='cascade')
+    referencia_id = fields.Many2one('cara.mia.referencia', string='Referencia de Calzado', ondelete='cascade')
     tipo_componente = fields.Selection([
         ('sintetico', 'Material Sintético / Base'),
         ('forro', 'Forro'),
@@ -16,7 +15,6 @@ class InsumoCatalogo(models.Model):
     ], string='Tipo de Componente', required=True)
     
     name = fields.Char(string='Descripción del Material / Insumo', required=True)
-    cantidad = fields.Float(string='Cantidad Requerida', default=1.0)
     unidad_medida = fields.Selection([
         ('cm', 'Cm'),
         ('mts', 'Mts'),
