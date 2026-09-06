@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields
 
 class CaramiaEmployeeJob(models.Model):
     _name = 'caramia.employee.job'
@@ -7,17 +7,17 @@ class CaramiaEmployeeJob(models.Model):
 
     name = fields.Char(string='Nombre del Cargo', required=True)
 
+
 class CaramiaEmployee(models.Model):
     _name = 'caramia.employee'
     _description = 'Empleado Caramia'
-    _order = 'employee_code desc, id desc'
+    _order = 'name, id desc'
 
     employee_code = fields.Char(
-        string='ID Empleado', 
+        string='Cédula / Documento', 
         required=True, 
-        copy=False, 
-        readonly=True, 
-        default='Nuevo'
+        copy=False,
+        index=True
     )
     name = fields.Char(string='Nombre Completo', required=True)
     job_id = fields.Many2one(
@@ -26,10 +26,8 @@ class CaramiaEmployee(models.Model):
         required=True,
         ondelete='restrict'
     )
+    phone = fields.Char(string='Teléfono', required=True)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get('employee_code', 'Nuevo') == 'Nuevo':
-                vals['employee_code'] = self.env['ir.sequence'].next_by_code('caramia.employee.sequence') or 'Nuevo'
-        return super().create(vals_list)
+    _sql_constraints = [
+        ('employee_code_unique', 'unique(employee_code)', 'La cédula/documento ingresado ya está registrado para otro empleado.')
+    ]
