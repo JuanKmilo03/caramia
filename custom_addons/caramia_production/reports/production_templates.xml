@@ -1,54 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="action_report_caramia_production" model="ir.actions.report">
-        <field name="name">Orden de Producción</field>
-        <field name="model">caramia.production</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">caramia_production.report_caramia_template</field>
-        <field name="report_file">Orden_Produccion</field>
-        <field name="print_report_name">'Orden_' + object.name</field>
-        <field name="binding_model_id" ref="model_caramia_production"/>
-        <field name="binding_type">report</field>
-    </record>
-
     <template id="report_caramia_template">
         <t t-call="web.basic_layout">
             <t t-foreach="docs" t-as="o">
                 <div class="page" style="font-size: 10px; font-family: Arial, sans-serif;">
                     
-                    <!-- Encabezado Principal -->
+                    <!-- Encabezado Principal de la Orden -->
                     <table class="table table-bordered mb-2">
                         <tr>
-                            <td style="width: 55%;">
-                                <h4><strong>ORDEN DE PRODUCCIÓN</strong></h4>
+                            <td style="width: 45%; vertical-align: middle;">
+                                <h4 class="m-0"><strong>ORDEN DE PRODUCCIÓN</strong></h4>
                                 <strong>ORDEN N°: </strong> <span t-field="o.name"/><br/>
                                 <strong>FECHA: </strong> <span t-field="o.date"/><br/>
-                                <strong>CLIENTE: </strong> <span t-field="o.partner_id.name"/><br/>
-                                <strong>REFERENCIA: </strong> <span t-field="o.product_id.default_code"/> - <span t-field="o.product_id.name"/>
+                                <strong>CLIENTE: </strong> <span t-field="o.customer_id.name"/><br/>
+                                <strong>REFERENCIA: </strong> <span t-field="o.referencia_id.display_name"/><br/>
+                                <strong>SELLO: </strong> <span t-field="o.sello"/>
                             </td>
-                            <td style="width: 45%; text-align: center; vertical-align: middle;">
-                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 45px;"/>
+                            <td style="width: 25%; text-align: center; vertical-align: middle;">
+                                <span t-if="o.imagen_zapato">
+                                    <img t-att-src="image_data_uri(o.imagen_zapato)" style="max-height: 65px; max-width: 90px; border: 1px solid #ccc; padding: 2px; border-radius: 4px;"/>
+                                </span>
+                            </td>
+                            <td style="width: 30%; text-align: center; vertical-align: middle;">
+                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px;"/>
                                 <div style="font-weight: bold; margin-top: 2px;" t-field="o.name"/>
                             </td>
                         </tr>
                     </table>
 
-                    <!-- Talones individuales por Proceso -->
-                    <t t-foreach="['GUARNICION', 'MONTADA', 'PLANTILLA', 'FORRADA', 'LIMPIADA']" t-as="proceso">
+                    <!-- Talones individuales (Uno por cada labor/proceso registrado) -->
+                    <t t-foreach="o.labor_ids" t-as="labor">
                         <div style="border: 1px dashed #000; padding: 4px; margin-bottom: 6px; page-break-inside: avoid;">
-                            <table class="table table-sm table-borderless m-0" style="width: 100%;">
+                            <table class="table table-sm table-borderless m-0" style="width: 100%; font-size: 9px;">
                                 <tr>
-                                    <td><strong>PROCESO: </strong> <span t-esc="proceso"/></td>
+                                    <td><strong>PROCESO: </strong> <span t-field="labor.tipo_labor" style="font-weight: bold; text-transform: uppercase;"/></td>
+                                    <td><strong>PRECIO/PAR: </strong> <span t-field="labor.tarifa_pago"/></td>
                                     <td><strong>COLOR: </strong> <span t-field="o.color"/></td>
                                     <td><strong>MATERIAL: </strong> <span t-field="o.material"/></td>
                                     <td><strong>ORDEN: </strong> <span t-field="o.name"/></td>
                                     <td class="text-end">
-                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 200, 30)" style="max-height: 25px;"/>
+                                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 200, 30)" style="max-height: 22px;"/>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Tabla Resumen de Tallas para el Talón -->
+                            <!-- Descripción de la orden en cada tiquete de labor -->
+                            <t t-if="o.description">
+                                <div style="font-size: 8.5px; border-top: 1px dotted #ccc; margin-top: 2px; padding-top: 2px; margin-bottom: 3px;">
+                                    <strong>DESCRIPCIÓN: </strong> <span t-field="o.description"/>
+                                </div>
+                            </t>
+
+                            <!-- Tabla Resumen de Tallas -->
                             <table class="table table-bordered table-sm text-center m-0" style="font-size: 8.5px;">
                                 <thead class="table-light">
                                     <tr>
