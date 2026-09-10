@@ -5,10 +5,10 @@
         <field name="model">cara.mia.insumo.catalogo</field>
         <field name="arch" type="xml">
             <list string="Catálogo General de Insumos">
-                <field name="name"/>
-                <field name="tipo_componente"/>
-                <field name="unidad_medida"/>
-                <field name="costo_referencia"/>
+                <field name="name" />
+                <field name="tipo_componente_id" />
+                <field name="unidad_medida" />
+                <field name="costo_referencia" />
             </list>
         </field>
     </record>
@@ -21,13 +21,13 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="tipo_componente"/>
+                            <field name="name" />
+                            <field name="tipo_componente_id" options="{'no_create_edit': True, 'no_open': True}" />
                         </group>
                         <group>
-                            <field name="unidad_medida"/>
-                            <field name="costo_referencia"/>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="unidad_medida" />
+                            <field name="costo_referencia" />
+                            <field name="currency_id" invisible="1" />
                         </group>
                     </group>
                 </sheet>
@@ -41,9 +41,9 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_cara_mia_insumo_catalogo" 
-              name="Insumos y Materiales" 
-              parent="menu_cara_mia_root" 
-              action="action_cara_mia_insumo_catalogo" 
-              sequence="20"/>
+    <menuitem id="menu_cara_mia_insumo_catalogo"
+        name="Insumos y Materiales"
+        parent="menu_cara_mia_root"
+        action="action_cara_mia_insumo_catalogo"
+        sequence="20" />
 </odoo>

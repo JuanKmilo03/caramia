@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cara_mia_tipo_labor_list" model="ir.ui.view">
+        <field name="name">cara.mia.tipo.labor.list</field>
+        <field name="model">cara.mia.tipo.labor</field>
+        <field name="arch" type="xml">
+            <list string="Catálogo de Labores y Tarifas" editable="bottom">
+                <field name="name"/>
+                <field name="tarifa_normal" widget="monetary"/>
+                <field name="tarifa_especial" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cara_mia_tipo_labor_form" model="ir.ui.view">
+        <field name="name">cara.mia.tipo.labor.form</field>
+        <field name="model">cara.mia.tipo.labor</field>
+        <field name="arch" type="xml">
+            <form string="Tipo de Labor">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="tarifa_normal" widget="monetary"/>
+                        <field name="tarifa_especial" widget="monetary"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cara_mia_tipo_labor" model="ir.actions.act_window">
+        <field name="name">Catálogo de Labores</field>
+        <field name="res_model">cara.mia.tipo.labor</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_cara_mia_tipos_labor" 
+        name="Catálogo de Labores" 
+        parent="menu_cara_mia_root" 
+        action="action_cara_mia_tipo_labor" 
+        sequence="20"/>
+</odoo>

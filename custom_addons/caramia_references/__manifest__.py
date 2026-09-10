@@ -10,6 +10,7 @@
         'views/referencia_views.xml',
         'data/secuencia_ref.xml',
         'views/insumo_catalogo_views.xml',
+        'views/labores.xml',
     ],
     'installable': True,
     'application': True,

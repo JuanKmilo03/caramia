@@ -25,6 +25,12 @@ class ReferenciaCalzado(models.Model):
         ('activo', 'Activo'),
         ('inactivo', 'Inactivo')
     ], string='Estado', default='activo', tracking=True)
+    
+    tipo_tarifa_header = fields.Selection([
+        ('manual', 'Manual / Digitar libre'),
+        ('1', 'Precio Sugerido 1'),
+        ('2', 'Precio Sugerido 2')
+    ], string='Origen de Precios', default='manual', tracking=True)
 
     insumo_ids = fields.One2many(
         'cara.mia.insumo.referencia', 'referencia_id',
@@ -48,16 +54,41 @@ class ReferenciaCalzado(models.Model):
         currency_field='currency_id'
     )
     costo_total_produccion = fields.Monetary(
-        string='Costo Total de Producción',
+        string='Costo Estimado de Producción',
         compute='_compute_costo_total_produccion',
         store=True,
         currency_field='currency_id'
     )
-
+    
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        tipos_labor = self.env['cara.mia.tipo.labor'].search([])
+        labor_lines = []
+        for labor in tipos_labor:
+            labor_lines.append((0, 0, {
+                'tipo_labor_id': labor.id,
+                'tarifa_pago': 0.0,
+            }))
+        res['labor_ids'] = labor_lines
+        return res
+    
     @api.depends('labor_ids.tarifa_pago')
     def _compute_precio_total_labor(self):
         for record in self:
             record.precio_total_labor = sum(record.labor_ids.mapped('tarifa_pago'))
+            
+    @api.onchange('tipo_tarifa_header')
+    def _onchange_tipo_tarifa_header(self):
+        for referencia in self:
+            if referencia.tipo_tarifa_header == 'manual':
+                continue
+            for linea in referencia.labor_ids:
+                if linea.tipo_labor_id:
+                    if referencia.tipo_tarifa_header == '2':
+                        linea.tarifa_pago = linea.tipo_labor_id.tarifa_especial or 0.0
+                    elif referencia.tipo_tarifa_header == '1':
+                        linea.tarifa_pago = linea.tipo_labor_id.tarifa_normal or 0.0
 
     @api.depends('insumo_ids.costo_estimado')
     def _compute_costo_total_insumos(self):

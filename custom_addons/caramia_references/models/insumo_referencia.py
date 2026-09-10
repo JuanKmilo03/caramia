@@ -15,10 +15,11 @@ class InsumoReferencia(models.Model):
         string='Material / Insumo',
         required=True
     )
-    tipo_componente = fields.Selection(
-        related='insumo_catalogo_id.tipo_componente',
+    tipo_componente_id = fields.Many2one(
+        related='insumo_catalogo_id.tipo_componente_id',
         string='Tipo',
-        readonly=True
+        readonly=True,
+        store=True
     )
     cantidad = fields.Float(string='Cantidad Requerida', default=0)
     unidad_medida = fields.Selection(
