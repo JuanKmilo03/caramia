@@ -8,7 +8,7 @@ TIPOS_LABOR = [
     ('plantilla', 'Plantilla'),
     ('forrada', 'Forrada'),
     ('corte', 'Corte'),
-    ('otro', 'Otra Labor')
+    ('suela', 'Suela')
 ]
 
 class CaramiaProduction(models.Model):

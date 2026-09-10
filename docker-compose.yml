@@ -13,7 +13,7 @@ services:
   odoo:
     build: .
     image: caramia-odoo:18.0
-    command: odoo -c /etc/odoo/odoo.conf
+    command: odoo -c /etc/odoo/odoo.conf -u caramia_production --dev=xml
     depends_on:
       - db
     ports:
