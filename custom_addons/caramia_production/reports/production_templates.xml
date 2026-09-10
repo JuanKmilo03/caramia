@@ -45,29 +45,29 @@
                     <t t-foreach="o.labor_ids" t-as="labor">
                         <div style="border: 1px dashed #000; padding: 4px; margin-bottom: 6px; page-break-inside: avoid;">
 
-                            <table class="table table-bordered table-sm text-center m-0" style="font-size: 8.5px;">
+                            <table class="table table-bordered table-sm text-center m-0" style="font-size: 10px;">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="background-color: #ffccff;">21</th>
-                                        <th>22</th>
-                                        <th style="background-color: #ffccff;">23</th>
-                                        <th>24</th>
-                                        <th style="background-color: #ffccff;">25</th>
-                                        <th>26</th>
-                                        <th style="background-color: #ffccff;">27</th>
-                                        <th>28</th>
-                                        <th style="background-color: #ffccff;">29</th>
-                                        <th>30</th>
-                                        <th style="background-color: #ffccff;">31</th>
-                                        <th>32</th>
-                                        <th style="background-color: #ffccff;">33</th>
-                                        <th>34</th>
-                                        <th style="background-color: #ffccff;">35</th>
-                                        <th>36</th>
-                                        <th style="background-color: #ffccff;">37</th>
-                                        <th>38</th>
-                                        <th style="background-color: #ffccff;">39</th>
-                                        <th>40</th>
+                                        <th style="background-color: #ffccff;"><strong>21</strong></th>
+                                        <th><strong>22</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>23</strong></th>
+                                        <th><strong>24</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>25</strong></th>
+                                        <th><strong>26</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>27</strong></th>
+                                        <th><strong>28</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>29</strong></th>
+                                        <th><strong>30</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>31</strong></th>
+                                        <th><strong>32</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>33</strong></th>
+                                        <th><strong>34</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>35</strong></th>
+                                        <th><strong>36</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>37</strong></th>
+                                        <th><strong>38</strong></th>
+                                        <th style="background-color: #ffccff;"><strong>39</strong></th>
+                                        <th><strong>40</strong></th>
                                         <th><strong>TOTAL PARES</strong></th>
                                         <th><strong>REFERENCIA</strong></th>
                                         <th><strong>DESCRIPCIÓN</strong></th>
@@ -95,29 +95,30 @@
                                         <td><span t-esc="o.talla_38 or ''"/></td>
                                         <td style="background-color: #ffccff;"><span t-esc="o.talla_39 or ''"/></td>
                                         <td><span t-esc="o.talla_40 or ''"/></td>
-                                        <td><strong><span t-field="o.total_pares"/></strong></td>
-                                        <td><strong><span t-field="o.referencia_id.display_name"/></strong></td>
+                                        <td><span t-field="o.total_pares"/></td>
+                                        <td><span t-field="o.referencia_id.display_name"/></td>
                                         <td rowSpan="2"><span t-field="o.description"/></td>
                                     </tr>
                                     <tr>
                                         <td colspan="3"><strong>COLOR</strong></td>
                                         <td colspan="17"><span t-field="o.color"/></td>
-                                        <td><strong>FECHA</strong></td>
+                                        <td><strong>FECHA CREACIÓN</strong></td>
                                         <td><span t-field="o.date"/></td>
                                     </tr>
                                     <tr>
                                         <td colspan="3"><strong>MATERIAL</strong></td>
                                         <td colspan="17"><span t-field="o.material"/></td>
-                                        <td><strong>ORDEN</strong></td>
+                                        <td><strong>ORDEN N°</strong></td>
                                         <td><span t-field="o.name"/></td>
-                                        <td style="text-align: center; vertical-align: middle;" rowspan="2">
-                                            <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px;"/>
+                                        <td style="vertical-align: middle; padding: 0; margin: 0;" rowspan="2">
+                                            <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px; max-width: 180px; padding: 0; margin: 0;"/>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td colspan="3"><strong>PRECIO</strong></td>
-                                        <td colspan="15" style="background-color: #ffccff;"><span t-field="labor.tarifa_pago"/></td>
-                                        <td colspan="3"><strong><span t-field="labor.tipo_labor"/></strong></td>
+                                        <td colspan="10" style="background-color: #ffccff;"><span t-field="labor.tarifa_pago"/></td>
+                                        <td colspan="7"><strong><span t-field="labor.tipo_labor"/></strong></td>
+                                        <td><strong>SELLO</strong></td>
                                         <td style="background-color: #ffccff;"><span t-field="o.sello"/></td>
                                     </tr>
                                 </tbody>
