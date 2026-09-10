@@ -10,7 +10,7 @@ config/odoo.conf
 # Archivos temporales de Python y caché
 *.py[cod]
 *.pyc
-_pycache_/
+__pycache__/
 .DS_Store
 
 # Configuración local de IDEs

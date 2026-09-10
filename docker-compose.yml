@@ -1,0 +1,34 @@
+services:
+  # 1. Servicio Base de Datos
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+
+  # 2. Servicio ERP Odoo
+  odoo:
+    build: .
+    image: caramia-odoo:18.0
+    command: odoo -c /etc/odoo/odoo.conf -u caramia_production --dev=xml
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - ./config/odoo.conf:/etc/odoo/odoo.conf
+      - ./custom_addons:/mnt/extra-addons
+
+  # 3. Servicio FastAPI (Asistente de IA)
+  fastapi_ai:
+    build: ./fastapi_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - odoo
+
+volumes:
+  odoo-db-data:

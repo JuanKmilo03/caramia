@@ -7,85 +7,64 @@
         <field name="arch" type="xml">
             <form string="Orden de Producción">
                 <header>
-                    <button name="action_download_pdf" 
-                            string="Imprimir PDF" 
-                            type="object" 
-                            class="btn-primary" 
-                            icon="fa-print"/>
-
-                    <button name="action_set_in_progress" 
-                            string="Iniciar Proceso" 
-                            type="object" 
-                            class="oe_highlight" 
-                            invisible="state != 'draft'"/>
-
-                    <button name="action_set_done" 
-                            string="Finalizar (Mandar a Historial)" 
-                            type="object" 
-                            class="oe_highlight" 
-                            invisible="state != 'in_progress'"/>
-
-                    <button name="action_set_draft" 
-                            string="Volver a Borrador" 
-                            type="object" 
-                            invisible="state == 'draft'"/>
-
+                    <button name="action_set_in_progress" string="Iniciar Producción" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_set_done" string="Finalizar" type="object" class="oe_highlight" invisible="state != 'in_progress'"/>
+                    <button name="action_download_pdf" string="Imprimir Tiquetes PDF" type="object" icon="fa-print"/>
+                    <button name="action_set_draft" string="Volver a Borrador" type="object" invisible="state == 'draft'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
                 </header>
                 <sheet>
+                    <field name="imagen_zapato" widget="image" class="oe_avatar" options="{'zoom': true}"/>
                     <div class="oe_title">
-                        <h1>
-                            <field name="name"/>
-                        </h1>
+                        <label for="name" string="ORDEN DE PRODUCCIÓN"/>
+                        <h1><field name="name" readonly="1"/></h1>
                     </div>
                     <group>
-                        <group string="Información General">
-                            <field name="customer_id"/>
-                            <field name="product_id"/>
-                            <field name="date"/>
-                            <field name="factura_nro"/>
-                        </group>
-                        <group string="Detalles de Calzado">
+                        <group>
+                            <field name="customer_id" placeholder="Seleccione cliente..."/>
+                            <field name="referencia_id" options="{'no_create': True}" placeholder="Seleccione modelo de zapato..."/>
+                            <field name="sello"/>
                             <field name="color"/>
                             <field name="material"/>
-                            <field name="sello"/>
-                            <field name="date_done" invisible="state != 'done'"/>
-                            <field name="active"/>
+                            <field name="factura_nro"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="total_pares" class="fw-bold fs-4"/>
+                            <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
+                    <group string="Descripción / Observaciones">
+                        <field name="description" nolabel="1" placeholder="Añada observaciones adicionales para esta orden..."/>
+                    </group>
+
                     <notebook>
-                        <page string="Curva de Tallas (21-40)">
-                            <group string="Tallas Niños / Juvenil (21 a 30)" col="10">
-                                <field name="talla_21"/>
-                                <field name="talla_22"/>
-                                <field name="talla_23"/>
-                                <field name="talla_24"/>
-                                <field name="talla_25"/>
-                                <field name="talla_26"/>
-                                <field name="talla_27"/>
-                                <field name="talla_28"/>
-                                <field name="talla_29"/>
-                                <field name="talla_30"/>
-                            </group>
-                            <group string="Tallas Adultos (31 a 40)" col="10">
-                                <field name="talla_31"/>
-                                <field name="talla_32"/>
-                                <field name="talla_33"/>
-                                <field name="talla_34"/>
-                                <field name="talla_35"/>
-                                <field name="talla_36"/>
-                                <field name="talla_37"/>
-                                <field name="talla_38"/>
-                                <field name="talla_39"/>
-                                <field name="talla_40"/>
-                            </group>
-                            <group class="oe_subtotal_footer">
-                                <field name="total_pares" class="oe_subtotal_footer_separator"/>
+                        <page string="Curva de Tallas">
+                            <group string="Distribución por Tallas">
+                                <group>
+                                    <field name="talla_21"/><field name="talla_22"/><field name="talla_23"/>
+                                    <field name="talla_24"/><field name="talla_25"/><field name="talla_26"/>
+                                    <field name="talla_27"/><field name="talla_28"/><field name="talla_29"/>
+                                    <field name="talla_30"/>
+                                </group>
+                                <group>
+                                    <field name="talla_31"/><field name="talla_32"/><field name="talla_33"/>
+                                    <field name="talla_34"/><field name="talla_35"/><field name="talla_36"/>
+                                    <field name="talla_37"/><field name="talla_38"/><field name="talla_39"/>
+                                    <field name="talla_40"/>
+                                </group>
                             </group>
                         </page>
-                        <page string="Descripción / Notas">
-                            <field name="description" placeholder="Notas adicionales de la orden..."/>
+
+                        <!-- Tabla de Labores Editable libremente -->
+                        <page string="Labores de la Orden">
+                            <field name="labor_ids">
+                                <list editable="bottom">
+                                    <field name="tipo_labor" string="Labor / Proceso"/>
+                                    <field name="tarifa_pago" widget="monetary" string="Precio por Par"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
@@ -102,7 +81,7 @@
             <list string="Órdenes de Producción">
                 <field name="name"/>
                 <field name="customer_id"/>
-                <field name="product_id"/>
+                <field name="referencia_id"/>
                 <field name="color"/>
                 <field name="total_pares"/>
                 <field name="date"/>
@@ -121,7 +100,7 @@
             <list string="Historial de Producción" create="false">
                 <field name="name"/>
                 <field name="customer_id"/>
-                <field name="product_id"/>
+                <field name="referencia_id"/>
                 <field name="total_pares"/>
                 <field name="date" string="Fecha Creación"/>
                 <field name="date_done" string="Fecha Finalización"/>

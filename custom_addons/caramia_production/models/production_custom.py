@@ -1,26 +1,71 @@
 from odoo import models, fields, api
 
+# Selección estándar de labores de producción
+TIPOS_LABOR = [
+    ('limpiada', 'Limpiada'),
+    ('montada', 'Montada'),
+    ('guarnicion', 'Guarnición'),
+    ('plantilla', 'Plantilla'),
+    ('forrada', 'Forrada'),
+    ('corte', 'Corte'),
+    ('suela', 'Suela')
+]
+
 class CaramiaProduction(models.Model):
     _name = 'caramia.production'
     _description = 'Orden de Producción'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'name desc'
 
-    name = fields.Char(string='Orden / Lote', required=True, copy=False, readonly=True, default='Nuevo', tracking=True)
-    description = fields.Text(string='Descripción')
+    name = fields.Char(
+        string='Orden / Lote', 
+        required=True, 
+        copy=False, 
+        readonly=True, 
+        default='Nuevo', 
+        tracking=True
+    )
+    description = fields.Text(string='Descripción / Observaciones')
     date = fields.Date(string='Fecha de Creación', default=fields.Date.today)
     date_done = fields.Datetime(string='Fecha de Finalización', readonly=True)
     active = fields.Boolean(string='Activo', default=True)
 
-    # Relaciones y datos del producto
+    # Relaciones principales
     customer_id = fields.Many2one('caramia.customer', string='Cliente', required=True, tracking=True)
-    product_id = fields.Many2one('product.product', string='Referencia / Producto', required=True, tracking=True)
+    referencia_id = fields.Many2one(
+        'cara.mia.referencia', 
+        string='Referencia / Modelo', 
+        required=True, 
+        tracking=True,
+        domain="[('estado', '=', 'activo')]",
+        ondelete='restrict'
+    )
+
+    imagen_zapato = fields.Image(
+        related='referencia_id.imagen_zapato', 
+        string='Fotografía del Calzado', 
+        readonly=True
+    )
+
+    # Relación con labores editables propias de esta orden
+    labor_ids = fields.One2many(
+        'caramia.production.labor', 
+        'production_id', 
+        string='Labores de la Orden'
+    )
+
+    currency_id = fields.Many2one(
+        'res.currency', 
+        default=lambda self: self.env.company.currency_id, 
+        string='Moneda'
+    )
+
     color = fields.Char(string='Color')
     material = fields.Char(string='Material')
     sello = fields.Char(string='Sello / Marca')
     factura_nro = fields.Char(string='Factura N°')
 
-    # Curva completa de tallas (21 a 40)
+    # Curva de tallas (21 a 40)
     talla_21 = fields.Integer(string='21', default=0)
     talla_22 = fields.Integer(string='22', default=0)
     talla_23 = fields.Integer(string='23', default=0)
@@ -65,17 +110,28 @@ class CaramiaProduction(models.Model):
                 rec.talla_36, rec.talla_37, rec.talla_38, rec.talla_39, rec.talla_40
             ])
 
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        """Intenta autocompletar atributos si están definidos en el producto"""
-        if self.product_id:
-            self.color = getattr(self.product_id, 'color', False) or self.color
-            self.material = getattr(self.product_id, 'material', False) or self.material
+    @api.onchange('referencia_id')
+    def _onchange_referencia_id(self):
+        if self.referencia_id:
+            if getattr(self.referencia_id, 'descripcion', False) and not self.description:
+                self.description = self.referencia_id.descripcion
+
+            # Extrae las tarifas de las labores configuradas en la referencia de zapato
+            precios_ref = {lab.tipo_labor: lab.tarifa_pago for lab in self.referencia_id.labor_ids}
+
+            # Carga todas las labores estándar en la orden con su valor o $0.0
+            lineas_labores = []
+            for code, name in TIPOS_LABOR:
+                lineas_labores.append((0, 0, {
+                    'tipo_labor': code,
+                    'tarifa_pago': precios_ref.get(code, 0.0),
+                }))
+            
+            self.labor_ids = [(5, 0, 0)] + lineas_labores
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
-        """Autocompleta el sello registrado en la ficha del cliente"""
-        if self.customer_id and self.customer_id.sello:
+        if self.customer_id and getattr(self.customer_id, 'sello', False):
             self.sello = self.customer_id.sello
 
     @api.model_create_multi
@@ -85,21 +141,25 @@ class CaramiaProduction(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('caramia.production.number') or 'Nuevo'
         return super().create(vals_list)
 
+    # Métodos invocados por los botones del encabezado en la vista
     def action_set_in_progress(self):
         self.write({'state': 'in_progress'})
 
     def action_set_done(self):
-        self.write({
-            'state': 'done',
-            'date_done': fields.Datetime.now()
-        })
+        self.write({'state': 'done', 'date_done': fields.Datetime.now()})
 
     def action_set_draft(self):
-        self.write({
-            'state': 'draft',
-            'date_done': False
-        })
+        self.write({'state': 'draft', 'date_done': False})
 
     def action_download_pdf(self):
-        """Ejecuta la descarga directa del reporte PDF con tiquetes de producción"""
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
+
+
+class CaramiaProductionLabor(models.Model):
+    _name = 'caramia.production.labor'
+    _description = 'Labor Editable de Orden de Producción'
+
+    production_id = fields.Many2one('caramia.production', string='Orden de Producción', ondelete='cascade')
+    tipo_labor = fields.Selection(TIPOS_LABOR, string='Tipo de Labor', required=True)
+    tarifa_pago = fields.Monetary(string='Precio por Par', currency_field='currency_id')
+    currency_id = fields.Many2one('res.currency', related='production_id.currency_id')
