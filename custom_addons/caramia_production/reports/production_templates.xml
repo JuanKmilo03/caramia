@@ -19,10 +19,29 @@
                     </style>
 
                     <!-- Encabezado con el cual el administrador de la fábrica se queda -->
-                    <table class="table table-bordered mb-2">
+                    <table class="table table-bordered table-sm text-center m-0" style="font-size: 10px; margin-bottom: 20px !important;">
+                        <tr>
+                            <td colspan="12" rowspan="2">
+                                <span t-if="res_company.logo">
+                                    <img t-att-src="image_data_uri(res_company.logo)" style="max-height: 100px; max-width: 250px; object-fit: contain;"/>
+                                </span>
+                            </td>
+                            <td colspan="10" style="background-color: #d09ad0; text-align: center; vertical-align: middle;">
+                                <strong><span t-field="o.referencia_id.display_name"/></strong>
+                            </td>
+                            <td rowspan="7" style="text-align: center; vertical-align: middle;">
+                                <span t-if="o.imagen_zapato">
+                                    <img t-att-src="image_data_uri(o.imagen_zapato)" style="max-height: 135px; max-width: 180px; width: auto; height: auto; object-fit: contain;"/>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="22"></td>
+                        </tr>
                         <tr>
                             <td colspan="5"><strong>FECHA CREACIÓN</strong></td>
                             <td colspan="13"><span t-field="o.date"/></td>
+                            <td colspan="4" style="border-top: hidden !important;"></td>
                         </tr>
                         <tr>
                             <td colspan="3"><strong>CLIENTE</strong></td>
@@ -87,8 +106,11 @@
                         <tr>
                             <td style="border: none !important;" colspan="3"></td>
                             <td colspan="16"><span t-field="o.material"/></td>
-                            <td style="border: none !important;" colspan="2"><strong>FACTURA N°:</strong></td>
-                            <td style="border: none !important;"><span t-esc="o.factura_nro or ''"/></td>
+                            <td colspan="2"><strong>FACTURA N°:</strong></td>
+                            <td ><span t-esc="o.factura_nro or ''"/></td>
+                            <td style="vertical-align: middle; padding: 0; margin: 0;" rowspan="3">
+                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px; max-width: 180px; padding: 0; margin: 0;"/>
+                            </td>
                         </tr>
                         <tr>
                             <td colspan="22" style="border-left: hidden !important; border-right: hidden !important;"></td>
@@ -97,14 +119,6 @@
                             <td colspan="22" style="background-color: #ffccff;"><span t-field="o.description"/></td>
                         </tr>
                     </table>
-                            <td style="width: 25%; text-align: center; vertical-align: middle;">
-                                <span t-if="o.imagen_zapato">
-                                    <img t-att-src="image_data_uri(o.imagen_zapato)" style="max-height: 65px; max-width: 90px; border: 1px solid #ccc; padding: 2px; border-radius: 4px;"/>
-                                </span>
-                            </td>
-                            <td style="width: 30%; text-align: center; vertical-align: middle;">
-                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px;"/>
-                            </td>
 
 
                     <!-- Tiquets por labor segun la referencia del calzado -->
