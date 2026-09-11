@@ -22,7 +22,7 @@
                     <group>
                         <group>
                             <field name="customer_id" placeholder="Seleccione cliente..."/>
-                            <field name="referencia_id" options="{'no_create': True}" placeholder="Seleccione modelo de zapato..."/>
+                            <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False,'no_open': false}" placeholder="Seleccione modelo de zapato..."/>
                             <field name="sello"/>
                             <field name="color"/>
                             <field name="material"/>
@@ -61,7 +61,7 @@
                         <page string="Labores de la Orden">
                             <field name="labor_ids">
                                 <list editable="bottom">
-                                    <field name="tipo_labor" string="Labor / Proceso"/>
+                                    <field name="tipo_labor_id" string="Labor / Proceso"/>
                                     <field name="tarifa_pago" widget="monetary" string="Precio por Par"/>
                                 </list>
                             </field>

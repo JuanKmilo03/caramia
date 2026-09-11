@@ -117,8 +117,7 @@ class CaramiaProduction(models.Model):
                 self.description = self.referencia_id.descripcion
 
             # Extrae las tarifas de las labores configuradas en la referencia de zapato
-            precios_ref = {lab.tipo_labor: lab.tarifa_pago for lab in self.referencia_id.labor_ids}
-
+            precios_ref = {lab.tipo_labor_id: lab.tarifa_pago for lab in self.referencia_id.labor_ids}
             # Carga todas las labores estándar en la orden con su valor o $0.0
             lineas_labores = []
             for code, name in TIPOS_LABOR:
@@ -154,12 +153,29 @@ class CaramiaProduction(models.Model):
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
 
+    @api.onchange('referencia_id')
+    def _onchange_referencia_id(self):
+        for order in self:
+            order.labor_ids = [(5, 0, 0)]
+            
+            if order.referencia_id and order.referencia_id.labor_ids:
+                lineas_nuevas = []
+                for labor_ref in order.referencia_id.labor_ids:
+                    lineas_nuevas.append((0, 0, {
+                        'tipo_labor_id': labor_ref.tipo_labor_id.id,
+                        'tarifa_pago': labor_ref.tarifa_pago,
+                    }))
+                order.labor_ids = lineas_nuevas
 
 class CaramiaProductionLabor(models.Model):
     _name = 'caramia.production.labor'
     _description = 'Labor Editable de Orden de Producción'
 
     production_id = fields.Many2one('caramia.production', string='Orden de Producción', ondelete='cascade')
-    tipo_labor = fields.Selection(TIPOS_LABOR, string='Tipo de Labor', required=True)
+    tipo_labor_id = fields.Many2one(
+        'cara.mia.tipo.labor', 
+        string='Labor / Proceso', 
+        required=True
+    )    
     tarifa_pago = fields.Monetary(string='Precio por Par', currency_field='currency_id')
     currency_id = fields.Many2one('res.currency', related='production_id.currency_id')
