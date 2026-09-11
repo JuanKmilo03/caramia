@@ -19,27 +19,107 @@
                     </style>
 
                     <!-- Encabezado con el cual el administrador de la fábrica se queda -->
-                    <table class="table table-bordered mb-2">
+                    <table class="table table-bordered table-sm text-center m-0" style="font-size: 10px; margin-bottom: 20px !important;">
                         <tr>
-                            <td style="width: 45%; vertical-align: middle;">
-                                <h4 class="m-0"><strong>ORDEN DE PRODUCCIÓN</strong></h4>
-                                <strong>ORDEN N°: </strong> <span t-field="o.name"/><br/>
-                                <strong>FECHA: </strong> <span t-field="o.date"/><br/>
-                                <strong>CLIENTE: </strong> <span t-field="o.customer_id.name"/><br/>
-                                <strong>REFERENCIA: </strong> <span t-field="o.referencia_id.display_name"/><br/>
-                                <strong>SELLO: </strong> <span t-field="o.sello"/>
-                            </td>
-                            <td style="width: 25%; text-align: center; vertical-align: middle;">
-                                <span t-if="o.imagen_zapato">
-                                    <img t-att-src="image_data_uri(o.imagen_zapato)" style="max-height: 65px; max-width: 90px; border: 1px solid #ccc; padding: 2px; border-radius: 4px;"/>
+                            <td colspan="12" rowspan="2">
+                                <span t-if="res_company.logo">
+                                    <img t-att-src="image_data_uri(res_company.logo)" style="max-height: 100px; max-width: 250px; object-fit: contain;"/>
                                 </span>
                             </td>
-                            <td style="width: 30%; text-align: center; vertical-align: middle;">
-                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px;"/>
-                                <div style="font-weight: bold; margin-top: 2px;" t-field="o.name"/>
+                            <td colspan="10" style="background-color: #d09ad0; text-align: center; vertical-align: middle;">
+                                <strong><span t-field="o.referencia_id.display_name"/></strong>
+                            </td>
+                            <td rowspan="7" style="text-align: center; vertical-align: middle;">
+                                <span t-if="o.imagen_zapato">
+                                    <img t-att-src="image_data_uri(o.imagen_zapato)" style="max-height: 135px; max-width: 180px; width: auto; height: auto; object-fit: contain;"/>
+                                </span>
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="22"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5"><strong>FECHA CREACIÓN</strong></td>
+                            <td colspan="13"><span t-field="o.date"/></td>
+                            <td colspan="4" style="border-top: hidden !important;"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>CLIENTE</strong></td>
+                            <td colspan="17"><span t-field="o.customer_id.name"/></td>
+                            <td><strong>ORDEN N°:</strong></td>
+                            <td><span t-field="o.name"/></td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #ffccff;"><strong>21</strong></td>
+                            <td><strong>22</strong></td>
+                            <td style="background-color: #ffccff;"><strong>23</strong></td>
+                            <td><strong>24</strong></td>
+                            <td style="background-color: #ffccff;"><strong>25</strong></td>
+                            <td><strong>26</strong></td>
+                            <td style="background-color: #ffccff;"><strong>27</strong></td>
+                            <td><strong>28</strong></td>
+                            <td style="background-color: #ffccff;"><strong>29</strong></td>
+                            <td><strong>30</strong></td>
+                            <td style="background-color: #ffccff;"><strong>31</strong></td>
+                            <td><strong>32</strong></td>
+                            <td style="background-color: #ffccff;"><strong>33</strong></td>
+                            <td><strong>34</strong></td>
+                            <td style="background-color: #ffccff;"><strong>35</strong></td>
+                            <td><strong>36</strong></td>
+                            <td style="background-color: #ffccff;"><strong>37</strong></td>
+                            <td><strong>38</strong></td>
+                            <td style="background-color: #ffccff;"><strong>39</strong></td>
+                            <td><strong>40</strong></td>
+                            <td><strong>TOTAL PARES</strong></td>
+                            <td><strong>REFERENCIA</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_21 or ''"/></td>
+                            <td><span t-esc="o.talla_22 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_23 or ''"/></td>
+                            <td><span t-esc="o.talla_24 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_25 or ''"/></td>
+                            <td><span t-esc="o.talla_26 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_27 or ''"/></td>
+                            <td><span t-esc="o.talla_28 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_29 or ''"/></td>
+                            <td><span t-esc="o.talla_30 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_31 or ''"/></td>
+                            <td><span t-esc="o.talla_32 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_33 or ''"/></td>
+                            <td><span t-esc="o.talla_34 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_35 or ''"/></td>
+                            <td><span t-esc="o.talla_36 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_37 or ''"/></td>
+                            <td><span t-esc="o.talla_38 or ''"/></td>
+                            <td style="background-color: #ffccff;"><span t-esc="o.talla_39 or ''"/></td>
+                            <td><span t-esc="o.talla_40 or ''"/></td>
+                            <td><span t-field="o.total_pares"/></td>
+                            <td><span t-field="o.referencia_id.display_name"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>COLOR</strong></td>
+                            <td colspan="16"><span t-field="o.color"/></td>
+                            <td colspan="2"><strong>SELLO</strong></td>
+                            <td style="background-color: #ffccff;"><span t-field="o.sello"/></td>
+                        </tr>
+                        <tr>
+                            <td style="border: none !important;" colspan="3"></td>
+                            <td colspan="16"><span t-field="o.material"/></td>
+                            <td colspan="2"><strong>FACTURA N°:</strong></td>
+                            <td ><span t-esc="o.factura_nro or ''"/></td>
+                            <td style="vertical-align: middle; padding: 0; margin: 0;" rowspan="3">
+                                <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', o.name, 300, 50)" style="max-height: 40px; max-width: 180px; padding: 0; margin: 0;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="22" style="border-left: hidden !important; border-right: hidden !important;"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="22" style="background-color: #ffccff;"><span t-field="o.description"/></td>
+                        </tr>
                     </table>
+
 
                     <!-- Tiquets por labor segun la referencia del calzado -->
                     <t t-foreach="o.labor_ids" t-as="labor">
