@@ -95,7 +95,7 @@
                             <td style="background-color: #ffccff;"><span t-esc="o.talla_39 or ''"/></td>
                             <td><span t-esc="o.talla_40 or ''"/></td>
                             <td><span t-field="o.total_pares"/></td>
-                            <td><span t-field="o.referencia_id.display_name"/></td>
+                            <td><span t-field="o.referencia_id.codigo_referencia"/></td>
                         </tr>
                         <tr>
                             <td colspan="3"><strong>COLOR</strong></td>
@@ -176,7 +176,7 @@
                                         <td style="background-color: #ffccff;"><span t-esc="o.talla_39 or ''"/></td>
                                         <td><span t-esc="o.talla_40 or ''"/></td>
                                         <td><span t-field="o.total_pares"/></td>
-                                        <td><span t-field="o.referencia_id.display_name"/></td>
+                                        <td><span t-field="o.referencia_id.codigo_referencia"/></td>
                                         <td rowSpan="2"><span t-field="o.description"/></td>
                                     </tr>
                                     <tr>
@@ -197,7 +197,7 @@
                                     <tr>
                                         <td colspan="3"><strong>PRECIO</strong></td>
                                         <td colspan="10" style="background-color: #ffccff;"><span t-field="labor.tarifa_pago"/></td>
-                                        <td colspan="7"><strong><span t-field="labor.tipo_labor"/></strong></td>
+                                        <td colspan="7"><strong><span t-field="labor.tipo_labor_id.name"/></strong></td>
                                         <td><strong>SELLO</strong></td>
                                         <td style="background-color: #ffccff;"><span t-field="o.sello"/></td>
                                     </tr>

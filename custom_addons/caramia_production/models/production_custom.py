@@ -1,16 +1,5 @@
 from odoo import models, fields, api
 
-# Selección estándar de labores de producción
-TIPOS_LABOR = [
-    ('limpiada', 'Limpiada'),
-    ('montada', 'Montada'),
-    ('guarnicion', 'Guarnición'),
-    ('plantilla', 'Plantilla'),
-    ('forrada', 'Forrada'),
-    ('corte', 'Corte'),
-    ('suela', 'Suela')
-]
-
 class CaramiaProduction(models.Model):
     _name = 'caramia.production'
     _description = 'Orden de Producción'
@@ -32,22 +21,11 @@ class CaramiaProduction(models.Model):
 
     # Relaciones principales
     customer_id = fields.Many2one('caramia.customer', string='Cliente', required=True, tracking=True)
-    referencia_id = fields.Many2one(
-        'cara.mia.referencia', 
-        string='Referencia / Modelo', 
-        required=True, 
-        tracking=True,
-        domain="[('estado', '=', 'activo')]",
-        ondelete='restrict'
-    )
+    referencia_id = fields.Many2one('cara.mia.referencia',string='Referencia / Modelo',required=True,tracking=True,domain="[('estado', '=', 'activo')]", ondelete='restrict')
 
-    imagen_zapato = fields.Image(
-        related='referencia_id.imagen_zapato', 
-        string='Fotografía del Calzado', 
-        readonly=True
-    )
+    imagen_zapato = fields.Image(related='referencia_id.imagen_zapato',string='Fotografía del Calzado',readonly=True)
 
-    # Relación con labores editables propias de esta orden
+    # Relación con las labores copiadas para esta orden
     labor_ids = fields.One2many(
         'caramia.production.labor', 
         'production_id', 
@@ -112,21 +90,18 @@ class CaramiaProduction(models.Model):
 
     @api.onchange('referencia_id')
     def _onchange_referencia_id(self):
-        if self.referencia_id:
-            if getattr(self.referencia_id, 'descripcion', False) and not self.description:
-                self.description = self.referencia_id.descripcion
+        # Vacia las lineas de labor existentes al seleccionar un zapato nuevo
+        self.labor_ids = [(5, 0, 0)]
 
-            # Extrae las tarifas de las labores configuradas en la referencia de zapato
-            precios_ref = {lab.tipo_labor_id: lab.tarifa_pago for lab in self.referencia_id.labor_ids}
-            # Carga todas las labores estándar en la orden con su valor o $0.0
-            lineas_labores = []
-            for code, name in TIPOS_LABOR:
-                lineas_labores.append((0, 0, {
-                    'tipo_labor': code,
-                    'tarifa_pago': precios_ref.get(code, 0.0),
-                }))
-            
-            self.labor_ids = [(5, 0, 0)] + lineas_labores
+        if self.referencia_id:
+            self.labor_ids = [
+                (0, 0, {
+                    'tipo_labor_id': labor.tipo_labor_id.id,
+                    'tarifa_pago': labor.tarifa_pago or 0.0,
+                })
+                for labor in self.referencia_id.labor_ids
+                if labor.tipo_labor_id
+            ]
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
@@ -140,7 +115,6 @@ class CaramiaProduction(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('caramia.production.number') or 'Nuevo'
         return super().create(vals_list)
 
-    # Métodos invocados por los botones del encabezado en la vista
     def action_set_in_progress(self):
         self.write({'state': 'in_progress'})
 
@@ -153,19 +127,6 @@ class CaramiaProduction(models.Model):
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
 
-    @api.onchange('referencia_id')
-    def _onchange_referencia_id(self):
-        for order in self:
-            order.labor_ids = [(5, 0, 0)]
-            
-            if order.referencia_id and order.referencia_id.labor_ids:
-                lineas_nuevas = []
-                for labor_ref in order.referencia_id.labor_ids:
-                    lineas_nuevas.append((0, 0, {
-                        'tipo_labor_id': labor_ref.tipo_labor_id.id,
-                        'tarifa_pago': labor_ref.tarifa_pago,
-                    }))
-                order.labor_ids = lineas_nuevas
 
 class CaramiaProductionLabor(models.Model):
     _name = 'caramia.production.labor'
