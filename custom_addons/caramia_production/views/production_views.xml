@@ -2,8 +2,8 @@
 <odoo>
     <!-- 1. VISTA FORMULARIO -->
     <record id="view_caramia_production_form" model="ir.ui.view">
-        <field name="name">caramia.production.form</field>
-        <field name="model">caramia.production</field>
+        <field name="name">cara.mia.produccion.form</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <form string="Orden de Producción">
                 <header>
@@ -21,7 +21,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="customer_id" placeholder="Seleccione cliente..."/>
+                            <field name="cliente_id" placeholder="Seleccione cliente..."/>
                             <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False,'no_open': false}" placeholder="Seleccione modelo de zapato..."/>
                             <field name="sello"/>
                             <field name="color"/>
@@ -29,14 +29,14 @@
                             <field name="factura_nro"/>
                         </group>
                         <group>
-                            <field name="date"/>
+                            <field name="fecha_creacion"/>
                             <field name="total_pares" class="fw-bold fs-4"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
                     <group string="Descripción / Observaciones">
-                        <field name="description" nolabel="1" placeholder="Añada observaciones adicionales para esta orden..."/>
+                        <field name="descripcion" nolabel="1" placeholder="Añada observaciones adicionales para esta orden..."/>
                     </group>
 
                     <notebook>
@@ -75,16 +75,16 @@
 
     <!-- 2. VISTA LISTA: Producción en Curso -->
     <record id="view_caramia_production_list" model="ir.ui.view">
-        <field name="name">caramia.production.list</field>
-        <field name="model">caramia.production</field>
+        <field name="name">cara.mia.produccion.list</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <list string="Órdenes de Producción">
                 <field name="name"/>
-                <field name="customer_id"/>
+                <field name="cliente_id"/>
                 <field name="referencia_id"/>
                 <field name="color"/>
                 <field name="total_pares"/>
-                <field name="date"/>
+                <field name="fecha_creacion"/>
                 <field name="state" widget="badge" 
                        decoration-info="state == 'draft'" 
                        decoration-warning="state == 'in_progress'"/>
@@ -94,16 +94,16 @@
 
     <!-- 3. VISTA LISTA: Historial de Producción -->
     <record id="view_caramia_production_history_list" model="ir.ui.view">
-        <field name="name">caramia.production.history.list</field>
-        <field name="model">caramia.production</field>
+        <field name="name">cara.mia.produccion.history.list</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <list string="Historial de Producción" create="false">
                 <field name="name"/>
-                <field name="customer_id"/>
+                <field name="cliente_id"/>
                 <field name="referencia_id"/>
                 <field name="total_pares"/>
-                <field name="date" string="Fecha Creación"/>
-                <field name="date_done" string="Fecha Finalización"/>
+                <field name="fecha_creacion" string="Fecha Creación"/>
+                <field name="fecha_finalizacion" string="Fecha Finalización"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'"/>
             </list>
         </field>
@@ -112,7 +112,7 @@
     <!-- 4. ACCIÓN 1: Filtra solo lo que NO está finalizado -->
     <record id="action_caramia_production_active" model="ir.actions.act_window">
         <field name="name">Órdenes de Producción</field>
-        <field name="res_model">caramia.production</field>
+        <field name="res_model">cara.mia.produccion</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('state', '!=', 'done')]</field>
         <field name="view_ids" eval="[(5, 0, 0), 
@@ -123,7 +123,7 @@
     <!-- 5. ACCIÓN 2: Filtra SOLO los registros finalizados (Historial) -->
     <record id="action_caramia_production_history" model="ir.actions.act_window">
         <field name="name">Historial de Producción</field>
-        <field name="res_model">caramia.production</field>
+        <field name="res_model">cara.mia.produccion</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('state', '=', 'done')]</field>
         <field name="view_ids" eval="[(5, 0, 0), 

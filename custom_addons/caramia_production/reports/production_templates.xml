@@ -40,12 +40,12 @@
                         </tr>
                         <tr>
                             <td colspan="5"><strong>FECHA CREACIÓN</strong></td>
-                            <td colspan="13"><span t-field="o.date"/></td>
+                            <td colspan="13"><span t-field="o.fecha_creacion"/></td>
                             <td colspan="4" style="border-top: hidden !important;"></td>
                         </tr>
                         <tr>
                             <td colspan="3"><strong>CLIENTE</strong></td>
-                            <td colspan="17"><span t-field="o.customer_id.name"/></td>
+                            <td colspan="17"><span t-field="o.cliente_id.nombre_cliente"/></td>
                             <td><strong>ORDEN N°:</strong></td>
                             <td><span t-field="o.name"/></td>
                         </tr>
@@ -116,7 +116,7 @@
                             <td colspan="22" style="border-left: hidden !important; border-right: hidden !important;"></td>
                         </tr>
                         <tr>
-                            <td colspan="22" style="background-color: #ffccff;"><span t-field="o.description"/></td>
+                            <td colspan="22" style="background-color: #ffccff;"><span t-field="o.descripcion"/></td>
                         </tr>
                     </table>
 
@@ -177,13 +177,13 @@
                                         <td><span t-esc="o.talla_40 or ''"/></td>
                                         <td><span t-field="o.total_pares"/></td>
                                         <td><span t-field="o.referencia_id.codigo_referencia"/></td>
-                                        <td rowSpan="2"><span t-field="o.description"/></td>
+                                        <td rowSpan="2"><span t-field="o.descripcion"/></td>
                                     </tr>
                                     <tr>
                                         <td colspan="3"><strong>COLOR</strong></td>
                                         <td colspan="17"><span t-field="o.color"/></td>
                                         <td><strong>FECHA CREACIÓN</strong></td>
-                                        <td><span t-field="o.date"/></td>
+                                        <td><span t-field="o.fecha_creacion"/></td>
                                     </tr>
                                     <tr>
                                         <td colspan="3"><strong>MATERIAL</strong></td>

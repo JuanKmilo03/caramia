@@ -1,33 +1,26 @@
 from odoo import models, fields
 
-class CaramiaEmployeeJob(models.Model):
-    _name = 'caramia.employee.job'
-    _description = 'Cargo / Puesto de Trabajo'
-    _order = 'name'
-
-    name = fields.Char(string='Nombre del Cargo', required=True)
-
-
 class CaramiaEmployee(models.Model):
-    _name = 'caramia.employee'
+    _name = 'cara.mia.empleado'
     _description = 'Empleado Caramia'
-    _order = 'name, id desc'
+    _rec_name = 'nombre_empleado'
 
-    employee_code = fields.Char(
-        string='Cédula / Documento', 
+    empleado_id = fields.Char(
+        string='Cédula', 
         required=True, 
         copy=False,
         index=True
     )
-    name = fields.Char(string='Nombre Completo', required=True)
-    job_id = fields.Many2one(
-        'caramia.employee.job', 
-        string='Cargo / Puesto', 
+    nombre_empleado = fields.Char(string='Nombre Completo', required=True)
+    telefono_empleado = fields.Char(string='Teléfono', required=True)
+
+    tipo_labor_id = fields.Many2one(
+        'cara.mia.tipo.labor', 
+        string='Labor', 
         required=True,
         ondelete='restrict'
     )
-    phone = fields.Char(string='Teléfono', required=True)
 
     _sql_constraints = [
-        ('employee_code_unique', 'unique(employee_code)', 'La cédula/documento ingresado ya está registrado para otro empleado.')
+        ('empleado_id_unique', 'unique(empleado_id)', 'La cédula/documento ingresado ya está registrado para otro empleado.')
     ]

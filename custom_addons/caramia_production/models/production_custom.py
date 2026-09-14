@@ -1,10 +1,9 @@
 from odoo import models, fields, api
 
 class CaramiaProduction(models.Model):
-    _name = 'caramia.production'
+    _name = 'cara.mia.produccion'
     _description = 'Orden de Producción'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'name desc'
 
     name = fields.Char(
         string='Orden / Lote', 
@@ -14,21 +13,21 @@ class CaramiaProduction(models.Model):
         default='Nuevo', 
         tracking=True
     )
-    description = fields.Text(string='Descripción / Observaciones')
-    date = fields.Date(string='Fecha de Creación', default=fields.Date.today)
-    date_done = fields.Datetime(string='Fecha de Finalización', readonly=True)
-    active = fields.Boolean(string='Activo', default=True)
+    descripcion = fields.Text(string='Descripción / Observaciones')
+    fecha_creacion = fields.Date(string='Fecha de Creación', default=fields.Date.today)
+    fecha_finalizacion = fields.Datetime(string='Fecha de Finalización', readonly=True)
+    activo = fields.Boolean(string='Activo', default=True)
 
     # Relaciones principales
-    customer_id = fields.Many2one('caramia.customer', string='Cliente', required=True, tracking=True)
+    cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
     referencia_id = fields.Many2one('cara.mia.referencia',string='Referencia / Modelo',required=True,tracking=True,domain="[('estado', '=', 'activo')]", ondelete='restrict')
 
     imagen_zapato = fields.Image(related='referencia_id.imagen_zapato',string='Fotografía del Calzado',readonly=True)
 
     # Relación con las labores copiadas para esta orden
     labor_ids = fields.One2many(
-        'caramia.production.labor', 
-        'production_id', 
+        'cara.mia.produccion.labor', 
+        'produccion_id', 
         string='Labores de la Orden'
     )
 
@@ -103,40 +102,40 @@ class CaramiaProduction(models.Model):
                 if labor.tipo_labor_id
             ]
 
-    @api.onchange('customer_id')
-    def _onchange_customer_id(self):
-        if self.customer_id and getattr(self.customer_id, 'sello', False):
-            self.sello = self.customer_id.sello
+    @api.onchange('cliente_id')
+    def _onchange_cliente_id(self):
+        if self.cliente_id and getattr(self.cliente_id, 'sello', False):
+            self.sello = self.cliente_id.sello
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', 'Nuevo') == 'Nuevo':
-                vals['name'] = self.env['ir.sequence'].next_by_code('caramia.production.number') or 'Nuevo'
+                vals['name'] = self.env['ir.sequence'].next_by_code('cara.mia.produccion.number') or 'Nuevo'
         return super().create(vals_list)
 
     def action_set_in_progress(self):
         self.write({'state': 'in_progress'})
 
     def action_set_done(self):
-        self.write({'state': 'done', 'date_done': fields.Datetime.now()})
+        self.write({'state': 'done', 'fecha_finalizacion': fields.Datetime.now()})
 
     def action_set_draft(self):
-        self.write({'state': 'draft', 'date_done': False})
+        self.write({'state': 'draft', 'fecha_finalizacion': False})
 
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
 
 
 class CaramiaProductionLabor(models.Model):
-    _name = 'caramia.production.labor'
+    _name = 'cara.mia.produccion.labor'
     _description = 'Labor Editable de Orden de Producción'
 
-    production_id = fields.Many2one('caramia.production', string='Orden de Producción', ondelete='cascade')
+    produccion_id = fields.Many2one('cara.mia.produccion', string='Orden de Producción', ondelete='cascade')
     tipo_labor_id = fields.Many2one(
         'cara.mia.tipo.labor', 
         string='Labor / Proceso', 
         required=True
     )    
     tarifa_pago = fields.Monetary(string='Precio por Par', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='production_id.currency_id')
+    currency_id = fields.Many2one('res.currency', related='produccion_id.currency_id')

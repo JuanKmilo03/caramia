@@ -16,13 +16,13 @@
 
     <record id="action_report_caramia_production" model="ir.actions.report">
         <field name="name">Orden de Producción</field>
-        <field name="model">caramia.production</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">caramia_production.report_caramia_template</field>
         <field name="report_file">Orden_Produccion</field>
         <field name="print_report_name">'Orden_' + object.name</field>
         <field name="paperformat_id" ref="paperformat_caramia_ticket"/>
-        <field name="binding_model_id" ref="model_caramia_production"/>
+        <field name="binding_model_id" ref="model_cara_mia_produccion"/>
         <field name="binding_type">report</field>
     </record>
 </odoo>
