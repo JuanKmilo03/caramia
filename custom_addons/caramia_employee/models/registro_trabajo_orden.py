@@ -6,7 +6,7 @@ class CaramiaRegistroTrabajo(models.Model):
     _description = 'Registro de Tiquetes / Trabajo Realizado'
     _order = 'fecha desc, id desc'
 
-    # 1. Datos de Producción (Escaneo directo sobre produccion_id)
+    # 1. Datos de producción
     produccion_id = fields.Many2one(
         'cara.mia.produccion', 
         string='Orden de Producción', 
@@ -15,7 +15,6 @@ class CaramiaRegistroTrabajo(models.Model):
         readonly=True
     )
     orden_codigo = fields.Char(string='Código de Orden', required=True)
-
 
     fecha = fields.Date(
         string='Fecha de Registro', 
@@ -32,7 +31,7 @@ class CaramiaRegistroTrabajo(models.Model):
         related='produccion_id.currency_id'
     )
 
-    # 2. Datos del Operario (Opcional al inicio)
+    # 2. Datos del Operario
     empleado_id = fields.Many2one(
         'cara.mia.empleado', 
         string='Empleado / Operario', 
@@ -66,7 +65,7 @@ class CaramiaRegistroTrabajo(models.Model):
         ('pagado', 'Pagado en Nómina')
     ], string='Estado', compute='_compute_estado', store=True, default='sin_asignar')
 
-    # 1. Cálculo automático en el servidor al cambiar orden_codigo
+    # Cálculos y Validaciones
     @api.depends('orden_codigo')
     def _compute_produccion_id(self):
         for rec in self:
@@ -77,7 +76,6 @@ class CaramiaRegistroTrabajo(models.Model):
             else:
                 rec.produccion_id = False
 
-    # 2. Validaciones al guardar
     @api.constrains('orden_codigo', 'produccion_id')
     def _check_orden_valida(self):
         for rec in self:
@@ -116,7 +114,7 @@ class CaramiaRegistroTrabajo(models.Model):
                 linea_labor = rec.produccion_id.labor_ids.filtered(
                     lambda l: l.tipo_labor_id == rec.tipo_labor_id
                 )
-                rec.tarifa_pago = linea_labor.tarifa_pago if linea_labor else 0.0
+                rec.tarifa_pago = linea_labor[:1].tarifa_pago if linea_labor else 0.0
             else:
                 rec.tarifa_pago = 0.0
 

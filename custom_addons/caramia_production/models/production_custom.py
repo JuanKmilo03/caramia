@@ -69,11 +69,10 @@ class CaramiaProduction(models.Model):
     total_pares = fields.Integer(string='Total Pares', compute='_compute_total_pares', store=True)
 
     state = fields.Selection([
-        ('draft', 'Borrador'),
-        ('in_progress', 'En Proceso'),
-        ('stop', 'Detenido'),
-        ('done', 'Finalizado'),
-        ('canceled', 'Cancelado'),
+        ('draft', 'Borrador'),#las ordenes que no tienen ningun tiquete de trabajo asignado se consideran borrador
+        ('in_progress', 'En Proceso'),#las ordenes que tienen al menos un tiquete de trabajo asignado se consideran en proceso y no se pueden modificar los datos de la orden
+        ('done', 'Finalizado'),#las ordenes que tienen todos los tiquetes de trabajo asignados se consideran finalizadas y no se pueden modificar los datos de la orden
+        ('canceled', 'Cancelado'),#las ordenes que son canceladas se consideran canceladas y no se pueden modificar los datos de la orden
     ], string='Estado', default='draft', tracking=True)
 
     @api.depends(

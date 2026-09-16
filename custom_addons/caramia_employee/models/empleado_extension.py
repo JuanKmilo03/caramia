@@ -17,6 +17,7 @@ class CaramiaEmpleado(models.Model):
         compute='_compute_ganancias', 
         currency_field='currency_id'
     )
+    
     ganancia_historica = fields.Monetary(
         string='Total Pagado (Histórico)', 
         compute='_compute_ganancias', 
