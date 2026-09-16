@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
+
 
 class CaramiaProduction(models.Model):
     _name = 'cara.mia.produccion'
@@ -20,9 +22,9 @@ class CaramiaProduction(models.Model):
 
     # Relaciones principales
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
-    referencia_id = fields.Many2one('cara.mia.referencia',string='Referencia / Modelo',required=True,tracking=True,domain="[('estado', '=', 'activo')]", ondelete='restrict')
+    referencia_id = fields.Many2one('cara.mia.referencia',string='Referencia / Modelo',required=True,tracking=True,domain="[('estado', '=', 'activo')]",ondelete='restrict')
 
-    imagen_zapato = fields.Image(related='referencia_id.imagen_zapato',string='Fotografía del Calzado',readonly=True)
+    imagen_zapato = fields.Image(related='referencia_id.imagen_zapato', string='Fotografía del Calzado', readonly=True)
 
     # Relación con las labores copiadas para esta orden
     labor_ids = fields.One2many(
@@ -37,9 +39,9 @@ class CaramiaProduction(models.Model):
         string='Moneda'
     )
 
-    color = fields.Char(string='Color')
-    material = fields.Char(string='Material')
-    sello = fields.Char(string='Sello / Marca')
+    color = fields.Char(string='Color', required=True)
+    material = fields.Char(string='Material', required=True)
+    sello = fields.Char(string='Sello / Marca', required=True)
     factura_nro = fields.Char(string='Factura N°')
 
     # Curva de tallas (21 a 40)
@@ -69,7 +71,9 @@ class CaramiaProduction(models.Model):
     state = fields.Selection([
         ('draft', 'Borrador'),
         ('in_progress', 'En Proceso'),
+        ('stop', 'Detenido'),
         ('done', 'Finalizado'),
+        ('canceled', 'Cancelado'),
     ], string='Estado', default='draft', tracking=True)
 
     @api.depends(
@@ -87,11 +91,18 @@ class CaramiaProduction(models.Model):
                 rec.talla_36, rec.talla_37, rec.talla_38, rec.talla_39, rec.talla_40
             ])
 
+    @api.constrains('total_pares')
+    def _check_total_pares(self):
+        """ Valida que la curva de tallas contenga al menos 1 par en total """
+        for rec in self:
+            if rec.total_pares <= 0:
+                raise ValidationError(
+                    "Debe ingresar al menos un par de zapatos en alguna de las tallas antes de guardar la orden."
+                )
+
     @api.onchange('referencia_id')
     def _onchange_referencia_id(self):
-        # Vacia las lineas de labor existentes al seleccionar un zapato nuevo
         self.labor_ids = [(5, 0, 0)]
-
         if self.referencia_id:
             self.labor_ids = [
                 (0, 0, {

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cara_mia_empleado_form_inherit_nomina" model="ir.ui.view">
+        <field name="name">cara.mia.empleado.form.inherit.nomina</field>
+        <field name="model">cara.mia.empleado</field>
+        <!-- Referencia corregida al ID del archivo employee_views.xml -->
+        <field name="inherit_id" ref="view_caramia_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Resumen de Nómina y Ganancias">
+                        <group col="2">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="ganancia_pendiente" widget="monetary"/>
+                            <field name="ganancia_historica" widget="monetary"/>
+                        </group>
+                        <field name="registro_trabajo_orden_ids" readonly="1">
+                            <list string="Tiquetes Registrados">
+                                <field name="fecha"/>
+                                <field name="orden_codigo"/>
+                                <field name="total_pares"/>
+                                <field name="tarifa_pago" widget="monetary"/>
+                                <field name="subtotal" widget="monetary"/>
+                                <field name="estado" widget="badge"/>
+                            </list>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

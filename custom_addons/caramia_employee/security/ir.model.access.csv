@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_cara_mia_empleado_user,access.cara.mia.empleado.user,model_cara_mia_empleado,base.group_user,1,1,1,1
+access_caramia_empleado,access_caramia_empleado,model_cara_mia_empleado,base.group_user,1,1,1,1
+access_caramia_registro_trabajo_orden,access_caramia_registro_trabajo_orden,model_cara_mia_registro_trabajo_orden,base.group_user,1,1,1,1
+access_caramia_nomina_semanal,access_caramia_nomina_semanal,model_cara_mia_nomina_semanal,base.group_user,1,1,1,1
