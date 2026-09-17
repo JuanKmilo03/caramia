@@ -1,12 +1,12 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+
 class CaramiaRegistroTrabajo(models.Model):
     _name = 'cara.mia.registro.trabajo.orden'
     _description = 'Registro de Tiquetes / Trabajo Realizado'
     _order = 'fecha desc, id desc'
 
-    # 1. Datos de producción
     produccion_id = fields.Many2one(
         'cara.mia.produccion', 
         string='Orden de Producción', 
@@ -31,7 +31,6 @@ class CaramiaRegistroTrabajo(models.Model):
         related='produccion_id.currency_id'
     )
 
-    # 2. Datos del Operario
     empleado_id = fields.Many2one(
         'cara.mia.empleado', 
         string='Empleado / Operario', 
@@ -45,7 +44,6 @@ class CaramiaRegistroTrabajo(models.Model):
         readonly=True
     )
 
-    # 3. Liquidación
     tarifa_pago = fields.Monetary(
         string='Tarifa por Par', 
         compute='_compute_tarifa_pago', 
@@ -65,7 +63,21 @@ class CaramiaRegistroTrabajo(models.Model):
         ('pagado', 'Pagado en Nómina')
     ], string='Estado', compute='_compute_estado', store=True, default='sin_asignar')
 
-    # Cálculos y Validaciones
+    @api.constrains('produccion_id')
+    def _check_estado_orden_produccion(self):
+        for rec in self:
+            if rec.produccion_id:
+                if rec.produccion_id.state == 'draft':
+                    raise ValidationError(
+                        f"¡No se puede registrar este tiquete!\n\n"
+                        f"La Orden '{rec.produccion_id.name}' se encuentra en estado BORRADOR.\n"
+                        f"Debe hacer clic en 'Iniciar Producción' dentro de la orden antes de asignar tiquetes a los empleados."
+                    )
+                elif rec.produccion_id.state in ('done', 'canceled'):
+                    raise ValidationError(
+                        f"La Orden '{rec.produccion_id.name}' ya está finalizada o cancelada. No se le pueden asignar más tiquetes."
+                    )
+
     @api.depends('orden_codigo')
     def _compute_produccion_id(self):
         for rec in self:
@@ -123,6 +135,21 @@ class CaramiaRegistroTrabajo(models.Model):
         for rec in self:
             rec.subtotal = rec.total_pares * rec.tarifa_pago
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.produccion_id:
+                rec.produccion_id._check_auto_finish()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        for rec in self:
+            if rec.produccion_id:
+                rec.produccion_id._check_auto_finish()
+        return res
+
     _sql_constraints = [
         (
             'orden_labor_unica', 
@@ -130,3 +157,28 @@ class CaramiaRegistroTrabajo(models.Model):
             '¡Esta labor para esta orden de producción ya fue registrada y asignada previamente!'
         )
     ]
+
+
+# EXTENSIÓN DEL MODELO DE PRODUCCIÓN DESDE ESTE MÓDULO
+class CaramiaProductionInherit(models.Model):
+    _inherit = 'cara.mia.produccion'
+
+    registro_trabajo_ids = fields.One2many(
+        'cara.mia.registro.trabajo.orden', 
+        'produccion_id', 
+        string='Tiquetes Registrados'
+    )
+
+    def _check_auto_finish(self):
+        """ Verifica si la orden se completó al registrar el tiquete """
+        for rec in self:
+            if rec.state == 'in_progress':
+                labores_orden = set(rec.labor_ids.mapped('tipo_labor_id.id'))
+                labores_registradas = set(
+                    rec.registro_trabajo_ids.filtered(lambda r: r.empleado_id).mapped('tipo_labor_id.id')
+                )
+                if labores_orden and labores_orden.issubset(labores_registradas):
+                    rec.write({
+                        'state': 'done',
+                        'fecha_finalizacion': fields.Datetime.now()
+                    })

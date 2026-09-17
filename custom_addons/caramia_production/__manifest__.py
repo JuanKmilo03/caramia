@@ -8,6 +8,7 @@
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'views/production_views.xml',
+        'views/produccion_historial_views.xml',
         'reports/production_reports.xml',
         'reports/production_templates.xml',
     ],

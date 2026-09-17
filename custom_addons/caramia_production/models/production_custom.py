@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError
 
 
 class CaramiaProduction(models.Model):
@@ -17,16 +17,24 @@ class CaramiaProduction(models.Model):
     )
     descripcion = fields.Text(string='Descripción / Observaciones')
     fecha_creacion = fields.Date(string='Fecha de Creación', default=fields.Date.today)
+    fecha_estimada = fields.Date(string='Fecha Estimada de Finalización', readonly=True)
     fecha_finalizacion = fields.Datetime(string='Fecha de Finalización', readonly=True)
     activo = fields.Boolean(string='Activo', default=True)
 
     # Relaciones principales
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
-    referencia_id = fields.Many2one('cara.mia.referencia',string='Referencia / Modelo',required=True,tracking=True,domain="[('estado', '=', 'activo')]",ondelete='restrict')
+    referencia_id = fields.Many2one(
+        'cara.mia.referencia',
+        string='Referencia / Modelo',
+        required=True,
+        tracking=True,
+        domain="[('estado', '=', 'activo')]",
+        ondelete='restrict'
+    )
 
     imagen_zapato = fields.Image(related='referencia_id.imagen_zapato', string='Fotografía del Calzado', readonly=True)
 
-    # Relación con las labores copiadas para esta orden
+    # Labores asociadas a esta orden
     labor_ids = fields.One2many(
         'cara.mia.produccion.labor', 
         'produccion_id', 
@@ -69,10 +77,10 @@ class CaramiaProduction(models.Model):
     total_pares = fields.Integer(string='Total Pares', compute='_compute_total_pares', store=True)
 
     state = fields.Selection([
-        ('draft', 'Borrador'),#las ordenes que no tienen ningun tiquete de trabajo asignado se consideran borrador
-        ('in_progress', 'En Proceso'),#las ordenes que tienen al menos un tiquete de trabajo asignado se consideran en proceso y no se pueden modificar los datos de la orden
-        ('done', 'Finalizado'),#las ordenes que tienen todos los tiquetes de trabajo asignados se consideran finalizadas y no se pueden modificar los datos de la orden
-        ('canceled', 'Cancelado'),#las ordenes que son canceladas se consideran canceladas y no se pueden modificar los datos de la orden
+        ('draft', 'Borrador'),
+        ('in_progress', 'En Proceso'),
+        ('done', 'Finalizado'),
+        ('canceled', 'Cancelado'),
     ], string='Estado', default='draft', tracking=True)
 
     @api.depends(
@@ -92,7 +100,6 @@ class CaramiaProduction(models.Model):
 
     @api.constrains('total_pares')
     def _check_total_pares(self):
-        """ Valida que la curva de tallas contenga al menos 1 par en total """
         for rec in self:
             if rec.total_pares <= 0:
                 raise ValidationError(
@@ -125,13 +132,19 @@ class CaramiaProduction(models.Model):
         return super().create(vals_list)
 
     def action_set_in_progress(self):
-        self.write({'state': 'in_progress'})
-
-    def action_set_done(self):
-        self.write({'state': 'done', 'fecha_finalizacion': fields.Datetime.now()})
+        for rec in self:
+            if not rec.labor_ids:
+                raise ValidationError("No se puede iniciar una orden de producción sin labores asignadas.")
+            rec.write({'state': 'in_progress'})
 
     def action_set_draft(self):
-        self.write({'state': 'draft', 'fecha_finalizacion': False})
+        for rec in self:
+            if getattr(rec, 'registro_trabajo_ids', False):
+                raise ValidationError("No puede regresar a Borrador una orden que ya tiene tiquetes o trabajos registrados.")
+            rec.write({'state': 'draft', 'fecha_finalizacion': False})
+
+    def action_cancel(self):
+        self.write({'state': 'canceled'})
 
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
@@ -142,10 +155,6 @@ class CaramiaProductionLabor(models.Model):
     _description = 'Labor Editable de Orden de Producción'
 
     produccion_id = fields.Many2one('cara.mia.produccion', string='Orden de Producción', ondelete='cascade')
-    tipo_labor_id = fields.Many2one(
-        'cara.mia.tipo.labor', 
-        string='Labor / Proceso', 
-        required=True
-    )    
+    tipo_labor_id = fields.Many2one('cara.mia.tipo.labor', string='Labor / Proceso', required=True)    
     tarifa_pago = fields.Monetary(string='Precio por Par', currency_field='currency_id')
     currency_id = fields.Many2one('res.currency', related='produccion_id.currency_id')

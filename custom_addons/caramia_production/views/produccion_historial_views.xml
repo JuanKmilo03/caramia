@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VISTA LISTA: Historial de Producción -->
+    <record id="view_caramia_production_history_list" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.history.list</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Producción" create="false" delete="false">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="referencia_id"/>
+                <field name="total_pares"/>
+                <field name="fecha_creacion" string="Fecha Creación"/>
+                <field name="fecha_finalizacion" string="Fecha Finalización"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'canceled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ACCIÓN: Historial de Producción -->
+    <record id="action_caramia_production_history" model="ir.actions.act_window">
+        <field name="name">Historial de Producción</field>
+        <field name="res_model">cara.mia.produccion</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', 'in', ('done', 'canceled'))]</field>
+        <field name="view_ids" eval="[(5, 0, 0), 
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_history_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
+    </record>
+
+    <!-- SUBMENÚ HISTORIAL -->
+    <menuitem id="menu_caramia_production_history" 
+              name="Historial de Producción" 
+              parent="menu_caramia_production_root" 
+              action="action_caramia_production_history" 
+              sequence="20"/>
+</odoo>
