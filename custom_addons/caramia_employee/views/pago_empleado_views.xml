@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VISTA FORMULARIO: Liquidación de Pago -->
+    <record id="view_caramia_pago_empleado_form" model="ir.ui.view">
+        <field name="name">cara.mia.pago.empleado.form</field>
+        <field name="model">cara.mia.pago.empleado</field>
+        <field name="arch" type="xml">
+            <form string="Liquidación a Empleados">
+                <header>
+                    <button name="action_calcular_pagos" 
+                            string="🔄 Calcular Pagos" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state != 'draft'"/>
+                    
+                    <button name="action_confirmar_pago" 
+                            string="✅ Aprobar" 
+                            type="object" 
+                            class="btn-success" 
+                            invisible="state != 'draft'"
+                            confirm="¿Está seguro de procesar esta liquidación? Los tiquetes del rango de fechas pasarán a estado PAGADO."/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!-- BLOQUE SUPERIOR: FILTRO DE FECHAS GLOBAL -->
+                    <group>
+                        <group string="📅 Período a Liquidar">
+                            <field name="fecha_inicio" readonly="state != 'draft'"/>
+                            <field name="fecha_fin" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="💰 Resumen General">
+                            <field name="fecha_pago"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_bruto" widget="monetary"/>
+                            <field name="total_descuentos" widget="monetary" class="text-danger"/>
+                            <field name="total_neto" widget="monetary" class="fw-bold fs-4 text-success"/>
+                        </group>
+                    </group>
+
+                    <!-- TABLA INFERIOR: RESUMEN POR EMPLEADO -->
+                    <notebook>
+                        <page string="📋 Lista de Empleados y Pagos">
+                            <field name="linea_ids" readonly="state != 'draft'">
+                                <list editable="bottom" create="false" delete="true">
+                                    <field name="empleado_id" readonly="1"/>
+                                    <field name="total_pares" readonly="1"/>
+                                    <field name="monto_bruto" widget="monetary" string="Bruto Ganado" readonly="1"/>
+                                    <field name="descuento" widget="monetary" string="Descuento / Vale"/>
+                                    <field name="monto_neto" widget="monetary" string="Neto A Pagar" class="fw-bold text-success"/>
+                                    <field name="observaciones" placeholder="Ej. Anticipo o préstamo..."/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- VISTA LISTA -->
+    <record id="view_caramia_pago_empleado_list" model="ir.ui.view">
+        <field name="name">cara.mia.pago.empleado.list</field>
+        <field name="model">cara.mia.pago.empleado</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Liquidaciones">
+                <field name="name"/>
+                <field name="fecha_inicio"/>
+                <field name="fecha_fin"/>
+                <field name="fecha_pago"/>
+                <field name="total_neto" widget="monetary"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+</odoo>

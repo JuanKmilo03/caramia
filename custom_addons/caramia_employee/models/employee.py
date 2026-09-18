@@ -20,6 +20,12 @@ class CaramiaEmployee(models.Model):
         required=True,
         ondelete='restrict'
     )
+    
+    registro_trabajo_orden_ids = fields.One2many(
+            'cara.mia.registro.trabajo.orden', 
+            'empleado_id', 
+            string='Historial de Trabajos'
+        )
 
     _sql_constraints = [
         ('empleado_id_unique', 'unique(empleado_id)', 'La cédula/documento ingresado ya está registrado para otro empleado.')

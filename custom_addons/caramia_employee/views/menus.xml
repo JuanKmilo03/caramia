@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- ACCIONES DE VENTANA (ACT_WINDOW)                             -->
+    <!-- ============================================================ -->
+
+    <!-- Acción: Lista de Empleados -->
+    <record id="action_caramia_employee" model="ir.actions.act_window">
+        <field name="name">Empleados</field>
+        <field name="res_model">cara.mia.empleado</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_caramia_employee_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea tu primer empleado y asígnale su labor de producción.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción: Registro de Tiquetes -->
+    <record id="action_caramia_registro_trabajo_orden" model="ir.actions.act_window">
+        <field name="name">Registro de Tiquetes</field>
+        <field name="res_model">cara.mia.registro.trabajo.orden</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Acción: Liquidación y Pagos -->
+    <record id="action_caramia_pago_empleado" model="ir.actions.act_window">
+        <field name="name">Liquidación y Pagos</field>
+        <field name="res_model">cara.mia.pago.empleado</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+    <!-- ============================================================ -->
+    <!-- ESTRUCTURA DE MENÚS                                          -->
+    <!-- ============================================================ -->
+
+    <!-- Menú Raíz Principal del Módulo (Barra Superior de Odoo) -->
+    <menuitem id="menu_caramia_employee_root" 
+              name="Empleados" 
+              sequence="15" 
+              web_icon="caramia_employee,static/description/icon.png"/>
+
+    <!-- Submenú 1: Lista de Empleados -->
+    <menuitem id="menu_caramia_employee_main" 
+              name="Lista de Empleados" 
+              parent="menu_caramia_employee_root" 
+              action="action_caramia_employee" 
+              sequence="10"/>
+
+    <!-- Submenú 2: Registrar Tiquetes -->
+    <menuitem id="menu_cara_mia_registro_trabajo_orden"
+              name="Registrar Tiquetes"
+              parent="menu_caramia_employee_root"
+              action="action_caramia_registro_trabajo_orden"
+              sequence="20"/>
+
+    <!-- Submenú 3: Liquidación y Pagos -->
+    <menuitem id="menu_caramia_pago_empleado" 
+              name="Liquidación y Pagos" 
+              parent="menu_caramia_employee_root" 
+              action="action_caramia_pago_empleado" 
+              sequence="30"/>
+
+</odoo>
