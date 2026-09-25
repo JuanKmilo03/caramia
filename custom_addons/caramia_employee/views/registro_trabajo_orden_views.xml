@@ -46,7 +46,7 @@
                 <field name="orden_codigo" readonly="1"/>
                 <field name="total_pares" readonly="1"/>
                 <field name="empleado_id" placeholder="Asignar empleado..."/>
-                <field name="tipo_labor_id" readonly="1"/>
+                <field name="tipo_labor_id" readonly="1" options="{'no_open': True}"/>
                 <field name="tarifa_pago" widget="monetary" readonly="1"/>
                 <field name="subtotal" widget="monetary" sum="Total acumulado" readonly="1"/>
                 <field name="estado" widget="badge" 

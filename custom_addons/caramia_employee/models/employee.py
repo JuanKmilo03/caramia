@@ -66,10 +66,10 @@ class CaramiaEmployee(models.Model):
     )
 
     # HISTORIAL DE LIQUIDACIONES RECIBIDAS
-    historial_liquidacion_ids = fields.One2many(
+    historial_nomina_ids = fields.One2many(
         'cara.mia.pago.empleado.linea',
         'empleado_id',
-        string='Historial de Liquidaciones',
+        string='Historial de Nóminas',
         domain=[('state_pago', '=', 'done'), ('pagado', '=', True)],
     )
 

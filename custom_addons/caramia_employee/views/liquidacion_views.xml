@@ -43,7 +43,7 @@
         </field>
     </record>
 
-    <!-- VISTA LISTA: Muestra la cantidad de empleados en vez del modo -->
+    <!-- VISTA LISTA -->
     <record id="view_caramia_liquidacion_list" model="ir.ui.view">
         <field name="name">cara.mia.liquidacion.list</field>
         <field name="model">cara.mia.liquidacion</field>
@@ -57,13 +57,12 @@
                 <field name="total_a_pagar" widget="monetary" string="Total A Pagar" class="fw-bold text-success" />
                 <field name="state" widget="badge"
                        decoration-success="state == 'done'"
-                       decoration-muted="state == 'draft'"
-                       decoration-danger="state == 'cancel'" />
+                       decoration-muted="state == 'draft'" />
             </list>
         </field>
     </record>
 
-    <!-- VISTA FORMULARIO PRINCIPAL: Sin el campo 'Modo de Liquidación' -->
+    <!-- VISTA FORMULARIO PRINCIPAL -->
     <record id="view_caramia_liquidacion_form" model="ir.ui.view">
         <field name="name">cara.mia.liquidacion.form</field>
         <field name="model">cara.mia.liquidacion</field>
@@ -84,10 +83,12 @@
                         invisible="state != 'draft'"
                         confirm="¿Está seguro de procesar esta liquidación?" />
 
+                    <!-- Botón Cancelar: Restaura préstamos a 'pending' y borra la liquidación -->
                     <button name="action_cancelar"
-                        string="Cancelar"
+                        string="Cancelar y Eliminar"
                         type="object"
-                        invisible="state == 'cancel'" />
+                        class="btn-secondary"
+                        confirm="¿Está seguro de cancelar? Se restaurarán los préstamos a pendientes y se eliminará este registro por completo." />
 
                     <field name="state" widget="statusbar" statusbar_visible="draft,done" />
                 </header>
@@ -119,7 +120,6 @@
                                     <field name="fondo_reserva_acumulado" widget="monetary" string="Acumulado 0.22%" class="text-warning fw-bold" readonly="1" />
                                     <field name="monto_descuentos" widget="monetary" string="Descuento Total" class="text-danger fw-bold" readonly="1" />
                                     
-                                    <!-- BOTÓN PARA ABRIR LA VENTANA MODAL DE DESCUENTOS -->
                                     <button name="action_abrir_descuentos"
                                             string="📝 Agregar / Ver Descuento"
                                             type="object"

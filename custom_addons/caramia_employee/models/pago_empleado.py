@@ -1,6 +1,6 @@
 from datetime import timedelta
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class CaramiaPagoEmpleado(models.Model):
@@ -173,6 +173,10 @@ class CaramiaPagoEmpleado(models.Model):
 
     def unlink(self):
         for rec in self:
+            if rec.state == 'done':
+                raise UserError(
+                    "No se puede eliminar una nómina que ya ha sido finalizada."
+                )
             tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if tiquetes:
                 tiquetes.write({'estado': 'pendiente'})

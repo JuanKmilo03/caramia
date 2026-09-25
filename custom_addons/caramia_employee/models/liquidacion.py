@@ -1,5 +1,5 @@
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class CaramiaLiquidacion(models.Model):
@@ -69,6 +69,16 @@ class CaramiaLiquidacion(models.Model):
         tracking=True,
     )
 
+    def unlink(self):
+        for rec in self:
+            if rec.state == 'done':
+                raise UserError(
+                    f"No es posible eliminar la liquidación '{rec.name or ''}' "
+                    "porque ya se encuentra en estado 'Liquidado / Pagado'. "
+                    'Debe cancelarla antes de poder borrarla.'
+                )
+        return super().unlink()
+
     @api.depends('linea_ids')
     def _compute_cantidad_empleados(self):
         for rec in self:
@@ -88,6 +98,7 @@ class CaramiaLiquidacion(models.Model):
                 rec.name = f"Liquidación Laboral ({f_str})"
 
     @api.depends(
+        'linea_ids',
         'linea_ids.fondo_reserva_acumulado',
         'linea_ids.monto_descuentos',
         'linea_ids.monto_neto',
@@ -102,21 +113,27 @@ class CaramiaLiquidacion(models.Model):
             )
             rec.total_a_pagar = sum(rec.linea_ids.mapped('monto_neto'))
 
+    @api.onchange('linea_ids')
+    def _onchange_linea_ids(self):
+        """Actualiza la vista en tiempo real al agregar o modificar líneas."""
+        self._compute_totales_globales()
+
     def action_cargar_todos_empleados(self):
-        """Carga únicamente a los empleados que tengan un fondo acumulado disponible (> 0)
-        o préstamos pendientes, ignorando opciones externas.
+        """Carga únicamente a los empleados que apliquen a liquidación y tengan un
+        fondo acumulado disponible (> 0) o préstamos pendientes en estado 'pending'.
         """
         for rec in self:
-            empleados = self.env['cara.mia.empleado'].search([])
+            # Solo empleados marcados para liquidación
+            empleados = self.env['cara.mia.empleado'].search([('aplica_liquidacion', '=', True)])
             if not empleados:
-                raise ValidationError("No se encontraron empleados registrados en el sistema.")
+                raise ValidationError("No se encontraron empleados habilitados para liquidación.")
 
             lineas = [(5, 0, 0)]
             for emp in empleados:
-                # 1. Préstamos pendientes
+                # 1. Préstamos pendientes ('pending')
                 prestamos = self.env['cara.mia.prestamo'].search([
                     ('empleado_id', '=', emp.id),
-                    ('state', '=', 'approved'),
+                    ('state', '=', 'pending'),
                 ])
 
                 # 2. Retenciones del 0.22% en nóminas aprobadas
@@ -134,7 +151,7 @@ class CaramiaLiquidacion(models.Model):
                 total_ya_usado = sum(liqs_previas.mapped('fondo_reserva_acumulado'))
                 fondo_disponible = max(0.0, total_retencion - total_ya_usado)
 
-                # REGLA SIMPLIFICADA: Se liquida solo si tiene saldo retenido (> 0) o préstamos pendientes
+                # Se liquida solo si tiene saldo retenido (> 0) o préstamos pendientes
                 if fondo_disponible > 0 or prestamos:
                     descuentos = []
                     for p in prestamos:
@@ -160,27 +177,31 @@ class CaramiaLiquidacion(models.Model):
                 raise ValidationError("No hay empleados con saldo acumulado del 0.22% o préstamos pendientes por liquidar.")
 
             rec.write({'linea_ids': lineas})
+            # Forzar recálculo en la base de datos
+            rec.linea_ids._compute_monto_descuentos()
+            rec.linea_ids._compute_monto_neto()
+            rec._compute_totales_globales()
 
     def action_confirmar_liquidacion(self):
-        """Al confirmar, pasa la liquidación a 'done' y marca los préstamos descontados como pagados ('paid')."""
+        """Al confirmar, pasa la liquidación a 'done' y pasa los préstamos a 'paid'."""
         for rec in self:
             if not rec.linea_ids:
                 raise ValidationError("Debe agregar al menos un empleado para liquidar.")
             
             for linea in rec.linea_ids:
-                prestamos = linea.descuento_ids.mapped('prestamo_id').filtered(lambda p: p.state == 'approved')
+                prestamos = linea.descuento_ids.mapped('prestamo_id').filtered(lambda p: p.state == 'pending')
                 if prestamos:
                     prestamos.write({'state': 'paid'})
 
             rec.write({'state': 'done'})
 
     def action_cancelar(self):
-        """Si se cancela la liquidación, reactiva los préstamos."""
+        """Si se cancela la liquidación, vuelve los préstamos a 'pending'."""
         for rec in self:
             for linea in rec.linea_ids:
                 prestamos = linea.descuento_ids.mapped('prestamo_id').filtered(lambda p: p.state == 'paid')
                 if prestamos:
-                    prestamos.write({'state': 'approved'})
+                    prestamos.write({'state': 'pending'})
             rec.write({'state': 'cancel'})
 
 
@@ -238,11 +259,11 @@ class CaramiaLiquidacionLinea(models.Model):
 
     @api.onchange('empleado_id')
     def _onchange_empleado_id_cargar_prestamos(self):
-        """Al seleccionar un empleado individualmente, auto-carga todos sus préstamos aprobados."""
+        """Al seleccionar un empleado individualmente, auto-carga todos sus préstamos pendientes ('pending')."""
         if self.empleado_id:
             prestamos = self.env['cara.mia.prestamo'].search([
                 ('empleado_id', '=', self.empleado_id.id),
-                ('state', '=', 'approved'),
+                ('state', '=', 'pending'),
             ])
             descuentos = []
             for p in prestamos:
@@ -257,18 +278,19 @@ class CaramiaLiquidacionLinea(models.Model):
         else:
             self.descuento_ids = [(5, 0, 0)]
 
+        self._compute_monto_descuentos()
+        self._compute_monto_neto()
+
     @api.depends('empleado_id')
     def _compute_fondo_reserva(self):
         for line in self:
             if line.empleado_id:
-                # Suma las retenciones del 0.22% en nóminas aprobadas
                 lineas_pago = self.env['cara.mia.pago.empleado.linea'].search([
                     ('empleado_id', '=', line.empleado_id.id),
                     ('state_pago', '=', 'done'),
                 ])
                 total_retencion = sum(lineas_pago.mapped('descuento_reserva'))
 
-                # Resta las liquidaciones ya aprobadas anteriormente
                 liqs_previas = self.env['cara.mia.liquidacion.linea'].search([
                     ('empleado_id', '=', line.empleado_id.id),
                     ('liquidacion_id.state', '=', 'done'),
@@ -280,10 +302,16 @@ class CaramiaLiquidacionLinea(models.Model):
             else:
                 line.fondo_reserva_acumulado = 0.0
 
-    @api.depends('descuento_ids.monto')
+    @api.depends('descuento_ids', 'descuento_ids.monto')
     def _compute_monto_descuentos(self):
         for line in self:
             line.monto_descuentos = sum(line.descuento_ids.mapped('monto'))
+
+    @api.onchange('descuento_ids')
+    def _onchange_descuento_ids(self):
+        """Actualiza los subtotales en tiempo real al manipular descuentos."""
+        self._compute_monto_descuentos()
+        self._compute_monto_neto()
 
     @api.depends('fondo_reserva_acumulado', 'monto_descuentos')
     def _compute_monto_neto(self):
@@ -291,7 +319,7 @@ class CaramiaLiquidacionLinea(models.Model):
             line.monto_neto = line.fondo_reserva_acumulado - line.monto_descuentos
 
     def action_abrir_descuentos(self):
-        """Abre la ventana emergente/modal para ingresar o ajustar descuentos."""
+        """Abre la ventana emergente/modal para ingresar o consultar descuentos."""
         self.ensure_one()
         
         view = (
@@ -314,7 +342,6 @@ class CaramiaLiquidacionLinea(models.Model):
             'target': 'new',
         }
 
-
 class CaramiaLiquidacionDescuento(models.Model):
     _name = 'cara.mia.liquidacion.descuento'
     _description = 'Registro Individual de Descuento en Liquidación'
@@ -332,7 +359,7 @@ class CaramiaLiquidacionDescuento(models.Model):
     prestamo_id = fields.Many2one(
         'cara.mia.prestamo',
         string='Préstamo del Empleado',
-        domain="[('empleado_id', '=', empleado_id), ('state', '=', 'approved')]",
+        domain="[('empleado_id', '=', empleado_id), ('state', '=', 'pending')]",
         ondelete='set null',
     )
 

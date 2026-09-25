@@ -61,7 +61,7 @@
                         <!-- Pestaña 1: Trabajos -->
                         <page string="Historial de trabajos">
                             <field name="registro_trabajo_orden_ids" readonly="1">
-                                <list string="Tiquetes Registrados">
+                                <list string="Tiquetes Registrados" open_form="false">
                                     <field name="fecha"/>
                                     <field name="orden_codigo"/>
                                     <field name="total_pares"/>
@@ -71,11 +71,11 @@
                             </field>
                         </page>
 
-                        <!-- Pestaña 2: Liquidaciones -->
-                        <page string="Historial de liquidaciones">
-                            <field name="historial_liquidacion_ids" readonly="1">
-                                <list create="false" delete="false">
-                                    <field name="pago_id" string="Nómina / Referencia"/>
+                        <!-- Pestaña 2: Nóminas -->
+                        <page string="Historial de Nóminas">
+                            <field name="historial_nomina_ids" readonly="1">
+                                <list create="false" delete="false" open_form="false">
+                                    <field name="pago_id" string="Nómina / Referencia" options="{'no_open': True}"/>
                                     <field name="fecha_pago" string="Fecha Pago"/>
                                     <field name="total_pares" string="Pares"/>
                                     <field name="monto_neto" widget="monetary" string="Total Ganado" class="fw-bold text-success"/>
