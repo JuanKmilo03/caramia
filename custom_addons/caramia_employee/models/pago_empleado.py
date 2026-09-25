@@ -157,37 +157,19 @@ class CaramiaPagoEmpleado(models.Model):
             lines_sin_pagar = rec.linea_ids.filtered(lambda l: not l.pagado)
             if lines_sin_pagar:
                 empleados_pendientes = ", ".join(
-                    lines_sin_pagar.mapped('empleado_id.name')
+                    lines_sin_pagar.mapped('empleado_id.nombre_empleado')
                 )
                 raise ValidationError(
                     f"No se puede aprobar la nómina porque existen empleados sin marcar como pagados:\n- {empleados_pendientes}"
                 )
 
+            # Marcar tiquetes de trabajo como pagados
             todos_los_tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if todos_los_tiquetes:
                 todos_los_tiquetes.write({'estado': 'pagado'})
 
+            # Cambiar estado de la nómina a 'done'
             rec.write({'state': 'done', 'fecha_nomina': fields.Date.today()})
-
-            # CREACIÓN AUTOMÁTICA DEL REGISTRO EN LA PANTALLA DE LIQUIDACIÓN
-            # Solo incluye a empleados con la opción 'aplica_liquidacion' activa
-            lineas_liquidacion = []
-            for line in rec.linea_ids:
-                if line.aplica_liquidacion:
-                    lineas_liquidacion.append((0, 0, {
-                        'empleado_id': line.empleado_id.id,
-                        'total_pares': line.total_pares,
-                        'monto_bruto': line.monto_bruto,
-                        'descuento_reserva': line.descuento_reserva,
-                        'monto_neto': line.monto_neto,
-                    }))
-
-            if lineas_liquidacion:
-                self.env['cara.mia.liquidacion'].create({
-                    'pago_id': rec.id,
-                    'fecha_liquidacion': fields.Date.today(),
-                    'linea_ids': lineas_liquidacion,
-                })
 
     def unlink(self):
         for rec in self:

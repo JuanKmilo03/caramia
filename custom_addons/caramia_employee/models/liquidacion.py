@@ -103,10 +103,8 @@ class CaramiaLiquidacion(models.Model):
             rec.total_a_pagar = sum(rec.linea_ids.mapped('monto_neto'))
 
     def action_cargar_todos_empleados(self):
-        """Carga masiva de empleados.
-        Incluye empleados que tengan activa la opción 'aplica_liquidacion',
-        o que tengan fondo acumulado pendiente por liquidar (aunque hayan desactivado la opción),
-        o que tengan préstamos pendientes por pagar.
+        """Carga únicamente a los empleados que tengan un fondo acumulado disponible (> 0)
+        o préstamos pendientes, ignorando opciones externas.
         """
         for rec in self:
             empleados = self.env['cara.mia.empleado'].search([])
@@ -115,19 +113,20 @@ class CaramiaLiquidacion(models.Model):
 
             lineas = [(5, 0, 0)]
             for emp in empleados:
-                # 1. Consultar préstamos pendientes
+                # 1. Préstamos pendientes
                 prestamos = self.env['cara.mia.prestamo'].search([
                     ('empleado_id', '=', emp.id),
                     ('state', '=', 'approved'),
                 ])
 
-                # 2. Consultar si tiene saldo de 0.22% retenido en nóminas anteriores
+                # 2. Retenciones del 0.22% en nóminas aprobadas
                 lineas_pago = self.env['cara.mia.pago.empleado.linea'].search([
                     ('empleado_id', '=', emp.id),
                     ('state_pago', '=', 'done'),
                 ])
                 total_retencion = sum(lineas_pago.mapped('descuento_reserva'))
 
+                # 3. Restar lo que ya se liquidó previamente
                 liqs_previas = self.env['cara.mia.liquidacion.linea'].search([
                     ('empleado_id', '=', emp.id),
                     ('liquidacion_id.state', '=', 'done'),
@@ -135,9 +134,8 @@ class CaramiaLiquidacion(models.Model):
                 total_ya_usado = sum(liqs_previas.mapped('fondo_reserva_acumulado'))
                 fondo_disponible = max(0.0, total_retencion - total_ya_usado)
 
-                # Criterio de inclusión:
-                # Aplica liquidación activa OR tiene saldo de 0.22% pendiente OR tiene préstamos pendientes
-                if getattr(emp, 'aplica_liquidacion', True) or fondo_disponible > 0 or prestamos:
+                # REGLA SIMPLIFICADA: Se liquida solo si tiene saldo retenido (> 0) o préstamos pendientes
+                if fondo_disponible > 0 or prestamos:
                     descuentos = []
                     for p in prestamos:
                         fecha_p = p.fecha.strftime('%d/%m/%Y') if p.fecha else ''
@@ -157,6 +155,9 @@ class CaramiaLiquidacion(models.Model):
                             'descuento_ids': descuentos,
                         },
                     ))
+
+            if len(lineas) == 1:
+                raise ValidationError("No hay empleados con saldo acumulado del 0.22% o préstamos pendientes por liquidar.")
 
             rec.write({'linea_ids': lineas})
 
@@ -260,14 +261,14 @@ class CaramiaLiquidacionLinea(models.Model):
     def _compute_fondo_reserva(self):
         for line in self:
             if line.empleado_id:
-                # Suma todas las retenciones del 0.22% reales en nóminas aprobadas ('done')
+                # Suma las retenciones del 0.22% en nóminas aprobadas
                 lineas_pago = self.env['cara.mia.pago.empleado.linea'].search([
                     ('empleado_id', '=', line.empleado_id.id),
                     ('state_pago', '=', 'done'),
                 ])
                 total_retencion = sum(lineas_pago.mapped('descuento_reserva'))
 
-                # Resta lo que ya fue pagado en liquidaciones pasadas aprobadas
+                # Resta las liquidaciones ya aprobadas anteriormente
                 liqs_previas = self.env['cara.mia.liquidacion.linea'].search([
                     ('empleado_id', '=', line.empleado_id.id),
                     ('liquidacion_id.state', '=', 'done'),
@@ -290,7 +291,7 @@ class CaramiaLiquidacionLinea(models.Model):
             line.monto_neto = line.fondo_reserva_acumulado - line.monto_descuentos
 
     def action_abrir_descuentos(self):
-        """Abre la pantalla emergente/modal para ingresar o ajustar descuentos."""
+        """Abre la ventana emergente/modal para ingresar o ajustar descuentos."""
         self.ensure_one()
         
         view = (
