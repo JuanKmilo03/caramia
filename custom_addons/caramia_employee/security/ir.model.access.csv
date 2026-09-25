@@ -2,4 +2,8 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_caramia_empleado,access_caramia_empleado,model_cara_mia_empleado,base.group_user,1,1,1,1
 access_caramia_registro_trabajo_orden,access_caramia_registro_trabajo_orden,model_cara_mia_registro_trabajo_orden,base.group_user,1,1,1,1
 access_caramia_pago_empleado,access_caramia_pago_empleado,model_cara_mia_pago_empleado,base.group_user,1,1,1,1
-access_caramia_pago_empleado_line,access_caramia_pago_empleado_line,model_cara_mia_pago_empleado_line,base.group_user,1,1,1,1
+access_caramia_pago_empleado_linea,access_caramia_pago_empleado_linea,model_cara_mia_pago_empleado_linea,base.group_user,1,1,1,1
+access_cara_mia_liquidacion,cara.mia.liquidacion,model_cara_mia_liquidacion,base.group_user,1,1,1,1
+access_cara_mia_liquidacion_linea,cara.mia.liquidacion.linea,model_cara_mia_liquidacion_linea,base.group_user,1,1,1,1
+access_cara_mia_prestamo,cara.mia.prestamo,model_cara_mia_prestamo,base.group_user,1,1,1,1
+access_cara_mia_liquidacion_descuento,access_cara_mia_liquidacion_descuento,model_cara_mia_liquidacion_descuento,base.group_user,1,1,1,1

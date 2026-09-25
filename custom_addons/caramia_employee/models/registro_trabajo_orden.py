@@ -59,8 +59,8 @@ class CaramiaRegistroTrabajo(models.Model):
     
     estado = fields.Selection([
         ('sin_asignar', 'Sin Asignar'),
-        ('pendiente', 'Pendiente de Liquidar'),
-        ('pagado', 'Pagado en Nómina')
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Registrado en Nómina')
     ], string='Estado', compute='_compute_estado', store=True, default='sin_asignar')
 
     @api.constrains('produccion_id')

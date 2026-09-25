@@ -1,109 +1,195 @@
-from odoo import models, fields, api
-from odoo.exceptions import ValidationError
 from datetime import timedelta
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class CaramiaPagoEmpleado(models.Model):
     _name = 'cara.mia.pago.empleado'
-    _description = 'Liquidación y Pago a Empleados'
+    _description = 'Nómina de Empleados'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'fecha_fin desc, id desc'
 
     def _get_default_fecha_inicio(self):
-        """ Retorna 7 días (1 semana) antes de la fecha actual """
         return fields.Date.today() - timedelta(days=7)
 
-    name = fields.Char(string='Referencia de Pago', required=True, copy=False, readonly=True, default='Nuevo')
-    
-    # --- RANGO DE FECHAS EN LA PARTE SUPERIOR ---
+    name = fields.Char(
+        string='Referencia de Nómina',
+        compute='_compute_name',
+        store=True,
+        readonly=True,
+        copy=False,
+    )
+
     fecha_inicio = fields.Date(
-        string='Desde', 
-        required=True, 
+        string='Desde',
+        required=True,
         default=_get_default_fecha_inicio,
-        help="Fecha inicial para calcular los trabajos acumulados de todos los empleados."
+        help='Fecha inicial del período de nómina.',
     )
     fecha_fin = fields.Date(
-        string='Hasta', 
-        required=True, 
+        string='Hasta',
+        required=True,
         default=fields.Date.context_today,
-        help="Fecha final para calcular los trabajos acumulados de todos los empleados."
+        help='Fecha final del período de nómina.',
     )
-    fecha_pago = fields.Date(string='Fecha de Liquidación', default=fields.Date.context_today, readonly=True)
+    fecha_nomina = fields.Date(
+        string='Fecha de Realización',
+        default=fields.Date.context_today,
+        readonly=True,
+    )
 
-    linea_ids = fields.One2many('cara.mia.pago.empleado.line', 'pago_id', string='Detalle por Empleado')
+    linea_ids = fields.One2many(
+        'cara.mia.pago.empleado.linea',
+        'pago_id',
+        string='Detalle por Empleado',
+    )
 
-    # TOTALES DE LA LIQUIDACIÓN
-    total_bruto = fields.Monetary(string='Total Ganado', compute='_compute_totales', store=True, currency_field='currency_id')
-    total_descuentos = fields.Monetary(string='Total Descuentos', compute='_compute_totales', store=True, currency_field='currency_id')
-    total_neto = fields.Monetary(string='Total A Pagar', compute='_compute_totales', store=True, currency_field='currency_id')
+    # TOTALES GLOBALES
+    total_bruto = fields.Monetary(
+        string='Total Labores',
+        compute='_compute_totales',
+        store=True,
+        currency_field='currency_id',
+    )
+    total_descontado = fields.Monetary(
+        string='Descuento (0.22%)',
+        compute='_compute_totales',
+        store=True,
+        currency_field='currency_id',
+    )
+    total_neto = fields.Monetary(
+        string='Total A Pagar',
+        compute='_compute_totales',
+        store=True,
+        currency_field='currency_id',
+    )
+    total_pagado = fields.Monetary(
+        string='Valor Pagado',
+        compute='_compute_totales',
+        store=True,
+        currency_field='currency_id',
+    )
 
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
-    state = fields.Selection([
-        ('draft', 'Borrador'),
-        ('done', 'Pagado / Finalizado'),
-        ('cancel', 'Cancelado')
-    ], string='Estado', default='draft', tracking=True)
+    currency_id = fields.Many2one(
+        'res.currency', default=lambda self: self.env.company.currency_id
+    )
+    state = fields.Selection(
+        [
+            ('draft', 'Borrador'),
+            ('in_progress', 'En Proceso'),
+            ('done', 'Finalizado'),
+            ('cancel', 'Cancelado'),
+        ],
+        string='Estado',
+        default='draft',
+        tracking=True,
+    )
 
-    @api.depends('linea_ids.monto_bruto', 'linea_ids.descuento')
+    @api.depends('fecha_inicio', 'fecha_fin')
+    def _compute_name(self):
+        for rec in self:
+            if rec.fecha_inicio and rec.fecha_fin:
+                f_inicio = rec.fecha_inicio.strftime('%d/%m/%Y')
+                f_fin = rec.fecha_fin.strftime('%d/%m/%Y')
+                rec.name = f"Nómina del {f_inicio} al {f_fin}"
+            else:
+                rec.name = "Nómina de Empleados"
+
+    @api.depends(
+        'linea_ids.monto_bruto',
+        'linea_ids.descuento_reserva',
+        'linea_ids.monto_neto',
+        'linea_ids.pagado',
+    )
     def _compute_totales(self):
         for rec in self:
             rec.total_bruto = sum(rec.linea_ids.mapped('monto_bruto'))
-            rec.total_descuentos = sum(rec.linea_ids.mapped('descuento'))
+            rec.total_descontado = sum(rec.linea_ids.mapped('descuento_reserva'))
             rec.total_neto = sum(rec.linea_ids.mapped('monto_neto'))
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get('name', 'Nuevo') == 'Nuevo':
-                # Coincide exactamente con el 'code' definido en ir_sequence_data.xml
-                vals['name'] = self.env['ir.sequence'].next_by_code('cara.mia.pago.empleado') or 'Nuevo'
-        return super().create(vals_list)
+            lineas_pagadas = rec.linea_ids.filtered(lambda l: l.pagado)
+            rec.total_pagado = sum(lineas_pagadas.mapped('monto_neto'))
 
     def action_calcular_pagos(self):
-        """ Busca los tiquetes pendientes dentro del rango de fechas y agrupa por empleado """
         for rec in self:
             if rec.fecha_inicio > rec.fecha_fin:
-                raise ValidationError("La fecha 'Desde' no puede ser mayor a la fecha 'Hasta'.")
+                raise ValidationError(
+                    "La fecha 'Desde' no puede ser mayor a la fecha 'Hasta'."
+                )
 
-            # 1. Buscar tiquetes pendientes en el rango de fechas
             tiquetes = self.env['cara.mia.registro.trabajo.orden'].search([
                 ('fecha', '>=', rec.fecha_inicio),
                 ('fecha', '<=', rec.fecha_fin),
                 ('estado', '=', 'pendiente'),
-                ('empleado_id', '!=', False)
+                ('empleado_id', '!=', False),
             ])
 
-            # 2. Comando ORM (5, 0, 0) para limpiar de forma segura las líneas anteriores
             lineas = [(5, 0, 0)]
-
-            # 3. Agrupar tiquetes por empleado
             empleados = tiquetes.mapped('empleado_id')
+
             for emp in empleados:
                 tiquetes_emp = tiquetes.filtered(lambda t: t.empleado_id == emp)
                 monto_bruto = sum(tiquetes_emp.mapped('subtotal'))
                 pares_totales = sum(tiquetes_emp.mapped('total_pares'))
 
-                lineas.append((0, 0, {
-                    'empleado_id': emp.id,
-                    'total_pares': pares_totales,
-                    'monto_bruto': monto_bruto,
-                    'descuento': 0.0,
-                    'tiquete_ids': [(6, 0, tiquetes_emp.ids)],
-                }))
+                lineas.append((
+                    0,
+                    0,
+                    {
+                        'empleado_id': emp.id,
+                        'pagado': False,  # Checkbox de pago
+                        'total_pares': pares_totales,
+                        'monto_bruto': monto_bruto,
+                        'tiquete_ids': [(6, 0, tiquetes_emp.ids)],
+                    },
+                ))
 
-            # 4. Escribir los cambios en la BD para forzar el renderizado en la interfaz
-            rec.write({'linea_ids': lineas})
+            rec.write({'linea_ids': lineas, 'state': 'in_progress'})
 
     def action_confirmar_pago(self):
-        """ Marca los tiquetes procesados de todos los empleados como PAGADOS """
         for rec in self:
+            if not rec.linea_ids:
+                raise ValidationError(
+                    "No hay empleados agregados en esta nómina."
+                )
+
+            # Validar que todos los empleados de la nómina estén marcados como pagados
+            lines_sin_pagar = rec.linea_ids.filtered(lambda l: not l.pagado)
+            if lines_sin_pagar:
+                empleados_pendientes = ", ".join(
+                    lines_sin_pagar.mapped('empleado_id.name')
+                )
+                raise ValidationError(
+                    f"No se puede aprobar la nómina porque existen empleados sin marcar como pagados:\n- {empleados_pendientes}"
+                )
+
             todos_los_tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if todos_los_tiquetes:
                 todos_los_tiquetes.write({'estado': 'pagado'})
-            rec.write({'state': 'done', 'fecha_pago': fields.Date.today()})
+
+            rec.write({'state': 'done', 'fecha_nomina': fields.Date.today()})
+
+            # CREACIÓN AUTOMÁTICA DEL REGISTRO EN LA PANTALLA DE LIQUIDACIÓN
+            # Solo incluye a empleados con la opción 'aplica_liquidacion' activa
+            lineas_liquidacion = []
+            for line in rec.linea_ids:
+                if line.aplica_liquidacion:
+                    lineas_liquidacion.append((0, 0, {
+                        'empleado_id': line.empleado_id.id,
+                        'total_pares': line.total_pares,
+                        'monto_bruto': line.monto_bruto,
+                        'descuento_reserva': line.descuento_reserva,
+                        'monto_neto': line.monto_neto,
+                    }))
+
+            if lineas_liquidacion:
+                self.env['cara.mia.liquidacion'].create({
+                    'pago_id': rec.id,
+                    'fecha_liquidacion': fields.Date.today(),
+                    'linea_ids': lineas_liquidacion,
+                })
 
     def unlink(self):
-        """ Al borrar la liquidación (en cualquier estado), fuerza que todos los tiquetes vuelvan a 'pendiente' """
         for rec in self:
             tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if tiquetes:
@@ -111,23 +197,77 @@ class CaramiaPagoEmpleado(models.Model):
         return super().unlink()
 
 
-class CaramiaPagoEmpleadoLine(models.Model):
-    _name = 'cara.mia.pago.empleado.line'
+class CaramiaPagoEmpleadoLinea(models.Model):
+    _name = 'cara.mia.pago.empleado.linea'
     _description = 'Línea de Liquidación por Empleado'
 
-    pago_id = fields.Many2one('cara.mia.pago.empleado', string='Liquidación', ondelete='cascade')
-    empleado_id = fields.Many2one('cara.mia.empleado', string='Empleado', required=True)
-    total_pares = fields.Integer(string='Pares Elaborados', readonly=True)
-
-    currency_id = fields.Many2one('res.currency', related='pago_id.currency_id')
-    monto_bruto = fields.Monetary(string='Ganado (Bruto)', readonly=True, currency_field='currency_id')
-    descuento = fields.Monetary(string='Descuento / Vale', default=0.0, currency_field='currency_id')
-    monto_neto = fields.Monetary(string='A Pagar (Neto)', compute='_compute_monto_neto', store=True, currency_field='currency_id')
+    pago_id = fields.Many2one(
+        'cara.mia.pago.empleado', string='Liquidación', ondelete='cascade'
+    )
+    empleado_id = fields.Many2one(
+        'cara.mia.empleado', string='Empleado', required=True
+    )
     
-    observaciones = fields.Char(string='Motivo Descuento / Nota')
-    tiquete_ids = fields.Many2many('cara.mia.registro.trabajo.orden', string='Tiquetes Incluidos')
+    # Campo relacionado para verificar la opción en la línea
+    aplica_liquidacion = fields.Boolean(
+        related='empleado_id.aplica_liquidacion',
+        string='Aplica Liquidación',
+        store=True,
+    )
 
-    @api.depends('monto_bruto', 'descuento')
-    def _compute_monto_neto(self):
+    pagado = fields.Boolean(
+        string='¿Pagado?',
+        default=False,
+        help='Marque este campo una vez le haya entregado el dinero al empleado.',
+    )
+
+    fecha_inicio = fields.Date(
+        related='pago_id.fecha_inicio', string='Desde', store=True
+    )
+    fecha_fin = fields.Date(
+        related='pago_id.fecha_fin', string='Hasta', store=True
+    )
+    fecha_pago = fields.Date(
+        related='pago_id.fecha_nomina', string='Fecha Pago', store=True
+    )
+    state_pago = fields.Selection(
+        related='pago_id.state', string='Estado Nómina', store=True
+    )
+
+    total_pares = fields.Integer(string='Pares Elaborados', readonly=True)
+    currency_id = fields.Many2one(
+        'res.currency', related='pago_id.currency_id'
+    )
+
+    monto_bruto = fields.Monetary(
+        string='Monto Bruto', readonly=True, currency_field='currency_id'
+    )
+    descuento_reserva = fields.Monetary(
+        string='Descuento (0.22%)',
+        compute='_compute_montos',
+        store=True,
+        currency_field='currency_id',
+    )
+    monto_neto = fields.Monetary(
+        string='Valor a Pagar',
+        compute='_compute_montos',
+        store=True,
+        currency_field='currency_id',
+    )
+
+    tiquete_ids = fields.Many2many(
+        comodel_name='cara.mia.registro.trabajo.orden',
+        relation='caramia_pago_linea_tiquete_rel',
+        column1='pago_linea_id',
+        column2='tiquete_id',
+        string='Tiquetes Incluidos',
+    )
+
+    @api.depends('monto_bruto', 'aplica_liquidacion')
+    def _compute_montos(self):
         for line in self:
-            line.monto_neto = line.monto_bruto - line.descuento
+            if line.aplica_liquidacion:
+                line.descuento_reserva = line.monto_bruto * 0.0022
+            else:
+                line.descuento_reserva = 0.0
+            line.monto_neto = line.monto_bruto - line.descuento_reserva

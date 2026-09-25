@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- VISTA FORMULARIO EMERGENTE (MODAL) PARA INGRESAR Y VER PRÉSTAMOS / DESCUENTOS -->
+    <record id="view_caramia_liquidacion_descuento_modal" model="ir.ui.view">
+        <field name="name">cara.mia.liquidacion.descuento.modal</field>
+        <field name="model">cara.mia.liquidacion.linea</field>
+        <field name="arch" type="xml">
+            <form string="Gestión de Descuentos del Empleado">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="empleado_id" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1" />
+                            <field name="fondo_reserva_acumulado" widget="monetary" readonly="1" string="Fondo 0.22% Acumulado" class="text-warning fw-bold" />
+                        </group>
+                    </group>
+
+                    <separator string="Préstamos y Descuentos Aplicados" />
+                    <p class="text-muted">Los préstamos en estado 'Aprobado' de este empleado se cargan automáticamente. También puede vincular manualmente un préstamo o añadir deducciones externas:</p>
+
+                    <field name="descuento_ids">
+                        <list editable="bottom">
+                            <field name="empleado_id" invisible="1" />
+                            <field name="prestamo_id" string="Préstamo Vinculado" options="{'no_create': True}" />
+                            <field name="monto" widget="monetary" string="Monto ($)" />
+                            <field name="razon" string="Razón / Motivo del Descuento" placeholder="Ej. Préstamo personal, herramientas no entregadas..." />
+                        </list>
+                    </field>
+
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="monto_descuentos" widget="monetary" string="Total Descuentos" class="fw-bold text-danger fs-4" />
+                        <field name="monto_neto" widget="monetary" string="Neto A Pagar" class="fw-bold text-success fs-3" />
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Guardar y Cerrar" special="save" class="btn-primary" />
+                    <button string="Cancelar" special="cancel" class="btn-secondary" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- VISTA LISTA: Muestra la cantidad de empleados en vez del modo -->
+    <record id="view_caramia_liquidacion_list" model="ir.ui.view">
+        <field name="name">cara.mia.liquidacion.list</field>
+        <field name="model">cara.mia.liquidacion</field>
+        <field name="arch" type="xml">
+            <list string="Liquidaciones Laborales">
+                <field name="name" />
+                <field name="cantidad_empleados" string="N° Empleados" class="fw-bold text-center" />
+                <field name="fecha_corte" />
+                <field name="total_fondo_disponible" widget="monetary" string="Fondo 0.22% Acumulado" class="text-warning" />
+                <field name="total_descuentos" widget="monetary" string="Total Descuentos" class="text-danger" />
+                <field name="total_a_pagar" widget="monetary" string="Total A Pagar" class="fw-bold text-success" />
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-muted="state == 'draft'"
+                       decoration-danger="state == 'cancel'" />
+            </list>
+        </field>
+    </record>
+
+    <!-- VISTA FORMULARIO PRINCIPAL: Sin el campo 'Modo de Liquidación' -->
+    <record id="view_caramia_liquidacion_form" model="ir.ui.view">
+        <field name="name">cara.mia.liquidacion.form</field>
+        <field name="model">cara.mia.liquidacion</field>
+        <field name="arch" type="xml">
+            <form string="Liquidación Laboral">
+                <header>
+                    <button name="action_cargar_todos_empleados"
+                        string="⚡ Cargar Todos los Empleados"
+                        type="object"
+                        class="btn-info"
+                        invisible="state != 'draft'"
+                        help="Carga a todos los empleados de la empresa e importa sus préstamos pendientes." />
+
+                    <button name="action_confirmar_liquidacion"
+                        string="Aprobar y Finalizar Pago"
+                        type="object"
+                        class="btn-success"
+                        invisible="state != 'draft'"
+                        confirm="¿Está seguro de procesar esta liquidación?" />
+
+                    <button name="action_cancelar"
+                        string="Cancelar"
+                        type="object"
+                        invisible="state == 'cancel'" />
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Configuración del Proceso">
+                            <field name="fecha_corte" readonly="state != 'draft'" />
+                        </group>
+                        <group string="Resumen General">
+                            <field name="currency_id" invisible="1" />
+                            <field name="total_fondo_disponible" widget="monetary" string="Fondo Reserva Acumulado (0.22%)" class="text-warning fw-bold" />
+                            <field name="total_descuentos" widget="monetary" string="Total Descuentos Aplicados" class="text-danger fw-bold" />
+                            <field name="total_a_pagar" widget="monetary" string="Total Neto a Entregar" class="fw-bold text-success fs-3" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Empleados a Liquidar">
+                            <field name="linea_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="empleado_id" />
+                                    <field name="motivo" />
+                                    <field name="fondo_reserva_acumulado" widget="monetary" string="Acumulado 0.22%" class="text-warning fw-bold" readonly="1" />
+                                    <field name="monto_descuentos" widget="monetary" string="Descuento Total" class="text-danger fw-bold" readonly="1" />
+                                    
+                                    <!-- BOTÓN PARA ABRIR LA VENTANA MODAL DE DESCUENTOS -->
+                                    <button name="action_abrir_descuentos"
+                                            string="📝 Agregar / Ver Descuento"
+                                            type="object"
+                                            class="btn-outline-primary btn-sm" />
+
+                                    <field name="monto_neto" widget="monetary" string="Neto A Pagar" class="fw-bold" readonly="1" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACCIÓN DE MENÚ -->
+    <record id="action_caramia_liquidacion" model="ir.actions.act_window">
+        <field name="name">Liquidaciones Laborales</field>
+        <field name="res_model">cara.mia.liquidacion</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

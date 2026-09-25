@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Vista Lista (List) -->
+    <!-- Vista Lista -->
     <record id="view_caramia_employee_list" model="ir.ui.view">
         <field name="name">cara.mia.empleado.list</field>
         <field name="model">cara.mia.empleado</field>
@@ -11,17 +11,34 @@
                 <field name="nombre_empleado"/>
                 <field name="telefono_empleado"/>
                 <field name="tipo_labor_id"/>
+                <field name="total_prestamos_pendientes" widget="monetary" string="Préstamos Pendientes"/>
+                <field name="aplica_liquidacion" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
 
-    <!-- Vista Formulario (Form) con Pestana Integrada -->
+    <!-- Vista Formulario -->
     <record id="view_caramia_employee_form" model="ir.ui.view">
         <field name="name">cara.mia.empleado.form</field>
         <field name="model">cara.mia.empleado</field>
         <field name="arch" type="xml">
             <form string="Empleado Caramia">
                 <sheet>
+                    <!-- BOTÓN INTELIGENTE EN PARTE SUPERIOR -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_prestamos"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-money">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value text-danger">
+                                    <field name="total_prestamos_pendientes" widget="monetary"/>
+                                </span>
+                                <span class="o_stat_text">Préstamos Pendientes</span>
+                            </div>
+                        </button>
+                    </div>
+
                     <div class="oe_title">
                         <label for="nombre_empleado" string="Nombre del Empleado"/>
                         <h1>
@@ -30,16 +47,18 @@
                     </div>
                     <group>
                         <group string="Datos Personales">
+                            <field name="currency_id" invisible="1"/>
                             <field name="empleado_id" placeholder="Ej. 1098765432"/>
                             <field name="telefono_empleado" placeholder="Ej. 3001234567"/>
                         </group>
                         <group string="Asignación Operativa">
                             <field name="tipo_labor_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="aplica_liquidacion" widget="boolean_toggle"/>
                         </group>
                     </group>
 
-                    <!-- Pestaña de Historial de Trabajos Integrada -->
                     <notebook>
+                        <!-- Pestaña 1: Trabajos -->
                         <page string="Historial de trabajos">
                             <field name="registro_trabajo_orden_ids" readonly="1">
                                 <list string="Tiquetes Registrados">
@@ -51,13 +70,49 @@
                                 </list>
                             </field>
                         </page>
+
+                        <!-- Pestaña 2: Liquidaciones -->
+                        <page string="Historial de liquidaciones">
+                            <field name="historial_liquidacion_ids" readonly="1">
+                                <list create="false" delete="false">
+                                    <field name="pago_id" string="Nómina / Referencia"/>
+                                    <field name="fecha_pago" string="Fecha Pago"/>
+                                    <field name="total_pares" string="Pares"/>
+                                    <field name="monto_neto" widget="monetary" string="Total Ganado" class="fw-bold text-success"/>
+                                    <field name="state_pago" widget="badge" string="Estado"
+                                           decoration-success="state_pago == 'done'" 
+                                           decoration-info="state_pago == 'draft'" 
+                                           decoration-danger="state_pago == 'cancel'"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- Pestaña 3: Préstamos y Descuentos -->
+                        <page string="Préstamos / Descuentos" name="page_prestamos">
+                            <group>
+                                <group>
+                                    <field name="total_prestamos_pendientes" widget="monetary" string="Saldo Pendiente de Cobro" class="fw-bold text-danger fs-4"/>
+                                </group>
+                            </group>
+                            <separator string="Préstamos Otorgados a este Empleado"/>
+                            <field name="prestamo_ids">
+                                <list editable="bottom"
+                                      decoration-warning="state == 'pending'"
+                                      decoration-success="state == 'paid'">
+                                    <field name="fecha"/>
+                                    <field name="monto" widget="monetary" class="fw-bold text-danger"/>
+                                    <field name="observaciones" string="Motivo / Observación"/>
+                                    <field name="state" widget="badge" string="Estado"/>
+                                </list>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Vista Búsqueda (Search) -->
+    <!-- Vista Búsqueda -->
     <record id="view_caramia_employee_search" model="ir.ui.view">
         <field name="name">cara.mia.empleado.search</field>
         <field name="model">cara.mia.empleado</field>
