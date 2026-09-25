@@ -1,10 +1,11 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
+
 
 class CaramiaProduction(models.Model):
-    _name = 'caramia.production'
+    _name = 'cara.mia.produccion'
     _description = 'Orden de Producción'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'name desc'
 
     name = fields.Char(
         string='Orden / Lote', 
@@ -26,28 +27,28 @@ class CaramiaProduction(models.Model):
     date = fields.Date(string='Fecha de Creación', default=fields.Date.today)
     date_done = fields.Datetime(string='Fecha de Finalización', readonly=True)
     active = fields.Boolean(string='Activo', default=True)
+    fecha_creacion = fields.Date(string='Fecha de Creación', default=fields.Date.today)
+    fecha_estimada = fields.Date(string='Fecha Estimada de Finalización', readonly=True)
+    fecha_finalizacion = fields.Datetime(string='Fecha de Finalización', readonly=True)
+    activo = fields.Boolean(string='Activo', default=True)
 
     # Relaciones principales
-    customer_id = fields.Many2one('caramia.customer', string='Cliente', required=True, tracking=True)
+    cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
     referencia_id = fields.Many2one(
-        'cara.mia.referencia', 
-        string='Referencia / Modelo', 
-        required=True, 
+        'cara.mia.referencia',
+        string='Referencia / Modelo',
+        required=True,
         tracking=True,
         domain="[('estado', '=', 'activo')]",
         ondelete='restrict'
     )
 
-    imagen_zapato = fields.Image(
-        related='referencia_id.imagen_zapato', 
-        string='Fotografía del Calzado', 
-        readonly=True
-    )
+    imagen_zapato = fields.Image(related='referencia_id.imagen_zapato', string='Fotografía del Calzado', readonly=True)
 
-    # Relación con labores editables propias de esta orden
+    # Labores asociadas a esta orden
     labor_ids = fields.One2many(
-        'caramia.production.labor', 
-        'production_id', 
+        'cara.mia.produccion.labor', 
+        'produccion_id', 
         string='Labores de la Orden'
     )
 
@@ -57,9 +58,9 @@ class CaramiaProduction(models.Model):
         string='Moneda'
     )
 
-    color = fields.Char(string='Color')
-    material = fields.Char(string='Material')
-    sello = fields.Char(string='Sello / Marca')
+    color = fields.Char(string='Color', required=True)
+    material = fields.Char(string='Material', required=True)
+    sello = fields.Char(string='Sello / Marca', required=True)
     factura_nro = fields.Char(string='Factura N°')
 
     # Curva de tallas (21 a 40)
@@ -90,6 +91,7 @@ class CaramiaProduction(models.Model):
         ('draft', 'Borrador'),
         ('in_progress', 'En Proceso'),
         ('done', 'Finalizado'),
+        ('canceled', 'Cancelado'),
     ], string='Estado', default='draft', tracking=True)
 
     @api.depends(
@@ -107,91 +109,63 @@ class CaramiaProduction(models.Model):
                 rec.talla_36, rec.talla_37, rec.talla_38, rec.talla_39, rec.talla_40
             ])
 
+    @api.constrains('total_pares')
+    def _check_total_pares(self):
+        for rec in self:
+            if rec.total_pares <= 0:
+                raise ValidationError(
+                    "Debe ingresar al menos un par de zapatos en alguna de las tallas antes de guardar la orden."
+                )
+
     @api.onchange('referencia_id')
     def _onchange_referencia_id(self):
-        if not self.referencia_id:
-            self.labor_ids = [fields.Command.clear()]
-            return
+        self.labor_ids = [(5, 0, 0)]
+        if self.referencia_id:
+            self.labor_ids = [
+                (0, 0, {
+                    'tipo_labor_id': labor.tipo_labor_id.id,
+                    'tarifa_pago': labor.tarifa_pago or 0.0,
+                })
+                for labor in self.referencia_id.labor_ids
+                if labor.tipo_labor_id
+            ]
 
-        if getattr(self.referencia_id, 'descripcion', False) and not self.description:
-            self.description = self.referencia_id.descripcion
-
-        # Limpiamos y cargamos de forma segura las labores usando comandos dinámicos optimizados de Odoo 18
-        lineas_labores = []
-        for labor_ref in self.referencia_id.labor_ids:
-            tipo = labor_ref.tipo_labor_id
-            if not tipo:
-                continue
-            lineas_labores.append(fields.Command.create({
-                'tipo_labor_id': tipo.id,
-                'tarifa_pago': labor_ref.tarifa_pago,
-            }))
-        
-        self.labor_ids = [fields.Command.clear()] + lineas_labores
-
-    @api.onchange('customer_id')
-    def _onchange_customer_id(self):
-        if self.customer_id and getattr(self.customer_id, 'sello', False):
-            self.sello = self.customer_id.sello
+    @api.onchange('cliente_id')
+    def _onchange_cliente_id(self):
+        if self.cliente_id and getattr(self.cliente_id, 'sello', False):
+            self.sello = self.cliente_id.sello
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', 'Nuevo') == 'Nuevo':
-                vals['name'] = self.env['ir.sequence'].next_by_code('caramia.production.number') or 'Nuevo'
+                vals['name'] = self.env['ir.sequence'].next_by_code('cara.mia.produccion.number') or 'Nuevo'
         return super().create(vals_list)
 
     def action_set_in_progress(self):
-        self.ensure_one()
-
-        if self.referencia_id and hasattr(self.referencia_id, 'insumo_ids'):
-            for linea_ref in self.referencia_id.insumo_ids:
-                insumo = linea_ref.insumo_catalogo_id
-                cantidad_por_par = linea_ref.cantidad
-
-                if not insumo or not cantidad_por_par:
-                    continue
-
-                total_a_descontar = cantidad_por_par * self.total_pares
-                stock_disponible = insumo.stock_actual
-
-                # Si no hay stock, no descuenta nada — nunca negativos
-                if stock_disponible <= 0:
-                    continue
-
-                # Descuenta solo lo que hay disponible
-                cantidad_real = min(total_a_descontar, stock_disponible)
-
-                self.env['cara.mia.stock.entrada'].create({
-                    'insumo_id': insumo.id,
-                    'tipo_componente_id': insumo.tipo_componente_id.id,
-                    'cantidad': -cantidad_real,
-                    'fecha': fields.Date.today(),
-                    'referencia_factura': self.name,
-                    'observaciones': f'Descuento automático — Orden de producción {self.name}',
-                })
-
-        self.write({'state': 'in_progress'})
-
-    def action_set_done(self):
-        self.write({'state': 'done', 'date_done': fields.Datetime.now()})
+        for rec in self:
+            if not rec.labor_ids:
+                raise ValidationError("No se puede iniciar una orden de producción sin labores asignadas.")
+            rec.write({'state': 'in_progress'})
 
     def action_set_draft(self):
-        self.write({'state': 'draft', 'date_done': False})
+        for rec in self:
+            if getattr(rec, 'registro_trabajo_ids', False):
+                raise ValidationError("No puede regresar a Borrador una orden que ya tiene tiquetes o trabajos registrados.")
+            rec.write({'state': 'draft', 'fecha_finalizacion': False})
+
+    def action_cancel(self):
+        self.write({'state': 'canceled'})
 
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
-    
-    
+
+
 class CaramiaProductionLabor(models.Model):
-    _name = 'caramia.production.labor'
+    _name = 'cara.mia.produccion.labor'
     _description = 'Labor Editable de Orden de Producción'
 
-    production_id = fields.Many2one('caramia.production', string='Orden de Producción', ondelete='cascade')
-    tipo_labor_id = fields.Many2one(
-        'cara.mia.tipo.labor', 
-        string='Labor / Proceso', 
-        required=True
-    )    
+    produccion_id = fields.Many2one('cara.mia.produccion', string='Orden de Producción', ondelete='cascade')
+    tipo_labor_id = fields.Many2one('cara.mia.tipo.labor', string='Labor / Proceso', required=True)    
     tarifa_pago = fields.Monetary(string='Precio por Par', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='production_id.currency_id')
+    currency_id = fields.Many2one('res.currency', related='produccion_id.currency_id')

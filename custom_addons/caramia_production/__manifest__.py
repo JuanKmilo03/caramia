@@ -13,6 +13,7 @@
         'views/production_views.xml',
         'wizard/lista_compras_wizard_views.xml',
         'views/production_compra_views.xml',
+        'views/produccion_historial_views.xml',
         'reports/production_reports.xml',
         'reports/production_templates.xml',
         'reports/lista_compras_production_report.xml',

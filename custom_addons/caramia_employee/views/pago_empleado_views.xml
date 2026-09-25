@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VISTA LISTA: Historial / Registro de Nóminas -->
+    <record id="view_caramia_pago_empleado_list" model="ir.ui.view">
+        <field name="name">cara.mia.pago.empleado.list</field>
+        <field name="model">cara.mia.pago.empleado</field>
+        <field name="arch" type="xml">
+            <list string="Lista de Nóminas de Empleados">
+                <field name="name" />
+                <field name="fecha_nomina" />
+                <field name="total_neto" widget="monetary" string="Total A Pagar"/>
+                <field name="total_pagado" widget="monetary" string="Total Pagado" class="fw-bold text-success" />
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'in_progress'"
+                       decoration-muted="state == 'draft'" />
+            </list>
+        </field>
+    </record>
+
+    <!-- VISTA FORMULARIO: Crear / Editar Nómina -->
+    <record id="view_caramia_pago_empleado_form" model="ir.ui.view">
+        <field name="name">cara.mia.pago.empleado.form</field>
+        <field name="model">cara.mia.pago.empleado</field>
+        <field name="arch" type="xml">
+            <form string="Nómina de Empleados">
+                <header>
+                    <button name="action_calcular_pagos"
+                        string="Calcular Pagos"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="state not in ['draft', 'in_progress']" />
+
+                    <button name="action_confirmar_pago"
+                        string="Aprobar y Liquidar"
+                        type="object"
+                        class="btn-success"
+                        invisible="state != 'in_progress'"
+                        confirm="¿Está seguro de procesar esta liquidación? Se verificará que todos los empleados de la lista estén marcados como pagados." />
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done" />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Período a Pagar">
+                            <field name="fecha_inicio" readonly="state == 'done'" />
+                            <field name="fecha_fin" readonly="state == 'done'" />
+                        </group>
+                        <group string="Resumen General">
+                            <field name="fecha_nomina" />
+                            <field name="currency_id" invisible="1" />
+                            <field name="total_bruto" widget="monetary" string="Total Labores" />
+                            <field name="total_descontado" widget="monetary" string="Descuento (0.22%)" class="text-warning" />
+                            <field name="total_neto" widget="monetary" string="Total A Pagar" />
+                            <field name="total_pagado" widget="monetary" string="Valor Pagado" class="fw-bold text-success fs-4" />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Lista de Empleados y Pagos">
+                            <field name="linea_ids" readonly="state == 'done'">
+                                <list editable="bottom" create="false" delete="true">
+                                    <field name="empleado_id" readonly="1" />
+                                    <field name="total_pares" readonly="1" />
+                                    <field name="monto_bruto" widget="monetary" string="Bruto Labores" readonly="1" />
+                                    <field name="descuento_reserva" widget="monetary" string="Descuento (0.22%)" class="text-warning" readonly="1" />
+                                    <field name="monto_neto" widget="monetary" string="Valor a Pagar" class="fw-bold" readonly="1" />
+                                    <field name="pagado" string="¿Pagado?" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

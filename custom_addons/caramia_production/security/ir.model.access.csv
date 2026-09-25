@@ -2,3 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_caramia_production_user,caramia.production.user,model_caramia_production,base.group_user,1,1,1,1
 access_caramia_production_labor,caramia.production.labor,model_caramia_production_labor,base.group_user,1,1,1,1
 access_lista_compras_wizard,caramia.lista.compras.wizard,model_caramia_lista_compras_wizard,,1,1,1,1
+access_cara_mia_produccion_user,cara.mia.produccion.user,model_cara_mia_produccion,base.group_user,1,1,1,1
+access_cara_mia_produccion_labor,cara.mia.produccion.labor,model_cara_mia_produccion_labor,base.group_user,1,1,1,1

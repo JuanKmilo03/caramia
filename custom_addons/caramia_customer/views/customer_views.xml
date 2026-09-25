@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_caramia_customer_form" model="ir.ui.view">
-        <field name="name">caramia.customer.form</field>
-        <field name="model">caramia.customer</field>
+        <field name="name">cara.mia.cliente.form</field>
+        <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
             <form string="Cliente">
                 <sheet>
                     <div class="oe_title">
-                        <label for="client_code" string="ID Cliente"/>
+                        <label for="cliente_id" string="ID Cliente"/>
                         <h1>
-                            <field name="client_code" readonly="1"/>
+                            <field name="cliente_id" readonly="1"/>
                         </h1>
-                        <label for="name" string="Nombre / Razón Social"/>
+                        <label for="nombre_cliente" string="Nombre / Razón Social"/>
                         <h2>
-                            <field name="name" placeholder="Nombre completo del cliente" required="1"/>
+                            <field name="nombre_cliente" placeholder="Nombre completo del cliente" required="1"/>
                         </h2>
                     </div>
                     <group>
                         <group>
-                            <field name="phone" string="Teléfono"/>
-                            <field name="address" string="Dirección"/>
+                            <field name="telefono_cliente" string="Teléfono"/>
+                            <field name="direccion" string="Dirección"/>
                         </group>
                         <group>
                             <field name="sello" string="Sello / Marca"/>
@@ -31,28 +31,28 @@
     </record>
 
     <record id="view_caramia_customer_list" model="ir.ui.view">
-        <field name="name">caramia.customer.list</field>
-        <field name="model">caramia.customer</field>
+        <field name="name">cara.mia.cliente.list</field>
+        <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
             <list string="Clientes">
-                <field name="client_code"/>
-                <field name="name"/>
-                <field name="address"/>
-                <field name="phone"/>
+                <field name="cliente_id"/>
+                <field name="nombre_cliente"/>
+                <field name="direccion"/>
+                <field name="telefono_cliente"/>
                 <field name="sello"/>
             </list>
         </field>
     </record>
 
     <record id="view_caramia_customer_search" model="ir.ui.view">
-        <field name="name">caramia.customer.search</field>
-        <field name="model">caramia.customer</field>
+        <field name="name">cara.mia.cliente.search</field>
+        <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
             <search string="Buscar Clientes">
-                <field name="client_code"/>
-                <field name="name"/>
-                <field name="address"/>
-                <field name="phone"/>
+                <field name="cliente_id"/>
+                <field name="nombre_cliente"/>
+                <field name="direccion"/>
+                <field name="telefono_cliente"/>
                 <field name="sello"/>
             </search>
         </field>
@@ -60,7 +60,7 @@
 
     <record id="action_caramia_customer" model="ir.actions.act_window">
         <field name="name">Clientes</field>
-        <field name="res_model">caramia.customer</field>
+        <field name="res_model">cara.mia.cliente</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

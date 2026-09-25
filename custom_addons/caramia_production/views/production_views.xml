@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. VISTA FORMULARIO -->
+    <!-- VISTA FORMULARIO PRINCIPAL -->
     <record id="view_caramia_production_form" model="ir.ui.view">
-        <field name="name">caramia.production.form</field>
-        <field name="model">caramia.production</field>
+        <field name="name">cara.mia.produccion.form</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <form string="Orden de Producción">
                 <header>
-                    <button name="action_set_in_progress" string="Iniciar Producción" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_set_done" string="Finalizar" type="object" class="oe_highlight" invisible="state != 'in_progress'"/>
+                    <button name="action_set_in_progress" 
+                            string="Iniciar Producción" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state != 'draft'"/>
+
                     <button name="action_download_pdf" string="Imprimir Tiquetes PDF" type="object" icon="fa-print"/>
-                    <button name="action_set_draft" string="Volver a Borrador" type="object" invisible="state == 'draft'"/>
+                    <button name="action_cancel" string="Cancelar Orden" type="object" invisible="state in ('done', 'canceled')"/>
+                    <button name="action_set_draft" string="Volver a Borrador" type="object" invisible="state in ('draft', 'done')"/>
+                    
                     <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
                 </header>
                 <sheet>
@@ -21,45 +27,58 @@
                     </div>
                     <group>
                         <group>
-                            <field name="customer_id" placeholder="Seleccione cliente..."/>
-                            <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False,'no_open': false}" placeholder="Seleccione modelo de zapato..."/>
-                            <field name="sello"/>
-                            <field name="color"/>
-                            <field name="material"/>
-                            <field name="factura_nro"/>
+                            <field name="cliente_id" placeholder="Seleccione cliente..." readonly="state != 'draft'"/>
+                            <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False, 'no_open': false}" placeholder="Seleccione modelo..." readonly="state != 'draft'"/>
+                            <field name="sello" readonly="state != 'draft'"/>
+                            <field name="color" readonly="state != 'draft'"/>
+                            <field name="material" readonly="state != 'draft'"/>
+                            <field name="factura_nro" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="date"/>
+                            <field name="fecha_creacion" readonly="state != 'draft'"/>
+                            <field name="fecha_estimada" readonly="state != 'draft'"/>
+                            <field name="fecha_finalizacion" invisible="not fecha_finalizacion"/>
                             <field name="total_pares" class="fw-bold fs-4"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
                     <group string="Descripción / Observaciones">
-                        <field name="description" nolabel="1" placeholder="Añada observaciones adicionales para esta orden..."/>
+                        <field name="descripcion" nolabel="1" placeholder="Añada observaciones adicionales..." readonly="state != 'draft'"/>
                     </group>
 
                     <notebook>
                         <page string="Curva de Tallas">
                             <group string="Distribución por Tallas">
                                 <group>
-                                    <field name="talla_21"/><field name="talla_22"/><field name="talla_23"/>
-                                    <field name="talla_24"/><field name="talla_25"/><field name="talla_26"/>
-                                    <field name="talla_27"/><field name="talla_28"/><field name="talla_29"/>
-                                    <field name="talla_30"/>
+                                    <field name="talla_21" readonly="state != 'draft'"/>
+                                    <field name="talla_22" readonly="state != 'draft'"/>
+                                    <field name="talla_23" readonly="state != 'draft'"/>
+                                    <field name="talla_24" readonly="state != 'draft'"/>
+                                    <field name="talla_25" readonly="state != 'draft'"/>
+                                    <field name="talla_26" readonly="state != 'draft'"/>
+                                    <field name="talla_27" readonly="state != 'draft'"/>
+                                    <field name="talla_28" readonly="state != 'draft'"/>
+                                    <field name="talla_29" readonly="state != 'draft'"/>
+                                    <field name="talla_30" readonly="state != 'draft'"/>
                                 </group>
                                 <group>
-                                    <field name="talla_31"/><field name="talla_32"/><field name="talla_33"/>
-                                    <field name="talla_34"/><field name="talla_35"/><field name="talla_36"/>
-                                    <field name="talla_37"/><field name="talla_38"/><field name="talla_39"/>
-                                    <field name="talla_40"/>
+                                    <field name="talla_31" readonly="state != 'draft'"/>
+                                    <field name="talla_32" readonly="state != 'draft'"/>
+                                    <field name="talla_33" readonly="state != 'draft'"/>
+                                    <field name="talla_34" readonly="state != 'draft'"/>
+                                    <field name="talla_35" readonly="state != 'draft'"/>
+                                    <field name="talla_36" readonly="state != 'draft'"/>
+                                    <field name="talla_37" readonly="state != 'draft'"/>
+                                    <field name="talla_38" readonly="state != 'draft'"/>
+                                    <field name="talla_39" readonly="state != 'draft'"/>
+                                    <field name="talla_40" readonly="state != 'draft'"/>
                                 </group>
                             </group>
                         </page>
 
-                        <!-- Tabla de Labores Editable libremente -->
                         <page string="Labores de la Orden">
-                            <field name="labor_ids">
+                            <field name="labor_ids" readonly="state != 'draft'">
                                 <list editable="bottom">
                                     <field name="tipo_labor_id" string="Labor / Proceso"/>
                                     <field name="tarifa_pago" widget="monetary" string="Precio por Par"/>
@@ -73,65 +92,39 @@
         </field>
     </record>
 
-    <!-- 2. VISTA LISTA: Producción en Curso -->
+    <!-- VISTA LISTA: Órdenes Activas -->
     <record id="view_caramia_production_list" model="ir.ui.view">
-        <field name="name">caramia.production.list</field>
-        <field name="model">caramia.production</field>
+        <field name="name">cara.mia.produccion.list</field>
+        <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <list string="Órdenes de Producción">
                 <field name="name"/>
-                <field name="customer_id"/>
+                <field name="cliente_id"/>
                 <field name="referencia_id"/>
-                <field name="color"/>
                 <field name="total_pares"/>
-                <field name="date"/>
+                <field name="fecha_creacion"/>
+                <field name="fecha_estimada"/>
                 <field name="state" widget="badge" 
                        decoration-info="state == 'draft'" 
-                       decoration-warning="state == 'in_progress'"/>
+                       decoration-warning="state == 'in_progress'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'canceled'"/>
             </list>
         </field>
     </record>
 
-    <!-- 3. VISTA LISTA: Historial de Producción -->
-    <record id="view_caramia_production_history_list" model="ir.ui.view">
-        <field name="name">caramia.production.history.list</field>
-        <field name="model">caramia.production</field>
-        <field name="arch" type="xml">
-            <list string="Historial de Producción" create="false">
-                <field name="name"/>
-                <field name="customer_id"/>
-                <field name="referencia_id"/>
-                <field name="total_pares"/>
-                <field name="date" string="Fecha Creación"/>
-                <field name="date_done" string="Fecha Finalización"/>
-                <field name="state" widget="badge" decoration-success="state == 'done'"/>
-            </list>
-        </field>
-    </record>
-
-    <!-- 4. ACCIÓN 1: Filtra solo lo que NO está finalizado -->
+    <!-- ACCIÓN: Órdenes Activas -->
     <record id="action_caramia_production_active" model="ir.actions.act_window">
         <field name="name">Órdenes de Producción</field>
-        <field name="res_model">caramia.production</field>
+        <field name="res_model">cara.mia.produccion</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('state', '!=', 'done')]</field>
+        <field name="domain">[('state', 'not in', ('done', 'canceled'))]</field>
         <field name="view_ids" eval="[(5, 0, 0), 
             (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_list')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
     </record>
 
-    <!-- 5. ACCIÓN 2: Filtra SOLO los registros finalizados (Historial) -->
-    <record id="action_caramia_production_history" model="ir.actions.act_window">
-        <field name="name">Historial de Producción</field>
-        <field name="res_model">caramia.production</field>
-        <field name="view_mode">list,form</field>
-        <field name="domain">[('state', '=', 'done')]</field>
-        <field name="view_ids" eval="[(5, 0, 0), 
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_history_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
-    </record>
-
-    <!-- 6. MENÚS DE LA APLICACIÓN -->
+    <!-- MENÚ PRINCIPAL Y SUBMENÚ ACTIVAS -->
     <menuitem id="menu_caramia_production_root" name="Producción" sequence="10"/>
 
     <menuitem id="menu_caramia_production_active" 
@@ -139,10 +132,4 @@
               parent="menu_caramia_production_root" 
               action="action_caramia_production_active" 
               sequence="10"/>
-
-    <menuitem id="menu_caramia_production_history" 
-              name="Historial de Producción" 
-              parent="menu_caramia_production_root" 
-              action="action_caramia_production_history" 
-              sequence="20"/>
 </odoo>

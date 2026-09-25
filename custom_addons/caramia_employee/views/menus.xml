@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ACCIONES DE VENTANA -->
+
+    <record id="action_caramia_employee" model="ir.actions.act_window">
+        <field name="name">Empleados</field>
+        <field name="res_model">cara.mia.empleado</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_caramia_employee_search"/>
+    </record>
+
+    <record id="action_caramia_registro_trabajo_orden" model="ir.actions.act_window">
+        <field name="name">Registro de Tiquetes</field>
+        <field name="res_model">cara.mia.registro.trabajo.orden</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_caramia_pago_empleado" model="ir.actions.act_window">
+        <field name="name">Nómina de Empleados</field>
+        <field name="res_model">cara.mia.pago.empleado</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ACCIÓN: Liquidación (Pantalla automática) -->
+    <record id="action_caramia_liquidacion" model="ir.actions.act_window">
+        <field name="name">Liquidación</field>
+        <field name="res_model">cara.mia.liquidacion</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+    <!-- ESTRUCTURA DE MENÚS -->
+
+    <menuitem id="menu_caramia_employee_root" 
+              name="Empleados" 
+              sequence="15" 
+              web_icon="caramia_employee,static/description/icon.png"/>
+
+    <menuitem id="menu_caramia_employee_main" 
+              name="Lista de Empleados" 
+              parent="menu_caramia_employee_root" 
+              action="action_caramia_employee" 
+              sequence="10"/>
+
+    <menuitem id="menu_cara_mia_registro_trabajo_orden"
+              name="Registrar Tiquetes"
+              parent="menu_caramia_employee_root"
+              action="action_caramia_registro_trabajo_orden"
+              sequence="20"/>
+
+    <menuitem id="menu_caramia_pago_empleado" 
+              name="Nómina" 
+              parent="menu_caramia_employee_root" 
+              action="action_caramia_pago_empleado" 
+              sequence="30"/>
+
+    <!-- NUEVO SUBMENÚ: Liquidación -->
+    <menuitem id="menu_caramia_liquidacion" 
+              name="Liquidación" 
+              parent="menu_caramia_employee_root" 
+              action="action_caramia_liquidacion" 
+              sequence="40"/>
+
+</odoo>
