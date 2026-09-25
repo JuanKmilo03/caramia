@@ -1,16 +1,5 @@
 from odoo import models, fields, api
 
-# Selección estándar de labores de producción
-TIPOS_LABOR = [
-    ('limpiada', 'Limpiada'),
-    ('montada', 'Montada'),
-    ('guarnicion', 'Guarnición'),
-    ('plantilla', 'Plantilla'),
-    ('forrada', 'Forrada'),
-    ('corte', 'Corte'),
-    ('suela', 'Suela')
-]
-
 class CaramiaProduction(models.Model):
     _name = 'caramia.production'
     _description = 'Orden de Producción'
@@ -25,6 +14,14 @@ class CaramiaProduction(models.Model):
         default='Nuevo', 
         tracking=True
     )
+    
+    company_id = fields.Many2one(
+        'res.company', 
+        string='Compañía', 
+        default=lambda self: self.env.company,
+        required=True
+    )
+    
     description = fields.Text(string='Descripción / Observaciones')
     date = fields.Date(string='Fecha de Creación', default=fields.Date.today)
     date_done = fields.Datetime(string='Fecha de Finalización', readonly=True)
@@ -112,21 +109,25 @@ class CaramiaProduction(models.Model):
 
     @api.onchange('referencia_id')
     def _onchange_referencia_id(self):
-        if self.referencia_id:
-            if getattr(self.referencia_id, 'descripcion', False) and not self.description:
-                self.description = self.referencia_id.descripcion
+        if not self.referencia_id:
+            self.labor_ids = [fields.Command.clear()]
+            return
 
-            # Extrae las tarifas de las labores configuradas en la referencia de zapato
-            precios_ref = {lab.tipo_labor_id: lab.tarifa_pago for lab in self.referencia_id.labor_ids}
-            # Carga todas las labores estándar en la orden con su valor o $0.0
-            lineas_labores = []
-            for code, name in TIPOS_LABOR:
-                lineas_labores.append((0, 0, {
-                    'tipo_labor': code,
-                    'tarifa_pago': precios_ref.get(code, 0.0),
-                }))
-            
-            self.labor_ids = [(5, 0, 0)] + lineas_labores
+        if getattr(self.referencia_id, 'descripcion', False) and not self.description:
+            self.description = self.referencia_id.descripcion
+
+        # Limpiamos y cargamos de forma segura las labores usando comandos dinámicos optimizados de Odoo 18
+        lineas_labores = []
+        for labor_ref in self.referencia_id.labor_ids:
+            tipo = labor_ref.tipo_labor_id
+            if not tipo:
+                continue
+            lineas_labores.append(fields.Command.create({
+                'tipo_labor_id': tipo.id,
+                'tarifa_pago': labor_ref.tarifa_pago,
+            }))
+        
+        self.labor_ids = [fields.Command.clear()] + lineas_labores
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
@@ -140,8 +141,36 @@ class CaramiaProduction(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('caramia.production.number') or 'Nuevo'
         return super().create(vals_list)
 
-    # Métodos invocados por los botones del encabezado en la vista
     def action_set_in_progress(self):
+        self.ensure_one()
+
+        if self.referencia_id and hasattr(self.referencia_id, 'insumo_ids'):
+            for linea_ref in self.referencia_id.insumo_ids:
+                insumo = linea_ref.insumo_catalogo_id
+                cantidad_por_par = linea_ref.cantidad
+
+                if not insumo or not cantidad_por_par:
+                    continue
+
+                total_a_descontar = cantidad_por_par * self.total_pares
+                stock_disponible = insumo.stock_actual
+
+                # Si no hay stock, no descuenta nada — nunca negativos
+                if stock_disponible <= 0:
+                    continue
+
+                # Descuenta solo lo que hay disponible
+                cantidad_real = min(total_a_descontar, stock_disponible)
+
+                self.env['cara.mia.stock.entrada'].create({
+                    'insumo_id': insumo.id,
+                    'tipo_componente_id': insumo.tipo_componente_id.id,
+                    'cantidad': -cantidad_real,
+                    'fecha': fields.Date.today(),
+                    'referencia_factura': self.name,
+                    'observaciones': f'Descuento automático — Orden de producción {self.name}',
+                })
+
         self.write({'state': 'in_progress'})
 
     def action_set_done(self):
@@ -152,21 +181,8 @@ class CaramiaProduction(models.Model):
 
     def action_download_pdf(self):
         return self.env.ref('caramia_production.action_report_caramia_production').report_action(self)
-
-    @api.onchange('referencia_id')
-    def _onchange_referencia_id(self):
-        for order in self:
-            order.labor_ids = [(5, 0, 0)]
-            
-            if order.referencia_id and order.referencia_id.labor_ids:
-                lineas_nuevas = []
-                for labor_ref in order.referencia_id.labor_ids:
-                    lineas_nuevas.append((0, 0, {
-                        'tipo_labor_id': labor_ref.tipo_labor_id.id,
-                        'tarifa_pago': labor_ref.tarifa_pago,
-                    }))
-                order.labor_ids = lineas_nuevas
-
+    
+    
 class CaramiaProductionLabor(models.Model):
     _name = 'caramia.production.labor'
     _description = 'Labor Editable de Orden de Producción'

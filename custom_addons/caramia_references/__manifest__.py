@@ -4,7 +4,7 @@
     'category': 'Manufacturing',
     'summary': 'Módulo para el control de referencias, fichas técnicas e insumos y materiales para la fabricación del calzado',
     'author': 'Adriana Amaya Llerena',
-    'depends': ['base', 'web'],
+    'depends': ['base', 'mail', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'views/referencia_views.xml',

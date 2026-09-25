@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_lista_compras_production" model="ir.actions.report">
+        <field name="name">Lista de Compras</field>
+        <field name="model">caramia.lista.compras.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caramia_production.report_lista_compras_production_template</field>
+        <field name="report_file">caramia_production.report_lista_compras_production_template</field>
+        <field name="paperformat_id" ref="base.paperformat_euro" />
+    </record>
+
+    <template id="report_lista_compras_production_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="company" t-value="doc.production_id.company_id or res_company" />
+
+                <t t-call="web.external_layout">
+
+                    <div class="page">
+
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2 class="font-weight-bold" style="margin-bottom: 2px;">LISTA DE
+                                    COMPRAS</h2>
+                                <p class="text-muted small mb-0"> Generado el: <t
+                                        t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')" />
+                                </p>
+                            </div>
+                        </div>
+                        <table class="table table-sm table-borderless mb-4" style="font-size: 11px;">
+                            <tr>
+                                <td style="border:none; padding:4px 8px; width:25%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        ORDEN</span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <t t-esc="doc.production_id.name" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:25%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        CLIENTE</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.customer_id.name" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:25%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        REFERENCIA</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.referencia_id.codigo_referencia" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:25%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        MODELO</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.referencia_id.nombre_modelo" />
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border:none; border-top:1px solid #eee; padding:4px 8px;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        FECHA</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.date"
+                                            t-options='{"widget": "date"}' />
+                                    </span>
+                                </td>
+                                <td style="border:none; border-top:1px solid #eee; padding:4px 8px;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        COLOR</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.color or '—'" />
+                                    </span>
+                                </td>
+                                <td style="border:none; border-top:1px solid #eee; padding:4px 8px;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">
+                                        MATERIAL</span>
+                                    <br />
+                                    <span>
+                                        <t t-esc="doc.production_id.material or '—'" />
+                                    </span>
+                                </td>
+                                <td style="border:none; border-top:1px solid #eee; padding:4px 8px;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700;
+                         letter-spacing:1px;">TOTAL
+                                        PARES</span>
+                                    <br />
+                                    <span style="font-size:20px; font-weight:700;">
+                                        <t t-esc="doc.production_id.total_pares" />
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                        <t t-if="doc.production_id.description">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-uppercase text-muted font-weight-bold mb-1"
+                                        style="font-size: 12px; letter-spacing: 1px;">
+                                        DESCRIPCIÓN
+                                    </p>
+                                    <div
+                                        style="border-left: 3px solid #e0e0e0; padding-left: 8px; margin-top: 4px;">
+                                        <p
+                                            style="font-size: 11px; color: #333333; margin: 0; white-space: pre-wrap;">
+                                            <t t-esc="doc.production_id.description" />
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <p class="text-uppercase text-muted font-weight-bold mt-4 mb-2"
+                            style="font-size: 12px; letter-spacing: 1px;">
+                            MATERIALES — VERIFICACIÓN DE EXISTENCIAS
+                        </p>
+
+                        <table class="table table-sm o_main_table table-borderless"
+                            style="font-size: 11px; margin-bottom: 0;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #cccccc;">
+                                    <th class="text-left" style="padding: 6px 8px;">MATERIAL /
+                                        INSUMO</th>
+                                    <th class="text-center" style="padding: 6px 8px;">CANT. / PAR</th>
+                                    <th class="text-center" style="padding: 6px 8px;">CANT. TOTAL</th>
+                                    <th class="text-center" style="padding: 6px 8px;">EXISTENCIAS</th>
+                                    <th class="text-center" style="padding: 6px 8px;">A COMPRAR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.production_id.referencia_id.insumo_ids"
+                                    t-as="linea">
+                                    <t t-set="cant_total"
+                                        t-value="linea.cantidad * doc.production_id.total_pares" />
+                                    <t t-set="stock_real"
+                                        t-value="linea.insumo_catalogo_id.stock_actual if linea.insumo_catalogo_id else 0.0" />
+                                    <t t-set="existencias" t-value="max(0.0, stock_real)" />
+
+                                    <t t-set="a_comprar"
+                                        t-value="max(0.0, cant_total - existencias)" />
+
+                                    <tr style="border-bottom: 1px solid #e5e5e5;">
+                                        <td class="text-left" style="padding: 6px 8px;">
+                                            <t t-esc="linea.insumo_catalogo_id.name" />
+                                            <span class="text-muted small ml-1"> (<t
+                                                    t-esc="linea.unidad_medida" />) </span>
+                                        </td>
+                                        <td class="text-center" style="padding: 6px 8px;">
+                                            <t t-esc="'%.2f' % linea.cantidad" />
+                                        </td>
+                                        <td class="text-center font-weight-bold"
+                                            style="padding: 6px 8px;">
+                                            <t t-esc="'%.2f' % cant_total" />
+                                        </td>
+                                        <td class="text-center" style="padding: 6px 8px;">
+                                            <t t-esc="'%.2f' % existencias" />
+                                        </td>
+                                        <td class="text-center font-weight-bold"
+                                            style="padding: 6px 8px;">
+                                            <t t-if="a_comprar == 0">—</t>
+                                            <t t-else="">
+                                                <t t-esc="'%.2f' % a_comprar" />
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <t t-if="doc.observaciones">
+                            <div class="row mb-3" style="margin-top: 15px;">
+                                <div class="col-12">
+                                    <p class="text-uppercase text-muted font-weight-bold mb-1"
+                                        style="font-size: 12px; letter-spacing: 1px;">OBSERVACIONES</p>
+                                    <div
+                                        style="border-left: 3px solid #e0e0e0; padding-left: 10px; margin-top: 4px;">
+                                        <p
+                                            style="font-size: 11px; color: #333333; margin: 0; white-space: pre-wrap;">
+                                            <t t-esc="doc.observaciones" />
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <div class="mt-5 text-center">
+                            <div class="d-inline-block border-top pt-2" style="width:220px; margin-top:40px">
+                                <span class="text-uppercase text-muted small font-weight-bold">
+                                    ELABORADO Y APROBADO POR
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

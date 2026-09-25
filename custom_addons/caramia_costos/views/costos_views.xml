@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="seq_caramia_costo_number" model="ir.sequence">
+        <field name="name">Secuencia de Cotización Cara Mia</field>
+        <field name="code">caramia.costo.number</field>
+        <field name="prefix">COT-%(year)s-</field>
+        <field name="padding">4</field>
+    </record>
+
+    <record id="view_caramia_costo_form" model="ir.ui.view">
+        <field name="name">caramia.costo.form</field>
+        <field name="model">caramia.costo</field>
+        <field name="arch" type="xml">
+            <form string="Cotización y Hoja de Costos">
+                <header>
+                    <button name="action_pass_to_production" 
+                            string="PASAR A PRODUCCIÓN" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,production"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="referencia_id"/>
+                            <field name="customer_id"/>
+                            <field name="fecha"/>
+                        </group>
+                        <group>
+                            <field name="porcentaje_margen"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="production_id" invisible="not production_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Materiales e Insumos">
+                            <field name="material_ids">
+                                <list editable="bottom">
+                                    <field name="insumo_catalogo_id"/>
+                                    <field name="nombre"/>
+                                    <field name="unidad_medida"/>
+                                    <field name="cantidad"/>
+                                    <field name="precio_unitario"/>
+                                    <field name="rendimiento_pares"/>
+                                    <field name="costo_par" sum="Total Materiales Par"/>
+                                    <field name="costo_docena" sum="Total Materiales Docena"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Mano de Obra / Labores">
+                            <field name="labor_ids">
+                                <list editable="bottom">
+                                    <field name="tipo_labor_id"/>
+                                    <field name="costo_par" sum="Total Labores Par"/>
+                                    <field name="costo_docena" sum="Total Labores Docena"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Observaciones">
+                            <field name="observaciones" placeholder="Añadir notas o requerimientos especiales del cliente..."/>
+                        </page>
+                    </notebook>
+
+                    <group class="oe_subtotal_footer oe_right">
+                        <field name="total_materiales_par"/>
+                        <field name="total_labores_par"/>
+                        <field name="costo_total_par" class="oe_subtotal_footer_separator"/>
+                        <field name="costo_total_docena"/>
+                        <field name="precio_venta_par" style="color: #2b78e4; font-weight: bold;"/>
+                        <field name="precio_venta_docena" style="color: #2b78e4; font-weight: bold;"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caramia_costo_tree" model="ir.ui.view">
+        <field name="name">caramia.costo.tree</field>
+        <field name="model">caramia.costo</field>
+        <field name="arch" type="xml">
+            <list string="Cotizaciones de Calzado">
+                <field name="name"/>
+                <field name="fecha"/>
+                <field name="referencia_id"/>
+                <field name="customer_id"/>
+                <field name="costo_total_par" sum="Total Costo Par"/>
+                <field name="precio_venta_par" sum="Total Precio Venta Par"/>
+                <field name="state" widget="badge" decoration-info="state=='draft'" decoration-success="state=='production'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_caramia_costo" model="ir.actions.act_window">
+        <field name="name">Cotizaciones / Hoja de Costos</field>
+        <field name="res_model">caramia.costo</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_caramia_costo_main"
+              name="Cotizaciones / Costos"
+              parent="caramia_production.menu_caramia_production_root"
+              action="action_caramia_costo"
+              sequence="15"/>
+
+</odoo>

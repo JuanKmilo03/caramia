@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_lista_compras_wizard_form" model="ir.ui.view">
+        <field name="name">caramia.lista.compras.wizard.form</field>
+        <field name="model">caramia.lista.compras.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Lista de Compras">
+                <sheet>
+
+                    <!-- RESUMEN READONLY -->
+                    <div class="row mb-3">
+                        <div class="col-12 text-center">
+                            <h4>Lista de Compras</h4>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group string="Orden de Producción">
+                            <field name="name" readonly="1" string="Número de Orden" />
+                            <field name="customer_name" readonly="1" string="Cliente" />
+                            <field name="referencia_nombre" readonly="1" string="Modelo" />
+                            <field name="total_pares" readonly="1" string="Total Pares" />
+                        </group>
+                        <group string="Información">
+                            <field name="production_id" readonly="1" invisible="1" />
+                        </group>
+                    </group>
+
+                    <separator string="Observaciones" />
+                    <field name="observaciones"
+                        widget="html"
+                        placeholder="Escriba observaciones adicionales para esta orden de compra. Puede incluir imágenes." />
+
+                </sheet>
+                <footer>
+                    <button
+                        name="action_imprimir"
+                        string="Imprimir Lista de Compras"
+                        type="object"
+                        class="btn-primary" />
+                    <button
+                        string="Cerrar"
+                        class="btn-secondary"
+                        special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lista_compras_wizard" model="ir.actions.act_window">
+        <field name="name">Lista de Compras</field>
+        <field name="res_model">caramia.lista.compras.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

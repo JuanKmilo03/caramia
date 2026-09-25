@@ -5,4 +5,5 @@ access_cara_mia_tipo_componente,cara.mia.tipo.componente,model_cara_mia_tipo_com
 access_cara_mia_tipo_labor,cara.mia.tipo.labor,model_cara_mia_tipo_labor,base.group_user,1,1,1,1
 access_cara_mia_precio_labor_ref,cara.mia.precio.labor.ref,model_cara_mia_precio_labor_ref,base.group_user,1,1,1,1
 access_cara_mia_catalogo,cara.mia.insumo.catalogo,model_cara_mia_insumo_catalogo,base.group_user,1,1,1,1
+access_cara_mia_stock_entrada,cara.mia.stock.entrada,model_cara_mia_stock_entrada,base.group_user,1,1,1,1
 

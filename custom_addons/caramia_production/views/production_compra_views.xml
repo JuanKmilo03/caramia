@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_caramia_production_form_inherit_compra" model="ir.ui.view">
+        <field name="name">caramia.production.form.inherit.compra</field>
+        <field name="model">caramia.production</field>
+        <field name="inherit_id" ref="caramia_production.view_caramia_production_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button
+                    name="action_imprimir_lista_compras"
+                    string="Lista de Compras"
+                    type="object"
+                    icon="fa-shopping-cart"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
