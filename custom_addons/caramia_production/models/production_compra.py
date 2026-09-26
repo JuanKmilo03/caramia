@@ -2,7 +2,7 @@ from odoo import models
 
 
 class CaramiaProductionCompra(models.Model):
-    _inherit = 'caramia.production'
+    _inherit = 'cara.mia.produccion'
 
     def action_imprimir_lista_compras(self):
         self.ensure_one()

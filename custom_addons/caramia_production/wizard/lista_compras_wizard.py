@@ -7,7 +7,7 @@ class ListaComprasWizard(models.TransientModel):
     _description = 'Vista Previa Lista de Compras'
 
     production_id = fields.Many2one(
-        'caramia.production',
+        'cara.mia.produccion',
         string='Orden de Producción',
         required=True,
         readonly=True
@@ -17,13 +17,13 @@ class ListaComprasWizard(models.TransientModel):
         help='Texto e imágenes que se incluirán en la orden de compra impresa'
     )
 
-    # Campos readonly para mostrar en el modal (related)
     name = fields.Char(related='production_id.name', readonly=True)
     customer_name = fields.Char(
-        related='production_id.customer_id.name',
+        related='production_id.cliente_id.nombre_cliente',
         readonly=True,
         string='Cliente'
     )
+    
     referencia_nombre = fields.Char(
         related='production_id.referencia_id.nombre_modelo',
         readonly=True,

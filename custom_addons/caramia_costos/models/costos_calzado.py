@@ -9,7 +9,7 @@ class CaramiaCosto(models.Model):
 
     name = fields.Char(string='Nº Cotización', required=True, readonly=True, default='Nuevo', copy=False)
     company_id = fields.Many2one('res.company', string='Compañía', default=lambda self: self.env.company, required=True)
-    currency_id = fields.Many2one('res.currency', related='company_id.currency_id', string='Moneda')
+    currency_id = fields.Many2one('res.currency', string='Moneda', default=lambda self: self.env.company.currency_id, required=True)
     
     fecha = fields.Date(string='Fecha', default=fields.Date.context_today, required=True)
     customer_id = fields.Many2one('caramia.customer', string='Cliente', tracking=True)
@@ -23,7 +23,7 @@ class CaramiaCosto(models.Model):
     
     observaciones = fields.Text(string='Notas / Observaciones')
     
-    # ⚠️ IMPORTANTE: Estas relaciones deben coincidir exactamente con el _name de los modelos de abajo
+    # Líneas de detalles
     material_ids = fields.One2many('caramia.costo.material.line', 'costo_id', string='Materiales e Insumos')
     labor_ids = fields.One2many('caramia.costo.labor.line', 'costo_id', string='Mano de Obra / Labores')
 
@@ -43,7 +43,7 @@ class CaramiaCosto(models.Model):
         ('cancel', 'Cancelado')
     ], string='Estado', default='draft', tracking=True)
 
-    production_id = fields.Many2one('caramia.production', string='Orden de Producción Creada', readonly=True)
+    production_id = fields.Many2one('cara.mia.produccion', string='Orden de Producción Creada', readonly=True)
 
     @api.depends('material_ids.costo_par', 'labor_ids.costo_par', 'porcentaje_margen')
     def _compute_totales(self):
@@ -105,7 +105,7 @@ class CaramiaCosto(models.Model):
             'company_id': self.company_id.id,
         }
         
-        nueva_op = self.env['caramia.production'].create(production_vals)
+        nueva_op = self.env['cara.mia.produccion'].create(production_vals)
         
         self.write({
             'state': 'production',
@@ -115,19 +115,20 @@ class CaramiaCosto(models.Model):
         return {
             'name': 'Orden de Producción Creada',
             'type': 'ir.actions.act_window',
-            'res_model': 'caramia.production',
+            'res_model': 'cara.mia.produccion',
             'res_id': nueva_op.id,
             'view_mode': 'form',
             'target': 'current',
         }
 
 
-# MODELO HIJO 1: LÍNEA DE MATERIALES
 class CaramiaCostoMaterialLine(models.Model):
     _name = 'caramia.costo.material.line'
     _description = 'Línea de Materiales para Cotización'
 
     costo_id = fields.Many2one('caramia.costo', string='Cotización', ondelete='cascade')
+    currency_id = fields.Many2one('res.currency', string='Moneda', default=lambda self: self.env.company.currency_id)
+    
     insumo_catalogo_id = fields.Many2one('cara.mia.insumo.catalogo', string='Insumo Catálogo')
     nombre = fields.Char(string='Descripción / Material', required=True)
     unidad_medida = fields.Char(string='U.M.')
@@ -138,7 +139,6 @@ class CaramiaCostoMaterialLine(models.Model):
     
     costo_par = fields.Monetary(string='Costo / Par', compute='_compute_costo_par', store=True, currency_field='currency_id')
     costo_docena = fields.Monetary(string='Costo / Docena', compute='_compute_costo_par', store=True, currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='costo_id.currency_id')
 
     @api.depends('cantidad', 'precio_unitario', 'rendimiento_pares')
     def _compute_costo_par(self):
@@ -155,16 +155,16 @@ class CaramiaCostoMaterialLine(models.Model):
             self.precio_unitario = self.insumo_catalogo_id.costo_referencia or 0.0
 
 
-# MODELO HIJO 2: LÍNEA DE LABORES
 class CaramiaCostoLaborLine(models.Model):
     _name = 'caramia.costo.labor.line'
     _description = 'Línea de Labores para Cotización'
 
     costo_id = fields.Many2one('caramia.costo', string='Cotización', ondelete='cascade')
+    currency_id = fields.Many2one('res.currency', string='Moneda', default=lambda self: self.env.company.currency_id)
+    
     tipo_labor_id = fields.Many2one('cara.mia.tipo.labor', string='Labor / Proceso', required=True)
     costo_par = fields.Monetary(string='Costo / Par', currency_field='currency_id', required=True)
     costo_docena = fields.Monetary(string='Costo / Docena', compute='_compute_costo_docena', store=True, currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='costo_id.currency_id')
 
     @api.depends('costo_par')
     def _compute_costo_docena(self):

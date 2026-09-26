@@ -7,8 +7,6 @@
         <field name="arch" type="xml">
             <form string="Lista de Compras">
                 <sheet>
-
-                    <!-- RESUMEN READONLY -->
                     <div class="row mb-3">
                         <div class="col-12 text-center">
                             <h4>Lista de Compras</h4>
