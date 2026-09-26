@@ -23,7 +23,7 @@ class CaramiaProduction(models.Model):
         required=True
     )
     
-    description = fields.Text(string='Descripción / Observaciones')
+    descripcion = fields.Text(string='Descripción / Observaciones')
     date = fields.Date(string='Fecha de Creación', default=fields.Date.today)
     date_done = fields.Datetime(string='Fecha de Finalización', readonly=True)
     active = fields.Boolean(string='Activo', default=True)

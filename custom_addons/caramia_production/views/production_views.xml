@@ -44,7 +44,7 @@
                     </group>
 
                     <group string="Descripción / Observaciones">
-                        <field name="description" nolabel="1" placeholder="Añada observaciones adicionales..." readonly="state != 'draft'"/>
+                        <field name="descripcion" nolabel="1" placeholder="Añada observaciones adicionales..." readonly="state != 'draft'"/>
                     </group>
 
                     <notebook>

@@ -46,7 +46,7 @@
                                         CLIENTE</span>
                                     <br />
                                     <span>
-                                        <t t-esc="doc.production_id.customer_id.name" />
+                                        <t t-esc="doc.production_id.customer_id.nombre_cliente" />
                                     </span>
                                 </td>
                                 <td style="border:none; padding:4px 8px; width:25%;">
