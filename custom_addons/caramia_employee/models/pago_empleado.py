@@ -10,7 +10,7 @@ class CaramiaPagoEmpleado(models.Model):
     _order = 'fecha_fin desc, id desc'
 
     def _get_default_fecha_inicio(self):
-        return fields.Date.today() - timedelta(days=7)
+        return fields.Date.today() - timedelta(days=6)
 
     name = fields.Char(
         string='Referencia de Nómina',

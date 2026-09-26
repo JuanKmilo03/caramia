@@ -55,8 +55,6 @@
                         <group string="Resumen General">
                             <field name="fecha_nomina" />
                             <field name="currency_id" invisible="1" />
-                            <field name="total_bruto" widget="monetary" string="Total Labores" />
-                            <field name="total_descontado" widget="monetary" string="Descuento (0.22%)" class="text-warning" />
                             <field name="total_neto" widget="monetary" string="Total A Pagar" />
                             <field name="total_pagado" widget="monetary" string="Valor Pagado" class="fw-bold text-success fs-4" />
                         </group>
