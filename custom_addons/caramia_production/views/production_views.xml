@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <!-- VISTA FORMULARIO PRINCIPAL -->
     <record id="view_caramia_production_form" model="ir.ui.view">
         <field name="name">cara.mia.produccion.form</field>
@@ -48,33 +49,93 @@
                     </group>
 
                     <notebook>
+                        <!-- PESTAÑA CON ETIQUETA ARRIBA Y CASILLA DEBAJO (TALLA 20 A 40) -->
                         <page string="Curva de Tallas">
-                            <group string="Distribución por Tallas">
-                                <group>
-                                    <field name="talla_21" readonly="state != 'draft'"/>
-                                    <field name="talla_22" readonly="state != 'draft'"/>
-                                    <field name="talla_23" readonly="state != 'draft'"/>
-                                    <field name="talla_24" readonly="state != 'draft'"/>
-                                    <field name="talla_25" readonly="state != 'draft'"/>
-                                    <field name="talla_26" readonly="state != 'draft'"/>
-                                    <field name="talla_27" readonly="state != 'draft'"/>
-                                    <field name="talla_28" readonly="state != 'draft'"/>
-                                    <field name="talla_29" readonly="state != 'draft'"/>
-                                    <field name="talla_30" readonly="state != 'draft'"/>
-                                </group>
-                                <group>
-                                    <field name="talla_31" readonly="state != 'draft'"/>
-                                    <field name="talla_32" readonly="state != 'draft'"/>
-                                    <field name="talla_33" readonly="state != 'draft'"/>
-                                    <field name="talla_34" readonly="state != 'draft'"/>
-                                    <field name="talla_35" readonly="state != 'draft'"/>
-                                    <field name="talla_36" readonly="state != 'draft'"/>
-                                    <field name="talla_37" readonly="state != 'draft'"/>
-                                    <field name="talla_38" readonly="state != 'draft'"/>
-                                    <field name="talla_39" readonly="state != 'draft'"/>
-                                    <field name="talla_40" readonly="state != 'draft'"/>
-                                </group>
-                            </group>
+                            <div class="p-3 border rounded bg-light">
+                                <h5 class="text-center mb-3">Distribución de Pares por Talla</h5>
+                                <div class="d-flex flex-wrap justify-content-start gap-2 text-center">
+                                    <div style="width: 60px;">
+                                        <label for="talla_21" class="fw-bold d-block mb-1">T-21</label>
+                                        <field name="talla_21" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_22" class="fw-bold d-block mb-1">T-22</label>
+                                        <field name="talla_22" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_23" class="fw-bold d-block mb-1">T-23</label>
+                                        <field name="talla_23" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_24" class="fw-bold d-block mb-1">T-24</label>
+                                        <field name="talla_24" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_25" class="fw-bold d-block mb-1">T-25</label>
+                                        <field name="talla_25" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_26" class="fw-bold d-block mb-1">T-26</label>
+                                        <field name="talla_26" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_27" class="fw-bold d-block mb-1">T-27</label>
+                                        <field name="talla_27" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_28" class="fw-bold d-block mb-1">T-28</label>
+                                        <field name="talla_28" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_29" class="fw-bold d-block mb-1">T-29</label>
+                                        <field name="talla_29" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_30" class="fw-bold d-block mb-1">T-30</label>
+                                        <field name="talla_30" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_31" class="fw-bold d-block mb-1">T-31</label>
+                                        <field name="talla_31" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_32" class="fw-bold d-block mb-1">T-32</label>
+                                        <field name="talla_32" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_33" class="fw-bold d-block mb-1">T-33</label>
+                                        <field name="talla_33" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_34" class="fw-bold d-block mb-1">T-34</label>
+                                        <field name="talla_34" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_35" class="fw-bold d-block mb-1">T-35</label>
+                                        <field name="talla_35" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_36" class="fw-bold d-block mb-1">T-36</label>
+                                        <field name="talla_36" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_37" class="fw-bold d-block mb-1">T-37</label>
+                                        <field name="talla_37" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_38" class="fw-bold d-block mb-1">T-38</label>
+                                        <field name="talla_38" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_39" class="fw-bold d-block mb-1">T-39</label>
+                                        <field name="talla_39" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                    <div style="width: 60px;">
+                                        <label for="talla_40" class="fw-bold d-block mb-1">T-40</label>
+                                        <field name="talla_40" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                    </div>
+                                </div>
+                            </div>
                         </page>
 
                         <page string="Labores de la Orden">
