@@ -63,6 +63,14 @@ class CaramiaRegistroTrabajo(models.Model):
         ('pagado', 'Registrado en Nómina')
     ], string='Estado', compute='_compute_estado', store=True, default='sin_asignar')
 
+    # -------------------------------------------------------------
+    # 1. NUEVO MÉODO: Convierte a mayúsculas mientras el usuario escribe/escanea
+    # -------------------------------------------------------------
+    @api.onchange('orden_codigo')
+    def _onchange_orden_codigo_uppercase(self):
+        if self.orden_codigo:
+            self.orden_codigo = self.orden_codigo.strip().upper()
+
     @api.constrains('produccion_id')
     def _check_estado_orden_produccion(self):
         for rec in self:
@@ -82,7 +90,10 @@ class CaramiaRegistroTrabajo(models.Model):
     def _compute_produccion_id(self):
         for rec in self:
             if rec.orden_codigo:
-                codigo_limpio = rec.orden_codigo.strip()
+                # -------------------------------------------------------------
+                # 2. MODIFICADO: Agregado .upper() al limpiar el código
+                # -------------------------------------------------------------
+                codigo_limpio = rec.orden_codigo.strip().upper()
                 orden = self.env['cara.mia.produccion'].search([('name', '=', codigo_limpio)], limit=1)
                 rec.produccion_id = orden.id if orden else False
             else:
@@ -137,6 +148,9 @@ class CaramiaRegistroTrabajo(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if 'orden_codigo' in vals and vals['orden_codigo']:
+                vals['orden_codigo'] = vals['orden_codigo'].strip().upper()
         records = super().create(vals_list)
         for rec in records:
             if rec.produccion_id:
@@ -144,6 +158,8 @@ class CaramiaRegistroTrabajo(models.Model):
         return records
 
     def write(self, vals):
+        if 'orden_codigo' in vals and vals['orden_codigo']:
+            vals['orden_codigo'] = vals['orden_codigo'].strip().upper()
         res = super().write(vals)
         for rec in self:
             if rec.produccion_id:

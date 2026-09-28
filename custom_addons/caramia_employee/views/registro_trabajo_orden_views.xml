@@ -10,14 +10,16 @@
                 <sheet>
                     <group>
                         <group string="Orden de Producción">
-                            <field name="orden_codigo"
+                            <field name="orden_codigo" 
                                    placeholder="Escanee o escriba el código de la orden" 
                                    default_focus="1"/>
                             <field name="total_pares"/>
                             <field name="fecha"/>
                         </group>
                         <group string="Empleado que completó la tarea">
-                            <field name="empleado_id" placeholder="Seleccionar operario..." options="{'no_create': True}"/>
+                            <field name="empleado_id" 
+                                   placeholder="Seleccionar operario..." 
+                                   options="{'no_create': True}"/>
                             <field name="tipo_labor_id"/>
                         </group>
                     </group>
@@ -36,8 +38,8 @@
         </field>
     </record>
 
-    <!-- Vista Lista -->
-    <record id="view_caramia_registro_trabajo_orden_tree" model="ir.ui.view">
+    <!-- Vista Lista (Odoo 18) -->
+    <record id="view_caramia_registro_trabajo_orden_list" model="ir.ui.view">
         <field name="name">cara.mia.registro.trabajo.orden.list</field>
         <field name="model">cara.mia.registro.trabajo.orden</field>
         <field name="arch" type="xml">
@@ -45,7 +47,7 @@
                 <field name="fecha" readonly="1"/>
                 <field name="orden_codigo" readonly="1"/>
                 <field name="total_pares" readonly="1"/>
-                <field name="empleado_id" placeholder="Asignar empleado..."/>
+                <field name="empleado_id"/>
                 <field name="tipo_labor_id" readonly="1" options="{'no_open': True}"/>
                 <field name="tarifa_pago" widget="monetary" readonly="1"/>
                 <field name="subtotal" widget="monetary" sum="Total acumulado" readonly="1"/>
@@ -56,4 +58,5 @@
             </list>
         </field>
     </record>
+
 </odoo>
