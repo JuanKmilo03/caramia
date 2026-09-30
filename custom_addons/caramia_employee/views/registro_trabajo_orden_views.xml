@@ -8,53 +8,90 @@
         <field name="arch" type="xml">
             <form string="Registro de Trabajo Realizado">
                 <sheet>
-                    <group>
-                        <group string="Orden de Producción">
-                            <field name="orden_codigo" 
-                                   placeholder="Escanee o escriba el código de la orden" 
-                                   default_focus="1"/>
-                            <field name="total_pares"/>
-                            <field name="fecha"/>
-                        </group>
-                        <group string="Empleado que completó la tarea">
-                            <field name="empleado_id" 
-                                   placeholder="Seleccionar operario..." 
-                                   options="{'no_create': True}"/>
-                            <field name="tipo_labor_id"/>
-                        </group>
+                    <widget name="web_ribbon" title="Pagado" bg_color="text-bg-success"
+                        invisible="estado != 'pagado'" />
+                    <widget name="web_ribbon" title="Pendiente" bg_color="text-bg-info"
+                        invisible="estado != 'pendiente'" />
+                    <field name="estado" invisible="1" />
+
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-8">
+                            <group>
+                                <field name="empleado_id" placeholder="Seleccionar operario..."
+                                    options="{'no_create': True}" class="fw-bold fs-5" />
+                                <field name="tipo_labor_id" invisible="not empleado_id" />
+                                <field name="fecha" />
+                            </group>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info text-center" role="alert" invisible="id">
+                        <i class="fa fa-info-circle"></i> Seleccione el operario, escriba o escanee
+                        el código abajo y presione <strong>Enter</strong>. Se agregará a la lista
+                        automáticamente. </div>
+
+                    <!-- Campo base oculto para satisfacer a la base de datos -->
+                    <field name="orden_codigo" invisible="1" />
+
+                    <group invisible="not empleado_id or id">
+                        <label for="codigo_escaner" string="Escanear Tiquete" />
+                        <div class="o_row">
+                            <!-- El campo puente que recibe el escaneo -->
+                            <field name="codigo_escaner"
+                                placeholder="Ej. ORDEN-001 y presione Enter..." default_focus="1"
+                                class="fw-bold fs-4" />
+                        </div>
                     </group>
-                    <group string="Valor total de la labor realizada">
-                        <group>
-                            <field name="tarifa_pago" widget="monetary"/>
-                            <field name="subtotal" widget="monetary"/>
-                            <field name="estado" widget="badge" 
-                                   decoration-warning="estado == 'sin_asignar'" 
-                                   decoration-info="estado == 'pendiente'" 
-                                   decoration-success="estado == 'pagado'"/>
-                        </group>
+
+                    <!-- La lista donde se irán guardando las órdenes -->
+                    <group invisible="id or not empleado_id">
+                        <field name="codigos_extra_ids" nolabel="1" colspan="2">
+                            <list editable="bottom">
+                                <field name="orden_codigo" string="Código de la Orden" />
+                                <field name="alerta_duplicado" readonly="1"
+                                    decoration-danger="alerta_duplicado != False" />
+                            </list>
+                        </field>
                     </group>
+
+                    <notebook invisible="not id">
+                        <page string="Resumen de la Orden">
+                            <group>
+                                <group>
+                                    <field name="produccion_id" />
+                                    <field name="total_pares" />
+                                </group>
+                                <group string="Valor de la labor">
+                                    <field name="tarifa_pago" widget="monetary" />
+                                    <field name="subtotal" widget="monetary"
+                                        class="fw-bold text-success fs-5" />
+                                    <field name="currency_id" invisible="1" />
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Vista Lista (Odoo 18) -->
+    <!-- Vista Lista -->
     <record id="view_caramia_registro_trabajo_orden_list" model="ir.ui.view">
         <field name="name">cara.mia.registro.trabajo.orden.list</field>
         <field name="model">cara.mia.registro.trabajo.orden</field>
         <field name="arch" type="xml">
             <list string="Tiquetes Registrados">
-                <field name="fecha" readonly="1"/>
-                <field name="orden_codigo" readonly="1"/>
-                <field name="total_pares" readonly="1"/>
-                <field name="empleado_id"/>
-                <field name="tipo_labor_id" readonly="1" options="{'no_open': True}"/>
-                <field name="tarifa_pago" widget="monetary" readonly="1"/>
-                <field name="subtotal" widget="monetary" sum="Total acumulado" readonly="1"/>
-                <field name="estado" widget="badge" 
-                       decoration-warning="estado == 'sin_asignar'" 
-                       decoration-info="estado == 'pendiente'" 
-                       decoration-success="estado == 'pagado'"/>
+                <field name="fecha" readonly="1" />
+                <field name="orden_codigo" readonly="1" />
+                <field name="total_pares" readonly="1" />
+                <field name="empleado_id" />
+                <field name="tipo_labor_id" readonly="1" options="{'no_open': True}" />
+                <field name="tarifa_pago" widget="monetary" readonly="1" />
+                <field name="subtotal" widget="monetary" sum="Total acumulado" readonly="1" />
+                <field name="estado" widget="badge"
+                    decoration-warning="estado == 'sin_asignar'"
+                    decoration-info="estado == 'pendiente'"
+                    decoration-success="estado == 'pagado'" />
             </list>
         </field>
     </record>
