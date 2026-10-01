@@ -30,7 +30,7 @@ class CaramiaRegistroTrabajo(models.Model):
     total_pares = fields.Integer(related='produccion_id.total_pares', string='Pares', store=True)
     currency_id = fields.Many2one('res.currency', related='produccion_id.currency_id')
 
-    empleado_id = fields.Many2one('cara.mia.empleado', string='Empleado / Operario', required=True)
+    empleado_id = fields.Many2one('cara.mia.empleado', string='Empleado', required=True)
     tipo_labor_id = fields.Many2one(
         'cara.mia.tipo.labor', related='empleado_id.tipo_labor_id', store=True, string='Labor Realizada', readonly=True
     )

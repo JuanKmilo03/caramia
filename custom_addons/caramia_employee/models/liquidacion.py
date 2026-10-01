@@ -64,7 +64,7 @@ class CaramiaLiquidacion(models.Model):
     state = fields.Selection(
         [
             ('draft', 'Borrador'),
-            ('done', 'Liquidado / Pagado'),
+            ('done', 'Liquidado'),
         ],
         string='Estado',
         default='draft',
