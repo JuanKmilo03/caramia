@@ -259,6 +259,13 @@ class CaramiaLiquidacion(models.Model):
 
             rec.write({'state': 'done'})
 
+    def action_imprimir_liquidacion(self):
+        self.ensure_one()
+        # Asegúrate de cambiar 'caramia_employee' por el nombre real de tu módulo
+        return self.env.ref(
+            'caramia_employee.action_report_liquidacion'
+        ).report_action(self)
+
 
 class CaramiaLiquidacionLinea(models.Model):
     _name = 'cara.mia.liquidacion.linea'

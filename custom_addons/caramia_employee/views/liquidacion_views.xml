@@ -86,6 +86,11 @@
                             invisible="state != 'draft'"
                             confirm="¿Está seguro de procesar esta liquidación?"/>
 
+                    <button name="action_imprimir_liquidacion"
+                        string="Imprimir Liquidación"
+                        type="object"
+                        class="btn-primary"/>
+
                     <button name="action_cancelar"
                             string="Cancelar y Eliminar"
                             type="object"
@@ -138,12 +143,4 @@
             </form>
         </field>
     </record>
-
-    <!-- ACCIÓN DE MENÚ -->
-    <record id="action_caramia_liquidacion" model="ir.actions.act_window">
-        <field name="name">Liquidaciones Laborales</field>
-        <field name="res_model">cara.mia.liquidacion</field>
-        <field name="view_mode">list,form</field>
-    </record>
-
 </odoo>

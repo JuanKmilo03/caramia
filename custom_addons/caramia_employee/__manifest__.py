@@ -11,7 +11,8 @@
         'views/pago_empleado_views.xml',
         'views/liquidacion_views.xml',
         'views/menus.xml',
-        'reports/nomina_report.xml'
+        'reports/nomina_report.xml',
+        'reports/liquidacion_report.xml',
     ],
     'installable': True,
     'application': True,
