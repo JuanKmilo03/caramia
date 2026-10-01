@@ -12,7 +12,7 @@
                 <field name="telefono_empleado"/>
                 <field name="tipo_labor_id"/>
                 <field name="total_prestamos_pendientes" widget="monetary" string="Préstamos Pendientes"/>
-                <field name="aplica_liquidacion" widget="boolean_toggle"/>
+                <field name="pago_liquidado" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
@@ -53,7 +53,7 @@
                         </group>
                         <group string="Asignación Operativa">
                             <field name="tipo_labor_id" options="{'no_create': True, 'no_open': True}"/>
-                            <field name="aplica_liquidacion" widget="boolean_toggle"/>
+                            <field name="pago_liquidado" widget="boolean_toggle"/>
                         </group>
                     </group>
 

@@ -32,14 +32,14 @@
                     domain="[('pagado', '=', False)]" />
                 <separator />
                 <filter string="Aplica Liquidación" name="filter_aplica_liq"
-                    domain="[('aplica_liquidacion', '=', True)]" />
+                    domain="[('pago_liquidado', '=', True)]" />
                 <filter string="No Aplica Liquidación" name="filter_no_aplica_liq"
-                    domain="[('aplica_liquidacion', '=', False)]" />
+                    domain="[('pago_liquidado', '=', False)]" />
                 <group expand="0" string="Agrupar Por">
                     <filter string="Estado de Pago" name="group_pagado"
                         context="{'group_by': 'pagado'}" />
                     <filter string="Aplica Liquidación" name="group_aplica_liq"
-                        context="{'group_by': 'aplica_liquidacion'}" />
+                        context="{'group_by': 'pago_liquidado'}" />
                 </group>
             </search>
         </field>
@@ -52,7 +52,7 @@
         <field name="arch" type="xml">
             <list string="Detalle de Empleados en Nómina" editable="bottom" create="false">
                 <field name="empleado_id" readonly="1" />
-                <field name="aplica_liquidacion" string="Aplica Liq." widget="boolean_toggle" />
+                <field name="pago_liquidado" string="Pago Liq." widget="boolean_toggle" />
                 <field name="total_pares" readonly="1" />
                 <field name="monto_bruto" widget="monetary" string="Bruto Labores" readonly="1" />
                 <field name="reserva" widget="monetary" string="Reserva Liq. (0.22%)"
@@ -148,7 +148,7 @@
                             <field name="linea_ids" readonly="state == 'done'">
                                 <list editable="bottom" create="false" delete="state != 'done'">
                                     <field name="empleado_id" readonly="1" />
-                                    <field name="aplica_liquidacion" string="Aplica Liq." />
+                                    <field name="pago_liquidado" string="Pago Liq." />
                                     <field name="total_pares" readonly="1" />
                                     <field name="monto_bruto" widget="monetary"
                                         string="Bruto Labores" readonly="1" />

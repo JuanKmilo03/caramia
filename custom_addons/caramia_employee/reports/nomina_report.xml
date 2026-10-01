@@ -33,7 +33,7 @@
                                     <th>Empleado</th>
                                     <th>Pares</th>
                                     <th>Bruto Labores</th>
-                                    <th>Aplica Liq.</th>
+                                    <th>Pago Liq.</th>
                                     <th>Reserva Liq. (0.22%)</th>
                                     <th>Valor a Pagar</th>
                                     <th>Estado Pago</th>
@@ -46,7 +46,7 @@
                                         <td class="text-center"><span t-field="line.total_pares"/></td>
                                         <td class="text-end"><span t-field="line.monto_bruto" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>
                                         <td class="text-center">
-                                            <span t-if="line.aplica_liquidacion">SÍ</span>
+                                            <span t-if="line.pago_liquidado">SÍ</span>
                                             <span t-else="">NO</span>
                                         </td>
                                         <td class="text-end"><span t-field="line.reserva" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/></td>

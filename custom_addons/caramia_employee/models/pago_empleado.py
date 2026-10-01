@@ -108,7 +108,7 @@ class CaramiaPagoEmpleado(models.Model):
     @api.depends(
         'linea_ids.monto_neto',
         'linea_ids.pagado',
-        'linea_ids.aplica_liquidacion',
+        'linea_ids.pago_liquidado',
     )
     def _compute_totales(self):
         for rec in self:
@@ -141,7 +141,7 @@ class CaramiaPagoEmpleado(models.Model):
                 lineas.append(
                     Command.create({
                         'empleado_id': emp.id,
-                        'aplica_liquidacion': emp.aplica_liquidacion,
+                        'pago_liquidado': emp.pago_liquidado,
                         'pagado': False,
                         'total_pares': pares_totales,
                         'monto_bruto': monto_bruto,
@@ -204,8 +204,8 @@ class CaramiaPagoEmpleadoLinea(models.Model):
         'cara.mia.empleado', string='Empleado', required=True
     )
 
-    aplica_liquidacion = fields.Boolean(
-        string='Aplica Liquidación',
+    pago_liquidado = fields.Boolean(
+        string='Pago Liquidado',
         default=True,
     )
 
@@ -258,14 +258,14 @@ class CaramiaPagoEmpleadoLinea(models.Model):
     @api.onchange('empleado_id')
     def _onchange_empleado_id(self):
         if self.empleado_id:
-            self.aplica_liquidacion = self.empleado_id.aplica_liquidacion
+            self.pago_liquidado = self.empleado_id.pago_liquidado
 
-    @api.depends('monto_bruto', 'aplica_liquidacion')
+    @api.depends('monto_bruto', 'pago_liquidado')
     def _compute_montos(self):
         for line in self:
             reserva_calc = line.monto_bruto * 0.0022
             line.reserva = reserva_calc
-            if line.aplica_liquidacion:
-                line.monto_neto = line.monto_bruto
-            else:
+            if line.pago_liquidado:
                 line.monto_neto = line.monto_bruto + reserva_calc
+            else:
+                line.monto_neto = line.monto_bruto
