@@ -27,7 +27,7 @@ class ReferenciaCalzado(models.Model):
     ], string='Estado', default='activo', tracking=True)
     
     tipo_tarifa_header = fields.Selection([
-        ('manual', 'Manual / Digitar libre'),
+        ('manual', 'Manual'),
         ('1', 'Precio Sugerido 1'),
         ('2', 'Precio Sugerido 2')
     ], string='Origen de Precios', default='manual', tracking=True)
