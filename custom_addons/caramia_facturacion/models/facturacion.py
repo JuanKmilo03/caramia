@@ -111,7 +111,7 @@ class CaramiaFacturacionLinea(models.Model):
     def _onchange_produccion_id(self):
         for rec in self:
             if rec.produccion_id and rec.produccion_id.referencia_id:
-                rec.valor_unitario = rec.produccion_id.referencia_id.precio_venta
+                rec.valor_unitario = rec.produccion_id.referencia_id.precio_venta_sugerido
             else:
                 rec.valor_unitario = 0.0
 
