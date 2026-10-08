@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_guardar_referencia_wizard_form" model="ir.ui.view">
+        <field name="name">caramia.guardar.referencia.wizard.form</field>
+        <field name="model">caramia.guardar.referencia.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Guardar como Referencia">
+                <group>
+                    <field name="costo_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="modo" widget="radio"/>
+                </group>
+
+                <group string="Nueva Referencia"
+                       invisible="modo != 'nueva'">
+                    <field name="nombre_modelo"
+                           placeholder="Ej: Mocasín Café Hombre 2024"/>
+                    <field name="precio_venta_sugerido"/>
+                </group>
+
+                <group string="Referencia a Actualizar"
+                       invisible="modo != 'actualizar'">
+                    <field name="referencia_a_actualizar_id"/>
+                    <field name="precio_venta_sugerido"/>
+                </group>
+
+                <group string="¿Qué datos actualizar?"
+                       invisible="modo != 'actualizar'">
+                    <field name="actualizar_materiales"/>
+                    <field name="actualizar_labores"/>
+                    <field name="actualizar_precio_venta"/>
+                </group>
+
+                <footer>
+                    <button name="action_confirmar"
+                            string="Confirmar"
+                            type="object"
+                            class="oe_highlight"/>
+                    <button string="Cancelar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_guardar_referencia_wizard" model="ir.actions.act_window">
+        <field name="name">Guardar como Referencia</field>
+        <field name="res_model">caramia.guardar.referencia.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>
