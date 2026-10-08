@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_cara_mia_facturacion" model="ir.sequence">
+            <field name="name">Secuencia Facturación Cara Mia</field>
+            <field name="code">cara.mia.facturacion.seq</field>
+            <field name="prefix">FAC-</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False" />
+        </record>
+    </data>
+</odoo>
