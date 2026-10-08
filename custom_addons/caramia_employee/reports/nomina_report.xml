@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_pago_empleado" model="ir.actions.report">
+        <field name="name">Comprobante de Nómina</field>
+        <field name="model">cara.mia.pago.empleado</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caramia_employee.report_pago_empleado_document</field>
+        <field name="report_file">caramia_employee.report_pago_empleado_document</field>
+        <field name="binding_model_id" ref="model_cara_mia_pago_empleado" />
+        <field name="binding_type">report</field>
+        <field name="print_report_name">(object.name or '').replace('/', '_')</field>
+    </record>
+
+    <template id="report_pago_empleado_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+
+                <!-- Odoo inyectará el encabezado, pie de página y LA MARCA DE AGUA aquí
+                automáticamente -->
+                <t t-call="web.external_layout">
+
+                    <div class="page">
+
+                        <!-- ENCABEZADO -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2 class="fw-bold text-uppercase" style="margin-bottom: 2px;">
+                                    COMPROBANTE DE NÓMINA
+                                </h2>
+                                <p class="text-muted small mb-0"> Generado el: <t
+                                        t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')" />
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- TABLA DE INFORMACIÓN DE LA NÓMINA (Diseño de Lista de Compras) -->
+                        <table class="table table-sm table-borderless mb-4" style="font-size: 11px;">
+                            <tr>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        REFERENCIA
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.name" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        FECHA DE NÓMINA
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.fecha_nomina" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        ESTADO
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.state" />
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- TÍTULO DE LA TABLA PRINCIPAL -->
+                        <p class="text-uppercase text-muted fw-bold mt-4 mb-2"
+                            style="font-size: 12px; letter-spacing: 1px;">
+                            DETALLE DE NÓMINA — PAGO DE LABORES
+                        </p>
+
+                        <!-- TABLA PRINCIPAL DE EMPLEADOS -->
+                        <table class="table table-sm o_main_table table-borderless mb-4"
+                            style="font-size: 11px; margin-bottom: 0;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #cccccc;">
+                                    <th class="text-start" style="padding: 6px 8px;">EMPLEADO</th>
+                                    <th class="text-center" style="padding: 6px 8px;">PARES</th>
+                                    <th class="text-end" style="padding: 6px 8px;">BRUTO LABORES</th>
+                                    <th class="text-center" style="padding: 6px 8px;">PAGO LIQ.</th>
+                                    <th class="text-end" style="padding: 6px 8px;">RESERVA (0.22%)</th>
+                                    <th class="text-end" style="padding: 6px 8px;">A PAGAR</th>
+                                    <th class="text-center" style="padding: 6px 8px;">ESTADO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.linea_ids" t-as="line">
+                                    <tr style="border-bottom: 1px solid #e5e5e5;">
+                                        <td class="text-start" style="padding: 6px 8px;">
+                                            <span t-field="line.empleado_id.nombre_empleado" />
+                                        </td>
+                                        <td class="text-center" style="padding: 6px 8px;">
+                                            <span t-field="line.total_pares" />
+                                        </td>
+                                        <td class="text-end" style="padding: 6px 8px;">
+                                            <span t-field="line.monto_bruto"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                        <td class="text-center" style="padding: 6px 8px;">
+                                            <span t-if="line.pago_liquidado">SÍ</span>
+                                            <span t-else="">NO</span>
+                                        </td>
+                                        <td class="text-end" style="padding: 6px 8px;">
+                                            <span t-field="line.reserva"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                        <td class="text-end fw-bold" style="padding: 6px 8px;">
+                                            <span t-field="line.monto_neto"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                        <td class="text-center" style="padding: 6px 8px;">
+                                            <span t-if="line.pagado"
+                                                style="color: #28a745; font-weight: 700;">PAGADO</span>
+                                            <span t-else=""
+                                                style="color: #ffc107; font-weight: 700;">PENDIENTE</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- SECCIÓN DE TOTALES -->
+                        <div class="row mb-3" style="margin-top: 15px;">
+                            <div class="col-6 offset-6">
+                                <div
+                                    style="border-left: 3px solid #e0e0e0; padding-left: 10px; margin-top: 4px;">
+                                    <table class="table table-sm table-borderless"
+                                        style="font-size: 11px; margin: 0;">
+                                        <tr>
+                                            <td class="text-uppercase text-muted fw-bold"
+                                                style="padding: 2px 0; letter-spacing: 1px;">TOTAL A
+                                                PAGAR</td>
+                                            <td class="text-end fw-bold"
+                                                style="padding: 2px 0; font-size: 14px;">
+                                                <span t-field="o.total_neto"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-uppercase text-muted fw-bold"
+                                                style="padding: 2px 0; letter-spacing: 1px;">TOTAL
+                                                PAGADO</td>
+                                            <td class="text-end fw-bold"
+                                                style="padding: 2px 0; color: #28a745;">
+                                                <span t-field="o.total_pagado"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

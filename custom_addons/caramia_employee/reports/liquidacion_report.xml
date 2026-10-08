@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ACCIÓN DEL REPORTE -->
+    <record id="action_report_liquidacion" model="ir.actions.report">
+        <field name="name">Comprobante de Liquidación</field>
+        <field name="model">cara.mia.liquidacion</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caramia_employee.report_liquidacion_document</field>
+        <field name="report_file">caramia_employee.report_liquidacion_document</field>
+        <field name="binding_model_id" ref="model_cara_mia_liquidacion" />
+        <field name="binding_type">report</field>
+        <field name="print_report_name">(object.name or 'Liquidacion').replace('/', '_')</field>
+    </record>
+
+    <!-- PLANTILLA DEL REPORTE (Con el mismo diseño elegante) -->
+    <template id="report_liquidacion_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+
+                <!-- Odoo inyectará el encabezado, pie de página y LA MARCA DE AGUA aquí
+                automáticamente -->
+                <t t-call="web.external_layout">
+
+                    <div class="page">
+
+                        <!-- ENCABEZADO -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2 class="fw-bold text-uppercase" style="margin-bottom: 2px;">
+                                    COMPROBANTE DE LIQUIDACIÓN
+                                </h2>
+                                <p class="text-muted small mb-0"> Generado el: <t
+                                        t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')" />
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- BLOQUE DE INFORMACIÓN (Estilo Lista de Compras) -->
+                        <table class="table table-sm table-borderless mb-4" style="font-size: 11px;">
+                            <tr>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        REFERENCIA
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.name" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        FECHA DE CORTE
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.fecha_corte" />
+                                    </span>
+                                </td>
+                                <td style="border:none; padding:4px 8px; width:33%;">
+                                    <span
+                                        style="color:#aaa; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">
+                                        ESTADO DEL DOCUMENTO
+                                    </span>
+                                    <br />
+                                    <span style="font-size:13px; font-weight:700;">
+                                        <span t-field="o.state" />
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- TÍTULO DE LA TABLA PRINCIPAL -->
+                        <p class="text-uppercase text-muted fw-bold mt-4 mb-2"
+                            style="font-size: 12px; letter-spacing: 1px;">
+                            DETALLE POR EMPLEADO
+                        </p>
+
+                        <!-- TABLA PRINCIPAL -->
+                        <table class="table table-sm o_main_table table-borderless mb-4"
+                            style="font-size: 11px; margin-bottom: 0;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #cccccc;">
+                                    <th class="text-start" style="padding: 6px 8px;">EMPLEADO</th>
+                                    <th class="text-start" style="padding: 6px 8px;">MOTIVO</th>
+                                    <th class="text-end" style="padding: 6px 8px;">ACUMULADO (0.22%)</th>
+                                    <th class="text-end" style="padding: 6px 8px;">DESCUENTOS</th>
+                                    <th class="text-end" style="padding: 6px 8px;">A PAGAR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.linea_ids" t-as="line">
+                                    <tr style="border-bottom: 1px solid #e5e5e5;">
+                                        <td class="text-start" style="padding: 6px 8px;">
+                                            <span t-field="line.empleado_id.nombre_empleado" />
+                                        </td>
+                                        <td class="text-start" style="padding: 6px 8px;">
+                                            <!-- t-field traduce automáticamente la llave del
+                                            selection
+                                        a su valor legible ("Corte de Fin de Año", etc) -->
+                                            <span t-field="line.motivo" />
+                                        </td>
+                                        <td class="text-end" style="padding: 6px 8px;">
+                                            <span t-field="line.fondo_reserva_acumulado"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                        <td class="text-end" style="padding: 6px 8px;">
+                                            <span t-if="line.monto_descuentos > 0"
+                                                class="text-danger"> - <span
+                                                    t-field="line.monto_descuentos"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </span>
+                                            <span t-else="" class="text-muted">—</span>
+                                        </td>
+                                        <td class="text-end fw-bold" style="padding: 6px 8px;">
+                                            <span t-field="line.monto_neto"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- SECCIÓN DE TOTALES -->
+                        <div class="row mb-3" style="margin-top: 15px;">
+                            <div class="col-6 offset-6">
+                                <div
+                                    style="border-left: 3px solid #e0e0e0; padding-left: 10px; margin-top: 4px;">
+                                    <table class="table table-sm table-borderless"
+                                        style="font-size: 11px; margin: 0;">
+                                        <tr>
+                                            <td class="text-uppercase text-muted fw-bold"
+                                                style="padding: 2px 0; letter-spacing: 1px;">TOTAL
+                                                FONDO
+                                                ACUMULADO</td>
+                                            <td class="text-end fw-bold"
+                                                style="padding: 2px 0; font-size: 13px;">
+                                                <span t-field="o.total_fondo_disponible"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-uppercase text-muted fw-bold"
+                                                style="padding: 2px 0; letter-spacing: 1px;">TOTAL
+                                                DESCUENTOS</td>
+                                            <td class="text-end fw-bold"
+                                                style="padding: 2px 0; font-size: 13px; color: #dc3545;">
+                                                <span t-field="o.total_descuentos"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-uppercase text-muted fw-bold"
+                                                style="padding: 2px 0; letter-spacing: 1px;">TOTAL
+                                                NETO
+                                                A ENTREGAR</td>
+                                            <td class="text-end fw-bold"
+                                                style="padding: 2px 0; color: #28a745; font-size: 14px;">
+                                                <span t-field="o.total_a_pagar"
+                                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}' />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

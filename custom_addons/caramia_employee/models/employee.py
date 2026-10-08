@@ -94,10 +94,10 @@ class CaramiaEmployee(models.Model):
         currency_field='currency_id',
     )
 
-    aplica_liquidacion = fields.Boolean(
-        string='Aplica Liquidación',
+    pago_liquidado = fields.Boolean(
+        string='Pagos liquidados',
         default=True,
-        help='Si no se activa, no se le aplicará el descuento del 0.22% ni será registrado para liquidación en nómina.'
+        help='Si se activa, el dinero de la liquidación se pagará en cada nómina.'
     )
 
     @api.depends('prestamo_ids', 'prestamo_ids.state', 'prestamo_ids.monto')

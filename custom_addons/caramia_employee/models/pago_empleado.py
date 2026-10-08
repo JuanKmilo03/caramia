@@ -1,6 +1,6 @@
 from datetime import timedelta
-from odoo import api, fields, models
-from odoo.exceptions import ValidationError, UserError
+from odoo import Command, api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 
 class CaramiaPagoEmpleado(models.Model):
@@ -10,7 +10,7 @@ class CaramiaPagoEmpleado(models.Model):
     _order = 'fecha_fin desc, id desc'
 
     def _get_default_fecha_inicio(self):
-        return fields.Date.today() - timedelta(days=7)
+        return fields.Date.today() - timedelta(days=6)
 
     name = fields.Char(
         string='Referencia de Nómina',
@@ -24,13 +24,11 @@ class CaramiaPagoEmpleado(models.Model):
         string='Desde',
         required=True,
         default=_get_default_fecha_inicio,
-        help='Fecha inicial del período de nómina.',
     )
     fecha_fin = fields.Date(
         string='Hasta',
         required=True,
         default=fields.Date.context_today,
-        help='Fecha final del período de nómina.',
     )
     fecha_nomina = fields.Date(
         string='Fecha de Realización',
@@ -44,19 +42,17 @@ class CaramiaPagoEmpleado(models.Model):
         string='Detalle por Empleado',
     )
 
-    # TOTALES GLOBALES
-    total_bruto = fields.Monetary(
-        string='Total Labores',
-        compute='_compute_totales',
-        store=True,
-        currency_field='currency_id',
+    cantidad_lineas = fields.Integer(
+        string='N° Empleados',
+        compute='_compute_cantidad_lineas',
     )
-    total_descontado = fields.Monetary(
-        string='Descuento (0.22%)',
-        compute='_compute_totales',
-        store=True,
-        currency_field='currency_id',
+
+    currency_id = fields.Many2one(
+        'res.currency',
+        default=lambda self: self.env.company.currency_id,
+        required=True,
     )
+
     total_neto = fields.Monetary(
         string='Total A Pagar',
         compute='_compute_totales',
@@ -70,9 +66,6 @@ class CaramiaPagoEmpleado(models.Model):
         currency_field='currency_id',
     )
 
-    currency_id = fields.Many2one(
-        'res.currency', default=lambda self: self.env.company.currency_id
-    )
     state = fields.Selection(
         [
             ('draft', 'Borrador'),
@@ -85,28 +78,41 @@ class CaramiaPagoEmpleado(models.Model):
         tracking=True,
     )
 
+    @api.depends('linea_ids')
+    def _compute_cantidad_lineas(self):
+        for rec in self:
+            rec.cantidad_lineas = len(rec.linea_ids)
+
+    def action_ver_lineas(self):
+        self.ensure_one()
+        return {
+            'name': f'Buscador de Empleados - {self.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'cara.mia.pago.empleado.linea',
+            'view_mode': 'list',
+            'domain': [('pago_id', '=', self.id)],
+            'context': {'default_pago_id': self.id},
+            'target': 'current',
+        }
+
     @api.depends('fecha_inicio', 'fecha_fin')
     def _compute_name(self):
         for rec in self:
             if rec.fecha_inicio and rec.fecha_fin:
                 f_inicio = rec.fecha_inicio.strftime('%d/%m/%Y')
                 f_fin = rec.fecha_fin.strftime('%d/%m/%Y')
-                rec.name = f"Nómina del {f_inicio} al {f_fin}"
+                rec.name = f'Nómina del {f_inicio} al {f_fin}'
             else:
-                rec.name = "Nómina de Empleados"
+                rec.name = 'Nómina de Empleados'
 
     @api.depends(
-        'linea_ids.monto_bruto',
-        'linea_ids.descuento_reserva',
         'linea_ids.monto_neto',
         'linea_ids.pagado',
+        'linea_ids.pago_liquidado',
     )
     def _compute_totales(self):
         for rec in self:
-            rec.total_bruto = sum(rec.linea_ids.mapped('monto_bruto'))
-            rec.total_descontado = sum(rec.linea_ids.mapped('descuento_reserva'))
             rec.total_neto = sum(rec.linea_ids.mapped('monto_neto'))
-
             lineas_pagadas = rec.linea_ids.filtered(lambda l: l.pagado)
             rec.total_pagado = sum(lineas_pagadas.mapped('monto_neto'))
 
@@ -124,7 +130,7 @@ class CaramiaPagoEmpleado(models.Model):
                 ('empleado_id', '!=', False),
             ])
 
-            lineas = [(5, 0, 0)]
+            lineas = [Command.clear()]
             empleados = tiquetes.mapped('empleado_id')
 
             for emp in empleados:
@@ -132,17 +138,16 @@ class CaramiaPagoEmpleado(models.Model):
                 monto_bruto = sum(tiquetes_emp.mapped('subtotal'))
                 pares_totales = sum(tiquetes_emp.mapped('total_pares'))
 
-                lineas.append((
-                    0,
-                    0,
-                    {
+                lineas.append(
+                    Command.create({
                         'empleado_id': emp.id,
-                        'pagado': False,  # Checkbox de pago
+                        'pago_liquidado': emp.pago_liquidado,
+                        'pagado': False,
                         'total_pares': pares_totales,
                         'monto_bruto': monto_bruto,
-                        'tiquete_ids': [(6, 0, tiquetes_emp.ids)],
-                    },
-                ))
+                        'tiquete_ids': [Command.set(tiquetes_emp.ids)],
+                    })
+                )
 
             rec.write({'linea_ids': lineas, 'state': 'in_progress'})
 
@@ -150,32 +155,37 @@ class CaramiaPagoEmpleado(models.Model):
         for rec in self:
             if not rec.linea_ids:
                 raise ValidationError(
-                    "No hay empleados agregados en esta nómina."
+                    'No hay empleados agregados en esta nómina.'
                 )
 
-            # Validar que todos los empleados de la nómina estén marcados como pagados
             lines_sin_pagar = rec.linea_ids.filtered(lambda l: not l.pagado)
             if lines_sin_pagar:
-                empleados_pendientes = ", ".join(
+                empleados_pendientes = ', '.join(
                     lines_sin_pagar.mapped('empleado_id.nombre_empleado')
                 )
                 raise ValidationError(
-                    f"No se puede aprobar la nómina porque existen empleados sin marcar como pagados:\n- {empleados_pendientes}"
+                    'No se puede aprobar la nómina porque existen empleados'
+                    f' sin marcar como pagados:\n- {empleados_pendientes}'
                 )
 
-            # Marcar tiquetes de trabajo como pagados
             todos_los_tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if todos_los_tiquetes:
                 todos_los_tiquetes.write({'estado': 'pagado'})
 
-            # Cambiar estado de la nómina a 'done'
             rec.write({'state': 'done', 'fecha_nomina': fields.Date.today()})
+
+    def action_imprimir_nomina(self):
+        self.ensure_one()
+        return self.env.ref(
+            'caramia_employee.action_report_pago_empleado'
+        ).report_action(self)
 
     def unlink(self):
         for rec in self:
             if rec.state == 'done':
                 raise UserError(
-                    "No se puede eliminar una nómina que ya ha sido finalizada."
+                    'No se puede eliminar una nómina que ya ha sido'
+                    ' finalizada.'
                 )
             tiquetes = rec.linea_ids.mapped('tiquete_ids')
             if tiquetes:
@@ -193,18 +203,15 @@ class CaramiaPagoEmpleadoLinea(models.Model):
     empleado_id = fields.Many2one(
         'cara.mia.empleado', string='Empleado', required=True
     )
-    
-    # Campo relacionado para verificar la opción en la línea
-    aplica_liquidacion = fields.Boolean(
-        related='empleado_id.aplica_liquidacion',
-        string='Aplica Liquidación',
-        store=True,
+
+    pago_liquidado = fields.Boolean(
+        string='Pago Liquidado',
+        default=True,
     )
 
     pagado = fields.Boolean(
         string='¿Pagado?',
         default=False,
-        help='Marque este campo una vez le haya entregado el dinero al empleado.',
     )
 
     fecha_inicio = fields.Date(
@@ -228,16 +235,15 @@ class CaramiaPagoEmpleadoLinea(models.Model):
     monto_bruto = fields.Monetary(
         string='Monto Bruto', readonly=True, currency_field='currency_id'
     )
-    descuento_reserva = fields.Monetary(
-        string='Descuento (0.22%)',
+
+    reserva = fields.Monetary(
+        string='Reserva Liquidación (0.22%)',
         compute='_compute_montos',
-        store=True,
         currency_field='currency_id',
     )
     monto_neto = fields.Monetary(
         string='Valor a Pagar',
         compute='_compute_montos',
-        store=True,
         currency_field='currency_id',
     )
 
@@ -249,11 +255,17 @@ class CaramiaPagoEmpleadoLinea(models.Model):
         string='Tiquetes Incluidos',
     )
 
-    @api.depends('monto_bruto', 'aplica_liquidacion')
+    @api.onchange('empleado_id')
+    def _onchange_empleado_id(self):
+        if self.empleado_id:
+            self.pago_liquidado = self.empleado_id.pago_liquidado
+
+    @api.depends('monto_bruto', 'pago_liquidado')
     def _compute_montos(self):
         for line in self:
-            if line.aplica_liquidacion:
-                line.descuento_reserva = line.monto_bruto * 0.0022
+            reserva_calc = line.monto_bruto * 0.0022
+            line.reserva = reserva_calc
+            if line.pago_liquidado:
+                line.monto_neto = line.monto_bruto + reserva_calc
             else:
-                line.descuento_reserva = 0.0
-            line.monto_neto = line.monto_bruto - line.descuento_reserva
+                line.monto_neto = line.monto_bruto

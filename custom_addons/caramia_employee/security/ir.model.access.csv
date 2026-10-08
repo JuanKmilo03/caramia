@@ -7,3 +7,4 @@ access_cara_mia_liquidacion,cara.mia.liquidacion,model_cara_mia_liquidacion,base
 access_cara_mia_liquidacion_linea,cara.mia.liquidacion.linea,model_cara_mia_liquidacion_linea,base.group_user,1,1,1,1
 access_cara_mia_prestamo,cara.mia.prestamo,model_cara_mia_prestamo,base.group_user,1,1,1,1
 access_cara_mia_liquidacion_descuento,access_cara_mia_liquidacion_descuento,model_cara_mia_liquidacion_descuento,base.group_user,1,1,1,1
+access_cara_mia_registro_trabajo_orden_extra,cara.mia.registro.trabajo.orden.extra,model_cara_mia_registro_trabajo_orden_extra,base.group_user,1,1,1,1
