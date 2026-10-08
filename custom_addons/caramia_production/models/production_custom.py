@@ -1,7 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
-
 class CaramiaProduction(models.Model):
     _name = 'cara.mia.produccion'
     _description = 'Orden de Producción'
@@ -58,9 +57,10 @@ class CaramiaProduction(models.Model):
         string='Moneda'
     )
 
-    color = fields.Char(string='Color', required=True)
-    material = fields.Char(string='Material', required=True)
-    sello = fields.Char(string='Sello / Marca', required=True)
+    color = fields.Char(string='Color')
+    material = fields.Char(string='Material',)
+    sello = fields.Char(string='Sello / Marca')
+
     factura_nro = fields.Char(string='Factura N°')
 
     # Curva de tallas (21 a 40)
@@ -112,9 +112,9 @@ class CaramiaProduction(models.Model):
     @api.constrains('total_pares')
     def _check_total_pares(self):
         for rec in self:
-            if rec.total_pares <= 0:
+            if rec.state != 'draft' and rec.total_pares <= 0:
                 raise ValidationError(
-                    "Debe ingresar al menos un par de zapatos en alguna de las tallas antes de guardar la orden."
+                    "Debe ingresar al menos un par en alguna talla antes de iniciar la orden."
                 )
 
     @api.onchange('referencia_id')

@@ -31,7 +31,12 @@ class ReferenciaCalzado(models.Model):
         ('1', 'Precio Sugerido 1'),
         ('2', 'Precio Sugerido 2')
     ], string='Origen de Precios', default='manual', tracking=True)
-
+    
+    precio_venta_sugerido = fields.Monetary(
+        string='Precio de Venta Sugerido',
+        currency_field='currency_id',
+        help='Precio sugerido por par. La cotización puede sobreescribirlo.'
+    )
     insumo_ids = fields.One2many(
         'cara.mia.insumo.referencia', 'referencia_id',
         string='Ficha Técnica de Insumos'

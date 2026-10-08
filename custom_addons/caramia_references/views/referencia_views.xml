@@ -23,6 +23,7 @@
                         <group>
                             <field name="tipo_tarifa_header" widget="radio" />
                         </group>
+                        <field name="precio_venta_sugerido" widget="monetary"/>
                         <group>
                             <field name="costo_total_produccion" readonly="1" widget="monetary" />
                         </group>

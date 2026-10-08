@@ -14,7 +14,8 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'views/costos_views.xml',
+        'views/costos_calzado_views.xml',
+        'wizard/guardar_referencia_wizard_views.xml',
     ],
     'installable': True,
     'application': True,
