@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- VISTA DE FORMULARIO -->
     <record id="view_caramia_facturacion_form" model="ir.ui.view">
         <field name="name">cara.mia.facturacion.form</field>
         <field name="model">cara.mia.facturacion</field>
         <field name="arch" type="xml">
             <form string="Remisión / Facturación">
                 <header>
-                    <!-- Botón para Emitir (Solo visible en borrador) -->
                     <button name="action_emitir" 
                             string="Emitir Remisión" 
                             type="object" 
                             class="oe_highlight" 
                             invisible="estado != 'borrador'"/>
                     
-                    <!-- Botón para Imprimir (Visible cuando ya está emitida o pagada) -->
                     <button name="action_imprimir_remision" 
                             string="Imprimir" 
                             type="object" 
@@ -21,66 +20,44 @@
                             class="oe_highlight" 
                             invisible="estado == 'borrador'"/>
                     
-                    <!-- Botón para devolver a borrador en caso de error -->
                     <button name="action_cancelar" 
                             string="Volver a Borrador" 
                             type="object" 
                             invisible="estado == 'borrador'"/>
 
-                    <!-- Barra de estados -->
                     <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida,pagada"/>
                 </header>
                 <sheet>
+                    <!-- CAMBIO: Campo de moneda oculto FUERA de los groups para evitar espacios vacíos -->
+                    <field name="currency_id" invisible="True"/>
+                    
                     <h2 class="text-primary">Remisión <field name="name" class="oe_inline" readonly="1"/></h2>
                     <group>
-                        <!-- Bloque Izquierdo: Datos del Cliente -->
                         <group>
                             <field name="cliente_id" placeholder="Seleccione el Cliente..."/>
                             <field name="cliente_identificador"/>
                             <field name="cliente_telefono"/>
                             <field name="cliente_direccion"/>
                         </group>
-                        <!-- Bloque Derecho: Fechas y Pedido -->
                         <group>
                             <field name="fecha_facturacion"/>
                             <field name="pedido_nro"/>
                             <field name="forma_pago"/>
                             <field name="fecha_vencimiento"/>
-                            <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
                     <notebook>
                         <page string="Artículos (Órdenes de Producción)">
-                            <!-- default_facturacion_id ajustado -->
                             <field name="linea_ids" context="{'default_facturacion_id': id}">
                                 <list editable="bottom">
                                     <field name="produccion_id" domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]" options="{'no_create': True}"/>
                                     <field name="descripcion"/>
-                                    <field name="talla_21"/>
-                                    <field name="talla_22"/>
-                                    <field name="talla_23"/>
-                                    <field name="talla_24"/>
-                                    <field name="talla_25"/>
-                                    <field name="talla_26"/>
-                                    <field name="talla_27"/>
-                                    <field name="talla_28"/>
-                                    <field name="talla_29"/>
-                                    <field name="talla_30"/>
-                                    <field name="talla_31"/>
-                                    <field name="talla_32"/>
-                                    <field name="talla_33"/>
-                                    <field name="talla_34"/>
-                                    <field name="talla_35"/>
-                                    <field name="talla_36"/>
-                                    <field name="talla_37"/>
-                                    <field name="talla_38"/>
-                                    <field name="talla_39"/>
-                                    <field name="talla_40"/>
                                     <field name="cantidad" sum="Total Pares"/>
                                     <field name="valor_unitario"/>
                                     <field name="total_linea" sum="Suma Total"/>
-                                    <field name="currency_id" invisible="1"/>
+                                    <!-- CAMBIO: column_invisible en lugar de invisible para vistas de lista -->
+                                    <field name="currency_id" column_invisible="True"/>
                                 </list>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
@@ -94,10 +71,38 @@
         </field>
     </record>
 
+    <!-- NUEVA VISTA DE LISTA -->
+    <record id="view_caramia_facturacion_list" model="ir.ui.view">
+        <field name="name">cara.mia.facturacion.list</field>
+        <field name="model">cara.mia.facturacion</field>
+        <field name="arch" type="xml">
+            <list string="Remisiones / Facturación" 
+                  decoration-info="estado == 'borrador'" 
+                  decoration-success="estado == 'pagada'">
+                
+                <field name="name" string="N° Factura"/>
+                <field name="cliente_id"/>
+                <field name="fecha_facturacion"/>
+                <field name="fecha_vencimiento"/>
+                <field name="forma_pago"/>
+                <!-- CAMBIO: column_invisible en lugar de invisible para la tabla principal -->
+                <field name="total_general" string="Valor Total" widget="monetary" decoration-bf="1"/>
+                <field name="currency_id" column_invisible="True"/>
+                <!-- Estado con colores según la etapa -->
+                <field name="estado" widget="badge" 
+                       decoration-info="estado == 'borrador'" 
+                       decoration-primary="estado == 'emitida'" 
+                       decoration-success="estado == 'pagada'"/>
+            </list>
+        </field>
+    </record>
+
     <record id="action_caramia_facturacion" model="ir.actions.act_window">
         <field name="name">Remisiones y Facturación</field>
         <field name="res_model">cara.mia.facturacion</field>
         <field name="view_mode">list,form</field>
+        <!-- Enlazamos la nueva vista de lista explícitamente -->
+        <field name="view_id" ref="view_caramia_facturacion_list"/>
     </record>
 
     <menuitem id="menu_caramia_facturacion_root" name="Facturación" sequence="20"/>

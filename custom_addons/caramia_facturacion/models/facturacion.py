@@ -106,7 +106,6 @@ class CaramiaFacturacionLinea(models.Model):
     valor_unitario = fields.Monetary(string='Valor', required=True, default=0.0)
     total_linea = fields.Monetary(string='Total', compute='_compute_total_linea', store=True)
 
-    # NUEVA FUNCIÓN: Traer el precio sugerido de la referencia
     @api.onchange('produccion_id')
     def _onchange_produccion_id(self):
         for rec in self:
