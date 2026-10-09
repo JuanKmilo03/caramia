@@ -48,7 +48,7 @@
                     </group>
 
                     <notebook>
-                        <page string="Artículos (Órdenes de Producción)">
+                        <page string="Órdenes de Producción">
                             <field name="linea_ids" context="{'default_facturacion_id': id}">
                                 <list editable="bottom">
                                     <field name="produccion_id" domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]" options="{'no_create': True}"/>
