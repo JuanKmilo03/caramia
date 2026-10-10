@@ -7,7 +7,7 @@ class CaramiaFacturacion(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'fecha_facturacion desc, id desc'
 
-    name = fields.Char(string='N° Facturación', required=True, copy=False, readonly=True, default='Nuevo', tracking=True)
+    name = fields.Char(string='N° Factura', required=True, copy=False, readonly=True, default='Nuevo', tracking=True)
     
     # Selección del Cliente y datos automáticos
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
@@ -55,7 +55,12 @@ class CaramiaFacturacion(models.Model):
                 raise ValidationError("Debe agregar al menos una orden de producción para emitir la factura/remisión.")
             if rec.total_general <= 0:
                 raise ValidationError("El total de la factura debe ser mayor a cero.")
+            
             rec.write({'estado': 'emitida'})
+            
+            for linea in rec.linea_ids:
+                if linea.produccion_id:
+                    linea.produccion_id.write({'factura_id': rec.id})
 
     def action_cancelar(self):
         for rec in self:
@@ -64,3 +69,13 @@ class CaramiaFacturacion(models.Model):
     def action_imprimir_remision(self):
         # Llama a la acción del reporte PDF que creamos anteriormente
         return self.env.ref('caramia_facturacion.action_report_remision_doble').report_action(self)
+
+class CaramiaProductionInherit(models.Model):
+    _inherit = 'cara.mia.produccion'
+
+    factura_id = fields.Many2one(
+        'cara.mia.facturacion', 
+        string='Factura N°', 
+        readonly=True, 
+        tracking=True
+    )

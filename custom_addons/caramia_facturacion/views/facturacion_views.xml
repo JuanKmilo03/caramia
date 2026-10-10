@@ -7,42 +7,44 @@
         <field name="arch" type="xml">
             <form string="Remisión / Facturación">
                 <header>
-                    <button name="action_emitir" 
-                            string="Emitir Remisión" 
-                            type="object" 
-                            class="oe_highlight" 
-                            invisible="estado != 'borrador'"/>
-                    
-                    <button name="action_imprimir_remision" 
-                            string="Imprimir" 
-                            type="object" 
-                            icon="fa-print"
-                            class="oe_highlight" 
-                            invisible="estado == 'borrador'"/>
-                    
-                    <button name="action_cancelar" 
-                            string="Volver a Borrador" 
-                            type="object" 
-                            invisible="estado == 'borrador'"/>
+                    <button name="action_emitir"
+                        string="Emitir Remisión"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="estado != 'borrador'" />
 
-                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida"/>
+                    <button name="action_imprimir_remision"
+                        string="Imprimir"
+                        type="object"
+                        icon="fa-print"
+                        class="oe_highlight"
+                        invisible="estado == 'borrador'" />
+
+                    <button name="action_cancelar"
+                        string="Volver a Borrador"
+                        type="object"
+                        invisible="estado == 'borrador'" />
+
+                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida" />
                 </header>
                 <sheet>
-                    <!-- CAMBIO: Campo de moneda oculto FUERA de los groups para evitar espacios vacíos -->
-                    <field name="currency_id" invisible="True"/>
-                    
-                    <h2 class="text-primary">Remisión <field name="name" class="oe_inline" readonly="1"/></h2>
+                    <!-- CAMBIO: Campo de moneda oculto FUERA de los groups para evitar espacios
+                    vacíos -->
+                    <field name="currency_id" invisible="True" />
+
+                    <h2 class="text-primary">Remisión <field name="name" class="oe_inline"
+                            readonly="1" /></h2>
                     <group>
                         <group>
-                            <field name="cliente_id" placeholder="Seleccione el Cliente..."/>
-                            <field name="cliente_identificador"/>
-                            <field name="cliente_telefono"/>
-                            <field name="cliente_direccion"/>
+                            <field name="cliente_id" placeholder="Seleccione el Cliente..." />
+                            <field name="cliente_identificador" />
+                            <field name="cliente_telefono" />
+                            <field name="cliente_direccion" />
                         </group>
                         <group>
-                            <field name="fecha_facturacion"/>
-                            <field name="forma_pago"/>
-                            <field name="fecha_vencimiento"/>
+                            <field name="fecha_facturacion" />
+                            <field name="forma_pago" />
+                            <field name="fecha_vencimiento" />
                         </group>
                     </group>
 
@@ -50,18 +52,24 @@
                         <page string="Órdenes de Producción">
                             <field name="linea_ids" context="{'default_facturacion_id': id}">
                                 <list editable="bottom">
-                                    <field name="produccion_id" domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]" options="{'no_create': True}"/>
-                                    <field name="descripcion"/>
-                                    <field name="cantidad" sum="Total Pares"/>
-                                    <field name="valor_unitario"/>
-                                    <field name="total_linea" sum="Suma Total"/>
-                                    <!-- CAMBIO: column_invisible en lugar de invisible para vistas de lista -->
-                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="produccion_id"
+                                        domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]"
+                                        options="{'no_create': True}" />
+                                    <field name="descripcion" />
+                                    <field name="cantidad" sum="Total Pares" />
+                                    <field name="valor_unitario" />
+                                    <field name="total_linea" sum="Suma Total" />
+                                    <!-- CAMBIO: column_invisible en lugar de invisible para vistas
+                                    de lista -->
+                                    <field name="currency_id" column_invisible="True" />
                                 </list>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
-                                <field name="total_general" class="oe_subtotal_footer_separator" widget="monetary"/>
-                                <field name="saldo_pendiente" class="oe_subtotal_footer_separator text-danger" widget="monetary"/>
+                                <field name="total_general" class="oe_subtotal_footer_separator"
+                                    widget="monetary" />
+                                <field name="saldo_pendiente"
+                                    class="oe_subtotal_footer_separator text-danger"
+                                    widget="monetary" />
                             </group>
                         </page>
                     </notebook>
@@ -75,24 +83,42 @@
         <field name="name">cara.mia.facturacion.list</field>
         <field name="model">cara.mia.facturacion</field>
         <field name="arch" type="xml">
-            <list string="Remisiones / Facturación" 
-                  decoration-info="estado == 'borrador'" 
-                  decoration-success="estado == 'pagada'">
-                
-                <field name="name" string="N° Factura"/>
-                <field name="cliente_id"/>
-                <field name="fecha_facturacion"/>
-                <field name="fecha_vencimiento"/>
-                <field name="forma_pago"/>
+            <list string="Remisiones / Facturación"
+                decoration-info="estado == 'borrador'"
+                decoration-success="estado == 'pagada'">
+
+                <field name="name" string="N° Factura" />
+                <field name="cliente_id" />
+                <field name="fecha_facturacion" />
+                <field name="fecha_vencimiento" />
+                <field name="forma_pago" />
                 <!-- CAMBIO: column_invisible en lugar de invisible para la tabla principal -->
-                <field name="total_general" string="Valor Total" widget="monetary" decoration-bf="1"/>
-                <field name="currency_id" column_invisible="True"/>
+                <field name="total_general" string="Valor Total" widget="monetary" decoration-bf="1" />
+                <field name="currency_id" column_invisible="True" />
                 <!-- Estado con colores según la etapa -->
-                <field name="estado" widget="badge" 
-                       decoration-info="estado == 'borrador'" 
-                       decoration-primary="estado == 'emitida'" 
-                       decoration-success="estado == 'pagada'"/>
+                <field name="estado" widget="badge"
+                    decoration-info="estado == 'borrador'"
+                    decoration-primary="estado == 'emitida'"
+                    decoration-success="estado == 'pagada'" />
             </list>
+        </field>
+    </record>
+
+    <!-- Inyectamos el campo Factura en el FORMULARIO de Producción -->
+    <record id="view_produccion_formulario_inherit_factura" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.form.inherit</field>
+        <field name="model">cara.mia.produccion</field>
+        <!-- Referencia al formulario original en el módulo de producción -->
+        <field name="inherit_id" ref="caramia_production.view_caramia_production_form" />
+        <field name="arch" type="xml">
+            <!-- Buscamos el campo 'material' y ponemos la factura justo después -->
+            <xpath expr="//field[@name='material']" position="after">
+                <field name="factura_id"
+                    string="Factura N°"
+                    widget="many2one"
+                    decoration-bf="1"
+                    invisible="state != 'done'" />
+            </xpath>
         </field>
     </record>
 
@@ -101,9 +127,10 @@
         <field name="res_model">cara.mia.facturacion</field>
         <field name="view_mode">list,form</field>
         <!-- Enlazamos la nueva vista de lista explícitamente -->
-        <field name="view_id" ref="view_caramia_facturacion_list"/>
+        <field name="view_id" ref="view_caramia_facturacion_list" />
     </record>
 
-    <menuitem id="menu_caramia_facturacion_root" name="Facturación" sequence="20"/>
-    <menuitem id="menu_caramia_facturacion_sub" name="Generar Remisión" parent="menu_caramia_facturacion_root" action="action_caramia_facturacion" sequence="10"/>
+    <menuitem id="menu_caramia_facturacion_root" name="Facturación" sequence="20" />
+    <menuitem id="menu_caramia_facturacion_sub" name="Generar Remisión"
+        parent="menu_caramia_facturacion_root" action="action_caramia_facturacion" sequence="10" />
 </odoo>
