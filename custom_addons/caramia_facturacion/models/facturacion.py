@@ -19,7 +19,6 @@ class CaramiaFacturacion(models.Model):
     linea_ids = fields.One2many('cara.mia.facturacion.linea', 'facturacion_id', string='Artículos / Órdenes')
 
     # Fechas y Detalles
-    pedido_nro = fields.Char(string='Pedido N°')
     fecha_facturacion = fields.Date(string='Fecha de Facturación', default=fields.Date.context_today, required=True, tracking=True)
     fecha_vencimiento = fields.Date(string='Fecha de Vencimiento', required=True)
     forma_pago = fields.Selection([
@@ -34,8 +33,7 @@ class CaramiaFacturacion(models.Model):
 
     estado = fields.Selection([
         ('borrador', 'Borrador'),
-        ('emitida', 'Emitida'),
-        ('pagada', 'Pagada')
+        ('emitida', 'Emitida')
     ], string='Estado', default='borrador', tracking=True)
 
     @api.depends('linea_ids.total_linea')

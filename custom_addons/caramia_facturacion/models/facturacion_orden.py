@@ -51,7 +51,7 @@ class CaramiaFacturacionLinea(models.Model):
     def _compute_descripcion(self):
         for rec in self:
             if rec.produccion_id and rec.produccion_id.referencia_id:
-                rec.descripcion = f"{rec.produccion_id.referencia_id.nombre_modelo} - {rec.produccion_id.color} - {rec.produccion_id.material}"
+                rec.descripcion = f"{rec.produccion_id.referencia_id.nombre_modelo}"
             else:
                 rec.descripcion = ""
 

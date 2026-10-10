@@ -25,7 +25,7 @@
                             type="object" 
                             invisible="estado == 'borrador'"/>
 
-                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida,pagada"/>
+                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida"/>
                 </header>
                 <sheet>
                     <!-- CAMBIO: Campo de moneda oculto FUERA de los groups para evitar espacios vacíos -->
@@ -41,7 +41,6 @@
                         </group>
                         <group>
                             <field name="fecha_facturacion"/>
-                            <field name="pedido_nro"/>
                             <field name="forma_pago"/>
                             <field name="fecha_vencimiento"/>
                         </group>
