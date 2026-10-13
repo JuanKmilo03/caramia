@@ -29,6 +29,12 @@ services:
       - "8000:8000"
     depends_on:
       - odoo
+    environment:
+      - ODOO_URL=${ODOO_URL}
+      - ODOO_DB=${ODOO_DB}
+      - ODOO_USER=${ODOO_USER}
+      - ODOO_PASSWORD=${ODOO_PASSWORD}
+      - AI_API_KEY=${AI_API_KEY}
 
 volumes:
   odoo-db-data:

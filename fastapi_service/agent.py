@@ -2,9 +2,6 @@ import os
 import json
 from openai import AsyncOpenAI
 from odoo_client import odoo_db
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # Configuramos el cliente. Si usas Groq, la base_url cambia. Si usas OpenAI, borra base_url.
 client = AsyncOpenAI(
@@ -33,7 +30,15 @@ async def procesar_chat(mensaje: str) -> str:
     respuesta = await client.chat.completions.create(
         model="openai/gpt-oss-20b",
         messages=[
-            {"role": "system", "content": "Eres el asistente inteligente de la fábrica de calzado Cara Mia. Ayudas a los empleados consultando información del ERP de forma concisa."},
+            {"role": "system",
+            "content": """Eres el asistente virtual de la fábrica de calzado Cara Mia. 
+            Tu objetivo es ayudar a los empleados respondiendo de forma natural, cálida y conversacional. 
+            Reglas estrictas:
+            1. NUNCA uses tablas Markdown para responder, a menos que el usuario pida explícitamente una 'tabla' o una 'lista detallada'.
+            2. Responde en párrafos cortos, como si estuvieras chateando por WhatsApp.
+            3. No muestres IDs internos de la base de datos a menos que sea estrictamente necesario.
+            4. Si encuentras un cliente, preséntalo de forma fluida (ej: 'Encontré al cliente Andepsito, su teléfono es 33333 y su sello es 67.')."""
+            },
             {"role": "user", "content": mensaje}
         ],
         tools=herramientas,

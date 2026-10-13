@@ -14,7 +14,7 @@ class AgenteController(http.Controller):
     # 2. RUTA PARA ENVIAR Y RECIBIR MENSAJES DE LA IA
     @http.route('/caramia/chat', type='json', auth='user')
     def enviar_mensaje_ia(self, mensaje):
-        url_fastapi = "http://host.docker.internal:8000/api/chat"
+        url_fastapi = "http://fastapi_ai:8000/api/chat"
         payload = {"mensaje": mensaje, "user_id": request.env.uid}
         headers = {'Content-Type': 'application/json'}
         
