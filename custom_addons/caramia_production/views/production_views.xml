@@ -8,44 +8,56 @@
         <field name="arch" type="xml">
             <form string="Orden de Producción">
                 <header>
-                    <button name="action_set_in_progress" 
-                            string="Iniciar Producción" 
-                            type="object" 
-                            class="oe_highlight" 
-                            invisible="state != 'draft'"/>
+                    <button name="action_set_in_progress"
+                        string="Iniciar Producción"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="state != 'draft'" />
 
-                    <button name="action_download_pdf" string="Imprimir Tiquetes PDF" type="object" icon="fa-print"/>
-                    <button name="action_cancel" string="Cancelar Orden" type="object" invisible="state in ('done', 'canceled')"/>
-                    <button name="action_set_draft" string="Volver a Borrador" type="object" invisible="state in ('draft', 'done')"/>
-                    
-                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                    <button name="action_download_pdf" string="Imprimir Tiquetes PDF" type="object"
+                        icon="fa-print" />
+                    <button name="action_cancel" string="Cancelar Orden" type="object"
+                        invisible="state in ('done', 'canceled')" />
+                    <button name="action_set_draft" string="Volver a Borrador" type="object"
+                        invisible="state in ('draft', 'done')" />
+
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,in_progress,done" />
                 </header>
                 <sheet>
-                    <field name="imagen_zapato" widget="image" class="oe_avatar" options="{'zoom': true}"/>
+                    <field name="imagen_zapato" widget="image" class="oe_avatar"
+                        options="{'zoom': true}" />
                     <div class="oe_title">
-                        <label for="name" string="ORDEN DE PRODUCCIÓN"/>
-                        <h1><field name="name" readonly="1"/></h1>
+                        <label for="name" string="ORDEN DE PRODUCCIÓN" />
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="cliente_id" placeholder="Seleccione cliente..." readonly="state != 'draft'"/>
-                            <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False, 'no_open': false}" placeholder="Seleccione modelo..." readonly="state != 'draft'"/>
-                            <field name="sello" readonly="state != 'draft'"/>
-                            <field name="color" readonly="state != 'draft'"/>
-                            <field name="material" readonly="state != 'draft'"/>
-                            <field name="factura_nro" readonly="state != 'draft'"/>
+                            <field name="cliente_id" placeholder="Seleccione cliente..."
+                                readonly="state != 'draft'" />
+                            <field name="referencia_id"
+                                options="{'no_create': true, 'no_create_edit': False, 'no_open': false}"
+                                placeholder="Seleccione modelo..." readonly="state != 'draft'" />
+                            <field name="sello" readonly="state != 'draft'" />
+                            <field name="color" readonly="state != 'draft'" />
+                            <field name="material" readonly="state != 'draft'" />
+                            <field name="factura_nro" readonly="state != 'draft'" />
                         </group>
                         <group>
-                            <field name="fecha_creacion" readonly="state != 'draft'"/>
-                            <field name="fecha_estimada" readonly="state != 'draft'"/>
-                            <field name="fecha_finalizacion" invisible="not fecha_finalizacion"/>
-                            <field name="total_pares" class="fw-bold fs-4"/>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="fecha_creacion" readonly="state != 'draft'" />
+                            <field name="fecha_estimada" readonly="state != 'draft'" />
+                            <field name="fecha_finalizacion" invisible="not fecha_finalizacion" />
+                            <field name="total_pares" class="fw-bold fs-4" />
+                            <field name="currency_id" invisible="1" />
                         </group>
                     </group>
 
                     <group string="Descripción / Observaciones">
-                        <field name="descripcion" nolabel="1" placeholder="Añada observaciones adicionales..." readonly="state != 'draft'"/>
+                        <field name="descripcion" nolabel="1"
+                            placeholder="Añada observaciones adicionales..."
+                            readonly="state != 'draft'" />
                     </group>
 
                     <notebook>
@@ -53,86 +65,107 @@
                         <page string="Curva de Tallas">
                             <div class="p-3 border rounded bg-light">
                                 <h5 class="text-center mb-3">Distribución de Pares por Talla</h5>
-                                <div class="d-flex flex-wrap justify-content-start gap-2 text-center">
+                                <div
+                                    class="d-flex flex-wrap justify-content-start gap-2 text-center">
                                     <div style="width: 60px;">
                                         <label for="talla_21" class="fw-bold d-block mb-1">T-21</label>
-                                        <field name="talla_21" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_21" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_22" class="fw-bold d-block mb-1">T-22</label>
-                                        <field name="talla_22" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_22" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_23" class="fw-bold d-block mb-1">T-23</label>
-                                        <field name="talla_23" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_23" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_24" class="fw-bold d-block mb-1">T-24</label>
-                                        <field name="talla_24" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_24" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_25" class="fw-bold d-block mb-1">T-25</label>
-                                        <field name="talla_25" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_25" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_26" class="fw-bold d-block mb-1">T-26</label>
-                                        <field name="talla_26" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_26" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_27" class="fw-bold d-block mb-1">T-27</label>
-                                        <field name="talla_27" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_27" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_28" class="fw-bold d-block mb-1">T-28</label>
-                                        <field name="talla_28" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_28" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_29" class="fw-bold d-block mb-1">T-29</label>
-                                        <field name="talla_29" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_29" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_30" class="fw-bold d-block mb-1">T-30</label>
-                                        <field name="talla_30" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_30" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_31" class="fw-bold d-block mb-1">T-31</label>
-                                        <field name="talla_31" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_31" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_32" class="fw-bold d-block mb-1">T-32</label>
-                                        <field name="talla_32" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_32" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_33" class="fw-bold d-block mb-1">T-33</label>
-                                        <field name="talla_33" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_33" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_34" class="fw-bold d-block mb-1">T-34</label>
-                                        <field name="talla_34" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_34" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_35" class="fw-bold d-block mb-1">T-35</label>
-                                        <field name="talla_35" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_35" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_36" class="fw-bold d-block mb-1">T-36</label>
-                                        <field name="talla_36" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_36" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_37" class="fw-bold d-block mb-1">T-37</label>
-                                        <field name="talla_37" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_37" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_38" class="fw-bold d-block mb-1">T-38</label>
-                                        <field name="talla_38" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_38" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_39" class="fw-bold d-block mb-1">T-39</label>
-                                        <field name="talla_39" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_39" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                     <div style="width: 60px;">
                                         <label for="talla_40" class="fw-bold d-block mb-1">T-40</label>
-                                        <field name="talla_40" nolabel="1" readonly="state != 'draft'" class="text-center"/>
+                                        <field name="talla_40" nolabel="1"
+                                            readonly="state != 'draft'" class="text-center" />
                                     </div>
                                 </div>
                             </div>
@@ -141,14 +174,15 @@
                         <page string="Labores de la Orden">
                             <field name="labor_ids" readonly="state != 'draft'">
                                 <list editable="bottom">
-                                    <field name="tipo_labor_id" string="Labor / Proceso"/>
-                                    <field name="tarifa_pago" widget="monetary" string="Precio por Par"/>
+                                    <field name="tipo_labor_id" string="Labor / Proceso" />
+                                    <field name="tarifa_pago" widget="monetary"
+                                        string="Precio por Par" />
                                 </list>
                             </field>
                         </page>
                     </notebook>
                 </sheet>
-                <chatter/>
+                <chatter />
             </form>
         </field>
     </record>
@@ -159,17 +193,17 @@
         <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
             <list string="Órdenes de Producción">
-                <field name="name"/>
-                <field name="cliente_id"/>
-                <field name="referencia_id"/>
-                <field name="total_pares"/>
-                <field name="fecha_creacion"/>
-                <field name="fecha_estimada"/>
-                <field name="state" widget="badge" 
-                       decoration-info="state == 'draft'" 
-                       decoration-warning="state == 'in_progress'"
-                       decoration-success="state == 'done'"
-                       decoration-danger="state == 'canceled'"/>
+                <field name="name" />
+                <field name="cliente_id" />
+                <field name="referencia_id" />
+                <field name="total_pares" />
+                <field name="fecha_creacion" />
+                <field name="fecha_estimada" />
+                <field name="state" widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-warning="state == 'in_progress'"
+                    decoration-success="state == 'done'"
+                    decoration-danger="state == 'canceled'" />
             </list>
         </field>
     </record>
@@ -180,17 +214,18 @@
         <field name="res_model">cara.mia.produccion</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('state', 'not in', ('done', 'canceled'))]</field>
-        <field name="view_ids" eval="[(5, 0, 0), 
+        <field name="view_ids"
+            eval="[(5, 0, 0), 
             (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_list')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]"/>
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]" />
     </record>
 
-    <!-- MENÚ PRINCIPAL Y SUBMENÚ ACTIVAS -->
-    <menuitem id="menu_caramia_production_root" name="Producción" sequence="10"/>
 
-    <menuitem id="menu_caramia_production_active" 
-              name="Órdenes de Producción" 
-              parent="menu_caramia_production_root" 
-              action="action_caramia_production_active" 
-              sequence="10"/>
+    <menuitem id="menu_caramia_production_root" name="Producción" sequence="10" />
+
+    <menuitem id="menu_caramia_production_active"
+        name="Órdenes de Producción"
+        parent="menu_caramia_production_root"
+        action="action_caramia_production_active"
+        sequence="10" />
 </odoo>

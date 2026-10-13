@@ -18,12 +18,11 @@
                         </h3>
                     </div>
 
-                    <!-- Selector Global de Tarifas en la Cabecera -->
                     <group>
                         <group>
                             <field name="tipo_tarifa_header" widget="radio" />
                         </group>
-                        <field name="precio_venta_sugerido" widget="monetary"/>
+                        <field name="precio_venta_sugerido" widget="monetary" />
                         <group>
                             <field name="costo_total_produccion" readonly="1" widget="monetary" />
                         </group>
@@ -55,8 +54,7 @@
                             </group>
                             <field name="labor_ids">
                                 <list editable="bottom">
-                                    <!-- Carga las labores maestras por defecto y permite añadir
-                                    nuevas al final -->
+                                    <field name="secuencia" widget="handle" />
                                     <field name="tipo_labor_id"
                                         options="{'no_open': True, 'no_create_edit': False}" />
                                     <field name="tarifa_pago" />

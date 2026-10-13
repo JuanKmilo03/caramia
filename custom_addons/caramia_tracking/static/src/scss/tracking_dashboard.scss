@@ -1,0 +1,5 @@
+.o_caramia_dashboard {
+    // Filas de la tabla de próximas entregas
+    .o_ct_tr_vencida > td   { background-color: #FBD3D3 !important; }   // rojo pastel: vencida
+    .o_ct_tr_estancada > td { background-color: #FDDDB8 !important; }   // naranja: estancada
+}

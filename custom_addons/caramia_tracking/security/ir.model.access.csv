@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cara_mia_produccion_seguimiento,cara.mia.produccion.seguimiento,model_cara_mia_produccion_seguimiento,caramia_tracking.group_production_tracking,1,0,0,0
