@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="assets_backend_caramia_ia" inherit_id="web.assets_backend" name="Cara Mia IA Assets">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" type="text/css" href="/caramia_agent/static/src/css/chat_flotante.css"/>
+                <script type="text/javascript" src="/caramia_agent/static/src/js/chat_flotante.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>

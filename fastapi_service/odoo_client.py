@@ -4,30 +4,28 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-URL = os.getenv("ODOO_URL")
-DB = os.getenv("ODOO_DB")
-USER = os.getenv("ODOO_USER")
-PASSWORD = os.getenv("ODOO_PASSWORD")
-
 class OdooClient:
     def __init__(self):
-        self.common = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/common')
-        # Autenticación: obtiene el ID del usuario (uid)
-        self.uid = self.common.authenticate(DB, USER, PASSWORD, {})
-        self.models = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object')
+        self.url = os.getenv("ODOO_URL")
+        self.db = os.getenv("ODOO_DB")
+        self.username = os.getenv("ODOO_USER")
+        self.password = os.getenv("ODOO_PASSWORD")
         
-        if not self.uid:
-            raise Exception("No se pudo autenticar con Odoo. Verifica las credenciales.")
+        try:
+            self.common = xmlrpc.client.ServerProxy(f'{self.url}/xmlrpc/2/common')
+            self.uid = self.common.authenticate(self.db, self.username, self.password, {})
+            self.models = xmlrpc.client.ServerProxy(f'{self.url}/xmlrpc/2/object')
+            if self.uid:
+                print("Conexión exitosa a Odoo XML-RPC")
+        except Exception as e:
+            print(f"Error conectando a Odoo: {e}")
 
-    def search_read(self, model_name, domain, fields):
-        """Busca registros en Odoo y devuelve los campos solicitados"""
-        return self.models.execute_kw(DB, self.uid, PASSWORD,
-            model_name, 'search_read', [domain], {'fields': fields})
-            
-    def create_record(self, model_name, values):
-        """Crea un nuevo registro en Odoo"""
-        return self.models.execute_kw(DB, self.uid, PASSWORD,
-            model_name, 'create', [values])
+    def buscar_datos(self, modelo, dominio, campos):
+        """Método genérico para buscar datos en módulos como caramia_production o facturacion"""
+        return self.models.execute_kw(
+            self.db, self.uid, self.password,
+            modelo, 'search_read', [dominio], {'fields': campos}
+        )
 
-# Instancia global para usar en nuestra API
+# Instancia global para ser reutilizada
 odoo_db = OdooClient()
