@@ -32,7 +32,6 @@
                                 <div class="col-4">
                                     <p class="mb-0 text-end fw-bold text-muted" t-esc="tipo_copia"/>
                                     <div class="mt-2" style="border: 1px solid #000; padding: 5px;">
-                                        <p class="mb-0"><strong>PEDIDO N°:</strong> <span t-field="doc.pedido_nro"/></p>
                                         <p class="mb-0"><strong>FORMA DE PAGO:</strong> <span t-field="doc.forma_pago"/></p>
                                         <p class="mb-0"><strong>FECHA VENCIMIENTO:</strong> <span t-field="doc.fecha_vencimiento"/></p>
                                         <p class="mb-0"><strong>N°:</strong> <span t-field="doc.name" class="fw-bold"/></p>

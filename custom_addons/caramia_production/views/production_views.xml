@@ -35,15 +35,12 @@
                     </div>
                     <group>
                         <group>
-                            <field name="cliente_id" placeholder="Seleccione cliente..."
-                                readonly="state != 'draft'" />
-                            <field name="referencia_id"
-                                options="{'no_create': true, 'no_create_edit': False, 'no_open': false}"
-                                placeholder="Seleccione modelo..." readonly="state != 'draft'" />
-                            <field name="sello" readonly="state != 'draft'" />
-                            <field name="color" readonly="state != 'draft'" />
-                            <field name="material" readonly="state != 'draft'" />
-                            <field name="factura_nro" readonly="state != 'draft'" />
+                            <field name="cliente_id" placeholder="Seleccione cliente..." readonly="state != 'draft'"/>
+                            <field name="referencia_id" options="{'no_create': true, 'no_create_edit': False, 'no_open': false}" placeholder="Seleccione modelo..." readonly="state != 'draft'"/>
+                            <field name="sello" readonly="state != 'draft'"/>
+                            <field name="color" readonly="state != 'draft'"/>
+                            <field name="material" readonly="state != 'draft'"/>
+                            <!-- <field name="factura_id" string="Factura N°" widget="many2one" decoration-bf="1" invisible="state != 'done'"/>-->
                         </group>
                         <group>
                             <field name="fecha_creacion" readonly="state != 'draft'" />

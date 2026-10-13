@@ -229,7 +229,7 @@
                                 <strong>FACTURA N°:</strong>
                             </td>
                             <td>
-                                <span t-esc="o.factura_nro or ''" />
+                                <span t-if="o.factura_id" t-esc="o.factura_id.name" />
                             </td>
                             <td style="vertical-align: middle; padding: 0; margin: 0;" rowspan="3">
                                 <img

@@ -61,7 +61,7 @@ class CaramiaProduction(models.Model):
     material = fields.Char(string='Material',)
     sello = fields.Char(string='Sello / Marca')
 
-    factura_nro = fields.Char(string='Factura N°')
+    #factura_id = fields.Many2one('cara.mia.facturacion', string='Factura N°', readonly=True, tracking=True)
 
     # Curva de tallas (21 a 40)
     talla_21 = fields.Integer(string='21', default=0)
