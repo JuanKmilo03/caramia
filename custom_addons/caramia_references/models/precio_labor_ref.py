@@ -3,7 +3,9 @@ from odoo import models, fields, api
 class LaborReferencia(models.Model):
     _name = 'cara.mia.precio.labor.ref'
     _description = 'Labores de Producción y Destajo'
-
+    _order = 'secuencia, id'
+    
+    secuencia = fields.Integer(string='Orden', default=10)
     referencia_id = fields.Many2one('cara.mia.referencia', string='Referencia', required=True, ondelete='cascade')
     
     tipo_labor_id = fields.Many2one(

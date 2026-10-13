@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="caramia_tracking.Stats">
+        <div class="o_caramia_dashboard p-3 overflow-auto h-100 bg-view">
+            <div t-if="state.loading" class="text-center text-muted p-5">Cargando…</div>
+            <t t-else="">
+                <t t-set="d" t-value="state.data"/>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="m-0">Estadísticas de producción</h3>
+                    <button class="btn btn-secondary" t-on-click="refresh">
+                        <i class="fa fa-refresh"/> Actualizar
+                    </button>
+                </div>
+                <!-- Próximas entregas -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title m-0">Próximas entregas</h5>
+                            <button class="btn btn-link" t-on-click="openPendientes">Ver todas</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Orden</th><th>Cliente</th><th class="text-end">Pares</th>
+                                        <th class="text-end">Días</th><th>Labor actual</th>
+                                        <th style="width:140px">Avance</th><th>Entrega</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="d.lista" t-as="o" t-key="o.id" role="button"
+                                        t-on-click="() => this.openOrder(o.id)"
+                                        t-att-class="o.vencida ? 'o_ct_tr_vencida' : (o.estancada ? 'o_ct_tr_estancada' : '')">
+                                        <td t-esc="o.name"/>
+                                        <td t-esc="o.cliente"/>
+                                        <td class="text-end" t-esc="o.pares"/>
+                                        <td class="text-end" t-esc="o.dias"/>
+                                        <td t-esc="o.cargo"/>
+                                        <td>
+                                            <div class="progress">
+                                                <div class="progress-bar" t-att-style="'width:' + o.progreso + '%'"/>
+                                            </div>
+                                        </td>
+                                        <td><t t-esc="fmtDate(o.fecha)"/><span t-if="o.vencida" class="badge text-bg-danger ms-1">Vencida</span></td>
+                                    </tr>
+                                    <tr t-if="!d.lista.length">
+                                        <td colspan="7" class="text-center text-muted">No hay entregas programadas.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Metas por periodo: programado vs real -->
+                <div class="row g-3 mb-3">
+                    <t t-foreach="periodos" t-as="p" t-key="p.key">
+                        <div class="col-12 col-lg-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="card-title" t-esc="p.titulo"/>
+                                        <span class="text-muted" t-esc="p.rango"/>
+                                    </div>
+                                    <div class="row text-center my-3">
+                                        <div class="col">
+                                            <div class="fs-2 fw-bold" t-esc="p.programado"/>
+                                            <div class="text-muted">Pares programados</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="fs-2 fw-bold text-success" t-esc="p.finalizado"/>
+                                            <div class="text-muted">Pares terminados</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="fs-2 fw-bold text-info" t-esc="p.procesado"/>
+                                            <div class="text-muted">Pares procesados (labores)</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small">
+                                        <span>Avance real contra programado</span>
+                                        <strong><t t-esc="pct(p.finalizado, p.programado)"/>%</strong>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             t-att-style="'width:' + pct(p.finalizado, p.programado) + '%'"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                
+                <!-- Entregas y alertas -->
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-lg-3">
+                        <div class="card h-100 text-center" role="button" t-on-click="openPendientes">
+                            <div class="card-body">
+                                <div class="fs-1 fw-bold" t-esc="d.entregas.pendientes"/>
+                                <div class="text-muted">Entregas pendientes</div>
+                                <div class="small"><t t-esc="d.entregas.pendientes_pares"/> pares</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card h-100 text-center" role="button" t-on-click="openVencidas">
+                            <div class="card-body">
+                                <div class="fs-1 fw-bold text-danger" t-esc="d.entregas.vencidas"/>
+                                <div class="text-muted">Entregas vencidas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card h-100 text-center" role="button" t-on-click="openProximas">
+                            <div class="card-body">
+                                <div class="fs-1 fw-bold text-warning" t-esc="d.entregas.proximas"/>
+                                <div class="text-muted">Entregas próximos 7 días</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card h-100 text-center" role="button" t-on-click="openEstancadas">
+                            <div class="card-body">
+                                <div class="fs-1 fw-bold text-danger" t-esc="d.estancadas"/>
+                                <div class="text-muted">Órdenes estancadas</div>
+                                <div class="small">de <t t-esc="d.activas"/> activas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- Gráficos por semana y mes -->
+                <div class="row g-3 mb-3">
+                    <t t-foreach="series" t-as="s" t-key="s.key">
+                        <div class="col-12 col-lg-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title" t-esc="s.titulo"/>
+                                    <div class="small mb-2">
+                                        <span class="badge bg-primary me-1">&#160;</span>Programado
+                                        <span class="badge bg-success ms-3 me-1">&#160;</span>Terminado
+                                    </div>
+                                    <div class="d-flex justify-content-around align-items-end" style="height:170px">
+                                        <t t-foreach="s.rows" t-as="r" t-key="r_index">
+                                            <div class="text-center">
+                                                <div class="d-flex align-items-end justify-content-center gap-1" style="height:150px">
+                                                    <div class="bg-primary" style="width:16px"
+                                                         t-att-style="'width:16px;height:' + barHeight(r.programado, s.rows) + 'px'"
+                                                         t-att-title="'Programado: ' + r.programado"/>
+                                                    <div class="bg-success" style="width:16px"
+                                                         t-att-style="'width:16px;height:' + barHeight(r.finalizado, s.rows) + 'px'"
+                                                         t-att-title="'Terminado: ' + r.finalizado"/>
+                                                </div>
+                                                <div class="small" t-att-class="r.actual ? 'fw-bold' : 'text-muted'" t-esc="r.label"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                
+
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_caramia_production_form_tracking" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.form.tracking</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="inherit_id" ref="caramia_production.view_caramia_production_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_cancel']" position="before">
+                <button name="action_set_stopped" string="Detener" type="object"
+                        invisible="state != 'in_progress'"/>
+                <button name="action_resume" string="Reanudar" type="object" class="oe_highlight"
+                        invisible="state != 'stopped'"/>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,in_progress,stopped,done</attribute>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="esta_estancada" invisible="1"/>
+                <div class="alert alert-danger mb-0" role="alert" invisible="not esta_estancada">
+                    <strong>Orden estancada: </strong><field name="motivo_estancamiento" nolabel="1" class="d-inline"/>
+                </div>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <div class="mb-3" invisible="state == 'draft'">
+                    <field name="etapas_html" widget="html" nolabel="1" readonly="1"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='total_pares']" position="after">
+                <field name="progreso" widget="progressbar" invisible="state == 'draft'"/>
+                <field name="cargo_actual" invisible="state == 'draft'"/>
+                <field name="dias_transcurridos" invisible="state == 'draft'"/>
+            </xpath>
+            <xpath expr="//field[@name='labor_ids']/list/field[@name='tipo_labor_id']" position="before">
+                <field name="sequence" widget="handle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- LISTA PRINCIPAL DE ÓRDENES: barra de avance -->
+    <record id="view_caramia_production_list_tracking" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.list.tracking</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="inherit_id" ref="caramia_production.view_caramia_production_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='total_pares']" position="after">
+                <field name="progreso" widget="progressbar" invisible="state == 'draft'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BUSCADOR AVANZADO (se aplica a la lista principal y a los listados del tablero) -->
+    <record id="view_caramia_production_search" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.search</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Orden"/>
+                <field name="cliente_id"/>
+                <field name="referencia_id"/>
+                <field name="fecha_estimada"/>
+                <filter name="f_draft" string="Borrador" domain="[('state', '=', 'draft')]"/>
+                <filter name="f_progress" string="En proceso" domain="[('state', '=', 'in_progress')]"/>
+                <filter name="f_stopped" string="Detenido" domain="[('state', '=', 'stopped')]"/>
+                <filter name="f_done" string="Finalizado" domain="[('state', '=', 'done')]"/>
+                <filter name="f_canceled" string="Cancelado" domain="[('state', '=', 'canceled')]"/>
+                <separator/>
+                <filter name="estancadas" string="Estancadas" domain="[('esta_estancada', '=', True)]"/>
+                <filter name="vencidas" string="Entrega vencida"
+                        domain="[('fecha_estimada', '&lt;', context_today().strftime('%Y-%m-%d')),
+                                 ('state', 'in', ('draft', 'in_progress', 'stopped'))]"/>
+                <filter name="proximas" string="Entrega próximos 7 días"
+                        domain="[('fecha_estimada', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('fecha_estimada', '&lt;=', (context_today() + datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
+                                 ('state', 'in', ('draft', 'in_progress', 'stopped'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="g_cliente" string="Cliente" context="{'group_by': 'cliente_id'}"/>
+                    <filter name="g_ref" string="Referencia" context="{'group_by': 'referencia_id'}"/>
+                    <filter name="g_cargo" string="Labor actual" context="{'group_by': 'proxima_labor_id'}"/>
+                    <filter name="g_entrega" string="Entrega (semana)" context="{'group_by': 'fecha_estimada:week'}"/>
+                    <filter name="g_entrega_m" string="Entrega (mes)" context="{'group_by': 'fecha_estimada:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>
