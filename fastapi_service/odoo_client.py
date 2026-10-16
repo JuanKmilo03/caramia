@@ -46,4 +46,20 @@ class OdooClient:
             print(f"Error ejecutando búsqueda en Odoo: {e}")
             return None
 
+    def crear_registro(self, modelo, valores):
+        if not self.conectar():
+            return None
+        
+        try:
+            # execute_kw espera un array con el diccionario de valores a crear
+            nuevo_id = self.models.execute_kw(
+                self.db, self.uid, self.password,
+                modelo, 'create',
+                [valores]
+            )
+            return nuevo_id
+        except Exception as e:
+            print(f"Error creando registro en Odoo: {e}")
+            return None
+
 odoo_db = OdooClient()
