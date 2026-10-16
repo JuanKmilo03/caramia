@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ======================================================= -->
+    <!-- VISTA KANBAN/DASHBOARD CABECERA DE TOTALES (ARRIBA)      -->
+    <!-- ======================================================= -->
+    <record id="view_cara_mia_cartera_dashboard_kanban" model="ir.ui.view">
+        <field name="name">cara.mia.cliente.cartera.resumen.kanban</field>
+        <field name="model">cara.mia.cliente.cartera.resumen</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" create="false">
+                <field name="cliente_id"/>
+                <field name="monto_total"/>
+                <field name="total_abonado"/>
+                <field name="saldo_pendiente"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-3 border rounded shadow-sm bg-white">
+                            <div class="o_kanban_record_top mb-2">
+                                <strong class="o_kanban_record_title fs-5 text-primary">
+                                    <field name="cliente_id"/>
+                                </strong>
+                            </div>
+                            <div class="row text-center mt-2">
+                                <div class="col-4 border-end">
+                                    <span class="text-muted d-block small">TOTAL FACTURA</span>
+                                    <strong class="text-dark"><field name="monto_total" widget="monetary"/></strong>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <span class="text-muted d-block small">TOTAL ABONO</span>
+                                    <strong class="text-success"><field name="total_abonado" widget="monetary"/></strong>
+                                </div>
+                                <div class="col-4">
+                                    <span class="text-muted d-block small">SALDO</span>
+                                    <strong class="text-danger fs-6"><field name="saldo_pendiente" widget="monetary"/></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ======================================================= -->
+    <!-- ALTERNATIVA: VISTA LISTA CON AGRUPACIÓN AUTOMÁTICA      -->
+    <!-- ======================================================= -->
+    <record id="view_cara_mia_cliente_cartera_resumen_list" model="ir.ui.view">
+        <field name="name">cara.mia.cliente.cartera.resumen.list</field>
+        <field name="model">cara.mia.cliente.cartera.resumen</field>
+        <field name="arch" type="xml">
+            <list string="CUENTAS POR COBRAR ACTIVAS" create="false" edit="false" delete="false">
+                <field name="cliente_id" string="CLIENTE"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="monto_total" string="TOTAL FACTURA" sum="TOTAL FACTURA" widget="monetary"/>
+                <field name="total_abonado" string="TOTAL ABONO" sum="TOTAL ABONO" widget="monetary"/>
+                <field name="saldo_pendiente" string="SALDO" sum="SALDO GENERAL" widget="monetary" decoration-bf="1" decoration-danger="saldo_pendiente &gt; 0"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Acción por Defecto que abre Kanban (Dashboard Arriba) y Lista Abajo -->
+    <record id="action_cara_mia_resumen_cuentas_activas" model="ir.actions.act_window">
+        <field name="name">Cuentas por Cobrar Activas</field>
+        <field name="res_model">cara.mia.cliente.cartera.resumen</field>
+        <field name="view_mode">kanban,list</field>
+        <field name="view_id" ref="view_cara_mia_cartera_dashboard_kanban"/>
+    </record>
+
+</odoo>

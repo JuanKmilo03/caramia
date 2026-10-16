@@ -34,8 +34,7 @@
 
     <menuitem id="menu_caramia_employee_root" 
               name="Empleados" 
-              sequence="15" 
-              web_icon="caramia_employee,static/description/icon.png"/>
+              sequence="15"/>
 
     <menuitem id="menu_caramia_employee_main" 
               name="Lista de Empleados" 

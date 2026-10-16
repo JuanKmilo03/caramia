@@ -56,7 +56,7 @@ class CaramiaProductionTracking(models.Model):
     def _compute_etapas_html(self):
         oro, gris, naranja = '#C9A227', '#adb5bd', '#fd7e14'
         for rec in self:
-            labores = rec.labor_ids.sorted(lambda l: (l.sequence, l.id))
+            labores = rec.labor_ids.sorted(lambda l: l.sequence)
             if not labores:
                 rec.etapas_html = False
                 continue
@@ -126,12 +126,10 @@ class CaramiaProductionTracking(models.Model):
         today = fields.Date.context_today(self)
 
         for rec in self:
-            # Días transcurridos desde la creación
             fin = rec.fecha_finalizacion.date() if rec.fecha_finalizacion else today
             rec.dias_transcurridos = (fin - rec.fecha_creacion).days if rec.fecha_creacion else 0
 
-            # Avance por labores (según el orden definido)
-            labores = rec.labor_ids.sorted(lambda l: (l.sequence, l.id))
+            labores = rec.labor_ids.sorted(lambda l: l.sequence)
             registros = rec.registro_trabajo_ids.filtered('empleado_id')
             hechas_ids = set(registros.mapped('tipo_labor_id').ids)
             pendientes = labores.filtered(lambda l: l.tipo_labor_id.id not in hechas_ids)

@@ -9,7 +9,7 @@ class CaramiaCustomer(models.Model):
     cliente_id = fields.Char(string='ID Cliente', required=True, copy=False, readonly=True, default='Nuevo')
     telefono_cliente = fields.Char(string='Teléfono')
     direccion = fields.Text(string='Dirección')
-    sello = fields.Char(string='Sello / Marca')
+    sello = fields.Char(string='Sello / Marca', required=True)
 
     @api.model_create_multi
     def create(self, vals_list):

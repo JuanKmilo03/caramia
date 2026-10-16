@@ -7,7 +7,8 @@
     'depends': ['base', 'mail', 'caramia_production', 'caramia_customer'],
     'data': [
         'security/ir.model.access.csv',
-        'data/sequence.xml',
+        'data/sequence_fac.xml',
+        'data/sequence_cc.xml',
         'views/facturacion_views.xml',
         'reports/facturacion_report.xml',
     ],

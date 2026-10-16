@@ -1,5 +1,4 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
 
 class CaramiaFacturacionLinea(models.Model):
     _name = 'cara.mia.facturacion.linea'

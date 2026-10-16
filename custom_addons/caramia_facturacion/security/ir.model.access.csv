@@ -1,3 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_cara_mia_facturacion,cara.mia.facturacion,model_cara_mia_facturacion,,1,1,1,1
-access_cara_mia_facturacion_linea,cara.mia.facturacion.linea,model_cara_mia_facturacion_linea,,1,1,1,1
+access_cara_mia_facturacion,cara.mia.facturacion,model_cara_mia_facturacion,base.group_user,1,1,1,1
+access_cara_mia_facturacion_linea,cara.mia.facturacion.linea,model_cara_mia_facturacion_linea,base.group_user,1,1,1,1
+access_cara_mia_cuenta_cobro,cara.mia.cuenta.cobro,model_cara_mia_cuenta_cobro,base.group_user,1,1,1,1
+access_cara_mia_pago_linea,cara.mia.pago.linea,model_cara_mia_pago_linea,base.group_user,1,1,1,1
+access_cara_mia_cuenta_anular_wizard,cara.mia.cuenta.anular.wizard,model_cara_mia_cuenta_anular_wizard,base.group_user,1,1,1,1

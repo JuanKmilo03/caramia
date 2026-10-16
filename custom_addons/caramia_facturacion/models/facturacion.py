@@ -33,14 +33,23 @@ class CaramiaFacturacion(models.Model):
 
     estado = fields.Selection([
         ('borrador', 'Borrador'),
-        ('emitida', 'Emitida')
+        ('emitida', 'Emitida'),
+        ('pagada', 'Pagada / Saldada'),
+        ('anulada', 'Anulada')
     ], string='Estado', default='borrador', tracking=True)
+
+    # Relación con la Cuenta de Cobro generada al emitir
+    cuenta_cobro_id = fields.Many2one('cara.mia.cuenta.cobro', string='Cuenta de Cobro Relacionada', readonly=True, tracking=True)
 
     @api.depends('linea_ids.total_linea')
     def _compute_totales(self):
         for rec in self:
             rec.total_general = sum(line.total_linea for line in rec.linea_ids)
-            rec.saldo_pendiente = rec.total_general if rec.estado != 'pagada' else 0.0
+            # El saldo se sincroniza o maneja desde la cuenta de cobro si está emitida
+            if rec.cuenta_cobro_id:
+                rec.saldo_pendiente = rec.cuenta_cobro_id.saldo_pendiente
+            else:
+                rec.saldo_pendiente = rec.total_general if rec.estado not in ['pagada', 'anulada'] else 0.0
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -62,12 +71,24 @@ class CaramiaFacturacion(models.Model):
                 if linea.produccion_id:
                     linea.produccion_id.write({'factura_id': rec.id})
 
+            # Crear automáticamente la Cuenta de Cobro asociada al emitir
+            if not rec.cuenta_cobro_id:
+                cuenta_vals = {
+                    'factura_id': rec.id,
+                    'cliente_id': rec.cliente_id.id,
+                    'fecha_vencimiento': rec.fecha_vencimiento,
+                    'monto_total': rec.total_general,
+                }
+                cuenta = self.env['cara.mia.cuenta.cobro'].create(cuenta_vals)
+                rec.cuenta_cobro_id = cuenta.id
+
     def action_cancelar(self):
         for rec in self:
+            if rec.cuenta_cobro_id and rec.cuenta_cobro_id.estado not in ['borrador', 'anulada']:
+                raise ValidationError("No se puede regresar a borrador una factura cuya cuenta de cobro ya tiene movimientos o está activa.")
             rec.write({'estado': 'borrador'})
 
     def action_imprimir_remision(self):
-        # Llama a la acción del reporte PDF que creamos anteriormente
         return self.env.ref('caramia_facturacion.action_report_remision_doble').report_action(self)
 
 class CaramiaProductionInherit(models.Model):

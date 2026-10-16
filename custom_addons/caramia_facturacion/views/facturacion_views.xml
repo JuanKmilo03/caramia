@@ -1,39 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- VISTA DE FORMULARIO -->
+
+    <!-- ======================================================= -->
+    <!-- 1. VISTA Y FORMULARIO DE FACTURACIÓN / REMISIONES       -->
+    <!-- ======================================================= -->
     <record id="view_caramia_facturacion_form" model="ir.ui.view">
         <field name="name">cara.mia.facturacion.form</field>
         <field name="model">cara.mia.facturacion</field>
         <field name="arch" type="xml">
             <form string="Remisión / Facturación">
                 <header>
-                    <button name="action_emitir"
-                        string="Emitir Remisión"
-                        type="object"
-                        class="oe_highlight"
-                        invisible="estado != 'borrador'" />
-
-                    <button name="action_imprimir_remision"
-                        string="Imprimir"
-                        type="object"
-                        icon="fa-print"
-                        class="oe_highlight"
-                        invisible="estado == 'borrador'" />
-
-                    <button name="action_cancelar"
-                        string="Volver a Borrador"
-                        type="object"
-                        invisible="estado == 'borrador'" />
-
-                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida" />
+                    <button name="action_emitir" string="Emitir Remisión" type="object" class="oe_highlight" invisible="estado != 'borrador'" />
+                    <button name="action_imprimir_remision" string="Imprimir" type="object" icon="fa-print" class="oe_highlight" invisible="estado == 'borrador'" />
+                    <button name="action_cancelar" string="Volver a Borrador" type="object" invisible="estado == 'borrador'" />
+                    <field name="estado" widget="statusbar" statusbar_visible="borrador,emitida,pagada" />
                 </header>
                 <sheet>
-                    <!-- CAMBIO: Campo de moneda oculto FUERA de los groups para evitar espacios
-                    vacíos -->
                     <field name="currency_id" invisible="True" />
-
-                    <h2 class="text-primary">Remisión <field name="name" class="oe_inline"
-                            readonly="1" /></h2>
+                    <h2 class="text-primary">Remisión <field name="name" class="oe_inline" readonly="1" /></h2>
                     <group>
                         <group>
                             <field name="cliente_id" placeholder="Seleccione el Cliente..." />
@@ -52,24 +36,17 @@
                         <page string="Órdenes de Producción">
                             <field name="linea_ids" context="{'default_facturacion_id': id}">
                                 <list editable="bottom">
-                                    <field name="produccion_id"
-                                        domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]"
-                                        options="{'no_create': True}" />
+                                    <field name="produccion_id" domain="[('cliente_id', '=', parent.cliente_id), ('state', '=', 'done')]" options="{'no_create': True}" />
                                     <field name="descripcion" />
                                     <field name="cantidad" sum="Total Pares" />
                                     <field name="valor_unitario" />
                                     <field name="total_linea" sum="Suma Total" />
-                                    <!-- CAMBIO: column_invisible en lugar de invisible para vistas
-                                    de lista -->
                                     <field name="currency_id" column_invisible="True" />
                                 </list>
                             </field>
                             <group class="oe_subtotal_footer oe_right">
-                                <field name="total_general" class="oe_subtotal_footer_separator"
-                                    widget="monetary" />
-                                <field name="saldo_pendiente"
-                                    class="oe_subtotal_footer_separator text-danger"
-                                    widget="monetary" />
+                                <field name="total_general" class="oe_subtotal_footer_separator" widget="monetary" />
+                                <field name="saldo_pendiente" class="oe_subtotal_footer_separator text-danger" widget="monetary" />
                             </group>
                         </page>
                     </notebook>
@@ -78,59 +55,231 @@
         </field>
     </record>
 
-    <!-- NUEVA VISTA DE LISTA -->
     <record id="view_caramia_facturacion_list" model="ir.ui.view">
         <field name="name">cara.mia.facturacion.list</field>
         <field name="model">cara.mia.facturacion</field>
         <field name="arch" type="xml">
-            <list string="Remisiones / Facturación"
-                decoration-info="estado == 'borrador'"
-                decoration-success="estado == 'pagada'">
-
+            <list string="Remisiones / Facturación" decoration-info="estado == 'borrador'" decoration-success="estado == 'pagada'">
                 <field name="name" string="N° Factura" />
                 <field name="cliente_id" />
                 <field name="fecha_facturacion" />
                 <field name="fecha_vencimiento" />
                 <field name="forma_pago" />
-                <!-- CAMBIO: column_invisible en lugar de invisible para la tabla principal -->
                 <field name="total_general" string="Valor Total" widget="monetary" decoration-bf="1" />
                 <field name="currency_id" column_invisible="True" />
-                <!-- Estado con colores según la etapa -->
-                <field name="estado" widget="badge"
-                    decoration-info="estado == 'borrador'"
-                    decoration-primary="estado == 'emitida'"
-                    decoration-success="estado == 'pagada'" />
+                <field name="estado" widget="badge" decoration-info="estado == 'borrador'" decoration-primary="estado == 'emitida'" decoration-success="estado == 'pagada'" decoration-danger="estado == 'anulada'" />
             </list>
         </field>
     </record>
 
-    <!-- Inyectamos el campo Factura en el FORMULARIO de Producción -->
+    <!-- INHERIT PRODUCCIÓN -->
     <record id="view_produccion_formulario_inherit_factura" model="ir.ui.view">
         <field name="name">cara.mia.produccion.form.inherit</field>
         <field name="model">cara.mia.produccion</field>
-        <!-- Referencia al formulario original en el módulo de producción -->
         <field name="inherit_id" ref="caramia_production.view_caramia_production_form" />
         <field name="arch" type="xml">
-            <!-- Buscamos el campo 'material' y ponemos la factura justo después -->
             <xpath expr="//field[@name='material']" position="after">
-                <field name="factura_id"
-                    string="Factura N°"
-                    widget="many2one"
-                    decoration-bf="1"
-                    invisible="state != 'done'" />
+                <field name="factura_id" string="Factura N°" widget="many2one" decoration-bf="1" invisible="state != 'done'" />
             </xpath>
         </field>
     </record>
 
+    <!-- ======================================================= -->
+    <!-- 2. RESUMEN POR CLIENTE (DISEÑO COMO LA IMAGEN EXCEL)    -->
+    <!-- ======================================================= -->
+    <record id="view_cara_mia_cliente_cartera_resumen_list" model="ir.ui.view">
+        <field name="name">cara.mia.cliente.cartera.resumen.list</field>
+        <field name="model">cara.mia.cliente.cartera.resumen</field>
+        <field name="arch" type="xml">
+            <list string="Cuentas por Cobrar Activas por Cliente" create="false" edit="false" delete="false">
+                <field name="cliente_id" string="CLIENTE"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="monto_total" string="TOTAL FACTURA" sum="Total Facturas" widget="monetary"/>
+                <field name="total_abonado" string="TOTAL ABONO" sum="Total Abonos" widget="monetary"/>
+                <field name="saldo_pendiente" string="SALDO" sum="SALDO GENERAL" widget="monetary" decoration-bf="1" decoration-danger="saldo_pendiente &gt; 0"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ======================================================= -->
+    <!-- 3. VISTAS DE DETALLE DE CUENTAS DE COBRO               -->
+    <!-- ======================================================= -->
+    <record id="view_cara_mia_cuenta_cobro_form" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.form</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <form string="Cuenta de Cobro">
+                <header>
+                    <button name="action_registrar_pago_wizard" string="Registrar Abono / Pago" type="object" class="oe_highlight" invisible="estado in ['saldada', 'anulada']"/>
+                    <button name="action_anular_cuenta" string="Anular Cuenta" type="object" class="btn-danger" invisible="estado == 'anulada'"/>
+                    <field name="estado" widget="statusbar" statusbar_visible="vigente,vencida,saldada,anulada"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Datos del Cliente y Factura">
+                            <field name="factura_id" readonly="1"/>
+                            <field name="cliente_id" readonly="1"/>
+                            <field name="fecha_emision"/>
+                            <field name="fecha_vencimiento"/>
+                        </group>
+                        <group string="Saldos">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="monto_total" widget="monetary"/>
+                            <field name="total_abonado" widget="monetary"/>
+                            <field name="saldo_pendiente" widget="monetary" class="oe_subtotal_footer_separator text-danger"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Historial de Abonos / Pagos">
+                            <field name="pago_linea_ids" readonly="1">
+                                <list string="Abonos Registrados">
+                                    <field name="fecha_pago"/>
+                                    <field name="metodo_pago"/>
+                                    <field name="referencia_pago"/>
+                                    <field name="monto_pago" widget="monetary"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Observaciones y Anulación" invisible="not motivo_anulacion and not observaciones">
+                            <group>
+                                <field name="observaciones"/>
+                                <field name="motivo_anulacion" invisible="not motivo_anulacion"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cara_mia_cuenta_cobro_list" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.list</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <list string="Detalle de Cuentas Activas" decoration-danger="estado == 'vencida'" decoration-info="estado == 'vigente'">
+                <field name="name"/>
+                <field name="factura_id"/>
+                <field name="cliente_id"/>
+                <field name="fecha_emision"/>
+                <field name="fecha_vencimiento"/>
+                <field name="monto_total" sum="Monto Total" widget="monetary"/>
+                <field name="total_abonado" sum="Total Abonado" widget="monetary"/>
+                <field name="saldo_pendiente" sum="Saldo Total" widget="monetary"/>
+                <field name="estado" widget="badge" decoration-danger="estado == 'vencida'" decoration-info="estado == 'vigente'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cara_mia_cuenta_cobro_historial_list" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.historial.list</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Pagos y Cuentas" create="false" decoration-success="estado == 'saldada'" decoration-muted="estado == 'anulada'">
+                <field name="name"/>
+                <field name="factura_id"/>
+                <field name="cliente_id"/>
+                <field name="fecha_vencimiento"/>
+                <field name="monto_total" widget="monetary"/>
+                <field name="total_abonado" widget="monetary"/>
+                <field name="saldo_pendiente" widget="monetary"/>
+                <field name="estado" widget="badge" decoration-success="estado == 'saldada'" decoration-muted="estado == 'anulada'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ======================================================= -->
+    <!-- 4. WIZARDS                                             -->
+    <!-- ======================================================= -->
+    <record id="view_cara_mia_cuenta_anular_wizard_form" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.anular.wizard.form</field>
+        <field name="model">cara.mia.cuenta.anular.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmar Anulación de Cuenta de Cobro">
+                <p class="text-danger">
+                    <strong>Atención:</strong> Al anular esta cuenta de cobro, la factura asociada cambiará a estado Anulada. Debe justificar el motivo.
+                </p>
+                <group>
+                    <field name="cuenta_id" readonly="1"/>
+                    <field name="motivo" placeholder="Indique detalladamente la razón de anulación..." required="1"/>
+                </group>
+                <footer>
+                    <button name="action_confirmar_anulacion" string="Confirmar Anulación" type="object" class="btn-danger"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cara_mia_pago_linea_form" model="ir.ui.view">
+        <field name="name">cara.mia.pago.linea.form</field>
+        <field name="model">cara.mia.pago.linea</field>
+        <field name="arch" type="xml">
+            <form string="Registrar Abono o Pago">
+                <group>
+                    <group>
+                        <field name="cuenta_cobro_id" readonly="1"/>
+                        <field name="fecha_pago"/>
+                        <field name="monto_pago" widget="monetary"/>
+                    </group>
+                    <group>
+                        <field name="metodo_pago"/>
+                        <field name="referencia_pago" placeholder="Ej: N° Consignación o Transferencia"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Guardar Abono" class="btn-primary" special="save"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ======================================================= -->
+    <!-- 5. ACCIONES DE VENTANA                                  -->
+    <!-- ======================================================= -->
     <record id="action_caramia_facturacion" model="ir.actions.act_window">
         <field name="name">Remisiones y Facturación</field>
         <field name="res_model">cara.mia.facturacion</field>
         <field name="view_mode">list,form</field>
-        <!-- Enlazamos la nueva vista de lista explícitamente -->
         <field name="view_id" ref="view_caramia_facturacion_list" />
     </record>
 
+    <record id="action_cara_mia_resumen_cuentas_activas" model="ir.actions.act_window">
+        <field name="name">Cuentas por Cobrar Activas</field>
+        <field name="res_model">cara.mia.cliente.cartera.resumen</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_cara_mia_cliente_cartera_resumen_list"/>
+    </record>
+
+    <record id="action_cara_mia_cuentas_activas_detalle" model="ir.actions.act_window">
+        <field name="name">Detalle de Cuentas Activas</field>
+        <field name="res_model">cara.mia.cuenta.cobro</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('estado', 'in', ['vigente', 'vencida'])]</field>
+        <field name="view_id" ref="view_cara_mia_cuenta_cobro_list"/>
+    </record>
+
+    <record id="action_cara_mia_historial_pagos" model="ir.actions.act_window">
+        <field name="name">Historial de Pagos</field>
+        <field name="res_model">cara.mia.cuenta.cobro</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('estado', 'in', ['saldada', 'anulada'])]</field>
+        <field name="view_id" ref="view_cara_mia_cuenta_cobro_historial_list"/>
+    </record>
+
+    <!-- ======================================================= -->
+    <!-- 6. MENÚ ÚNICO UNIFICADO DENTRO DE FACTURACIÓN          -->
+    <!-- ======================================================= -->
     <menuitem id="menu_caramia_facturacion_root" name="Facturación" sequence="20" />
-    <menuitem id="menu_caramia_facturacion_sub" name="Generar Remisión"
-        parent="menu_caramia_facturacion_root" action="action_caramia_facturacion" sequence="10" />
+
+    <menuitem id="menu_caramia_facturacion_sub" name="Generar Remisión" parent="menu_caramia_facturacion_root" action="action_caramia_facturacion" sequence="10" />
+
+    <menuitem id="menu_cara_mia_cobros" name="Cuentas por Cobrar" parent="menu_caramia_facturacion_root" sequence="20"/>
+    <menuitem id="menu_cara_mia_resumen_cuentas_item" name="Cuentas Activas (Por Cliente)" parent="menu_cara_mia_cobros" action="action_cara_mia_resumen_cuentas_activas" sequence="1"/>
+    <menuitem id="menu_cara_mia_cuentas_activas_item" name="Detalle Cuentas Activas" parent="menu_cara_mia_cobros" action="action_cara_mia_cuentas_activas_detalle" sequence="2"/>
+    <menuitem id="menu_cara_mia_historial_pagos_item" name="Historial Pagos" parent="menu_cara_mia_cobros" action="action_cara_mia_historial_pagos" sequence="3"/>
+
 </odoo>
