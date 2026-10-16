@@ -1,33 +1,65 @@
 import xmlrpc.client
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-URL = os.getenv("ODOO_URL")
-DB = os.getenv("ODOO_DB")
-USER = os.getenv("ODOO_USER")
-PASSWORD = os.getenv("ODOO_PASSWORD")
 
 class OdooClient:
     def __init__(self):
-        self.common = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/common')
-        # Autenticación: obtiene el ID del usuario (uid)
-        self.uid = self.common.authenticate(DB, USER, PASSWORD, {})
-        self.models = xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object')
-        
-        if not self.uid:
-            raise Exception("No se pudo autenticar con Odoo. Verifica las credenciales.")
+        self.url = os.getenv("ODOO_URL")
+        self.db = os.getenv("ODOO_DB")
+        self.username = os.getenv("ODOO_USER")
+        self.password = os.getenv("ODOO_PASSWORD")
+        self.models = None
+        self.uid = None
 
-    def search_read(self, model_name, domain, fields):
-        """Busca registros en Odoo y devuelve los campos solicitados"""
-        return self.models.execute_kw(DB, self.uid, PASSWORD,
-            model_name, 'search_read', [domain], {'fields': fields})
+    def conectar(self):
+        if self.uid and self.models:
+            return True
             
-    def create_record(self, model_name, values):
-        """Crea un nuevo registro en Odoo"""
-        return self.models.execute_kw(DB, self.uid, PASSWORD,
-            model_name, 'create', [values])
+        try:
+            print(f"Intentando conectar a Odoo en {self.url}...")
+            common = xmlrpc.client.ServerProxy(f'{self.url}/xmlrpc/2/common')
+            self.uid = common.authenticate(self.db, self.username, self.password, {})
+            
+            if self.uid:
+                self.models = xmlrpc.client.ServerProxy(f'{self.url}/xmlrpc/2/object')
+                print("Conexión exitosa a Odoo XML-RPC")
+                return True
+            else:
+                print("Fallo la autenticación: Credenciales o Base de Datos incorrectas.")
+                return False
+        except Exception as e:
+            print(f"Error conectando a Odoo: {e}")
+            return False
 
-# Instancia global para usar en nuestra API
+    def buscar_datos(self, modelo, dominio, campos):
+        if not self.conectar():
+            return None
+            
+        try:
+            registros = self.models.execute_kw(
+                self.db, self.uid, self.password,
+                modelo, 'search_read',
+                [dominio],
+                {'fields': campos}
+            )
+            return registros
+        except Exception as e:
+            print(f"Error ejecutando búsqueda en Odoo: {e}")
+            return None
+
+    def crear_registro(self, modelo, valores):
+        if not self.conectar():
+            return None
+        
+        try:
+            # execute_kw espera un array con el diccionario de valores a crear
+            nuevo_id = self.models.execute_kw(
+                self.db, self.uid, self.password,
+                modelo, 'create',
+                [valores]
+            )
+            return nuevo_id
+        except Exception as e:
+            print(f"Error creando registro en Odoo: {e}")
+            return None
+
 odoo_db = OdooClient()
