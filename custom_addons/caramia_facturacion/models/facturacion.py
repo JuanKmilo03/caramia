@@ -1,5 +1,6 @@
-from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
+from odoo.exceptions import UserError, ValidationError
+
 
 class CaramiaFacturacion(models.Model):
     _name = 'cara.mia.facturacion'
@@ -8,13 +9,13 @@ class CaramiaFacturacion(models.Model):
     _order = 'fecha_facturacion desc, id desc'
 
     name = fields.Char(string='N° Factura', required=True, copy=False, readonly=True, default='Nuevo', tracking=True)
-    
+
     # Selección del Cliente y datos automáticos
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
     cliente_identificador = fields.Char(related='cliente_id.cliente_id', string='ID Cliente', readonly=True)
     cliente_telefono = fields.Char(related='cliente_id.telefono_cliente', string='Teléfono', readonly=True)
     cliente_direccion = fields.Text(related='cliente_id.direccion', string='Dirección', readonly=True)
-    
+
     # Líneas de la facturación (Múltiples órdenes)
     linea_ids = fields.One2many('cara.mia.facturacion.linea', 'facturacion_id', string='Artículos / Órdenes')
 
@@ -23,33 +24,44 @@ class CaramiaFacturacion(models.Model):
     fecha_vencimiento = fields.Date(string='Fecha de Vencimiento', required=True)
     forma_pago = fields.Selection([
         ('contado', 'Contado'),
-        ('credito', 'Crédito')
+        ('credito', 'Crédito'),
     ], string='Forma de Pago', required=True, default='contado')
 
     # Cálculos y Valores
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     total_general = fields.Monetary(string='Total', compute='_compute_totales', store=True)
-    saldo_pendiente = fields.Monetary(string='Saldo', compute='_compute_totales', store=True)
+    saldo_pendiente = fields.Monetary(string='Saldo', compute='_compute_saldo', store=True)
 
     estado = fields.Selection([
         ('borrador', 'Borrador'),
         ('emitida', 'Emitida'),
-        ('pagada', 'Pagada / Saldada'),
-        ('anulada', 'Anulada')
+        ('pagada', 'Pagada'),
+        ('anulada', 'Anulada'),
     ], string='Estado', default='borrador', tracking=True)
 
-    # Relación con la Cuenta de Cobro generada al emitir
-    cuenta_cobro_id = fields.Many2one('cara.mia.cuenta.cobro', string='Cuenta de Cobro Relacionada', readonly=True, tracking=True)
+    # Cuentas de cobro generadas al emitir (solo una puede estar activa)
+    cuenta_ids = fields.One2many('cara.mia.cuenta.cobro', 'factura_id', string='Cuentas de Cobro')
 
     @api.depends('linea_ids.total_linea')
     def _compute_totales(self):
         for rec in self:
-            rec.total_general = sum(line.total_linea for line in rec.linea_ids)
-            # El saldo se sincroniza o maneja desde la cuenta de cobro si está emitida
-            if rec.cuenta_cobro_id:
-                rec.saldo_pendiente = rec.cuenta_cobro_id.saldo_pendiente
+            rec.total_general = sum(rec.linea_ids.mapped('total_linea'))
+
+    @api.depends('estado', 'total_general', 'cuenta_ids.saldo_pendiente', 'cuenta_ids.estado')
+    def _compute_saldo(self):
+        for rec in self:
+            cuenta = rec._cuenta_vigente()
+            if cuenta:
+                rec.saldo_pendiente = cuenta.saldo_pendiente
+            elif rec.estado == 'pagada':
+                rec.saldo_pendiente = 0.0
             else:
-                rec.saldo_pendiente = rec.total_general if rec.estado not in ['pagada', 'anulada'] else 0.0
+                rec.saldo_pendiente = rec.total_general
+
+    def _cuenta_vigente(self):
+        """Cuenta de cobro no anulada de la factura (si existe)."""
+        self.ensure_one()
+        return self.cuenta_ids.filtered(lambda c: c.estado != 'anulada')[:1]
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -64,39 +76,54 @@ class CaramiaFacturacion(models.Model):
                 raise ValidationError("Debe agregar al menos una orden de producción para emitir la factura/remisión.")
             if rec.total_general <= 0:
                 raise ValidationError("El total de la factura debe ser mayor a cero.")
-            
+
             rec.write({'estado': 'emitida'})
-            
+
             for linea in rec.linea_ids:
                 if linea.produccion_id:
                     linea.produccion_id.write({'factura_id': rec.id})
 
-            # Crear automáticamente la Cuenta de Cobro asociada al emitir
-            if not rec.cuenta_cobro_id:
-                cuenta_vals = {
-                    'factura_id': rec.id,
-                    'cliente_id': rec.cliente_id.id,
-                    'fecha_vencimiento': rec.fecha_vencimiento,
-                    'monto_total': rec.total_general,
-                }
-                cuenta = self.env['cara.mia.cuenta.cobro'].create(cuenta_vals)
-                rec.cuenta_cobro_id = cuenta.id
+            rec._crear_cuenta_cobro()
+
+    def _crear_cuenta_cobro(self):
+        """Abre la cuenta de cobro de las facturas emitidas que aún no tienen una activa."""
+        Cuenta = self.env['cara.mia.cuenta.cobro']
+        for rec in self.filtered(lambda f: f.estado == 'emitida' and not f._cuenta_vigente()):
+            Cuenta.create({'factura_id': rec.id})
 
     def action_cancelar(self):
         for rec in self:
-            if rec.cuenta_cobro_id and rec.cuenta_cobro_id.estado not in ['borrador', 'anulada']:
-                raise ValidationError("No se puede regresar a borrador una factura cuya cuenta de cobro ya tiene movimientos o está activa.")
+            if rec._cuenta_vigente():
+                raise UserError(
+                    "La factura %s tiene una cuenta de cobro activa.\n"
+                    "Anule primero la cuenta de cobro para poder devolverla a borrador." % rec.name
+                )
             rec.write({'estado': 'borrador'})
 
+    def action_ver_cuenta(self):
+        self.ensure_one()
+        cuenta = self._cuenta_vigente() or self.cuenta_ids[:1]
+        if not cuenta:
+            raise UserError("Esta factura todavía no tiene cuenta de cobro.")
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Cuenta de Cobro',
+            'res_model': 'cara.mia.cuenta.cobro',
+            'res_id': cuenta.id,
+            'view_mode': 'form',
+        }
+
     def action_imprimir_remision(self):
+        # Llama a la acción del reporte PDF que creamos anteriormente
         return self.env.ref('caramia_facturacion.action_report_remision_doble').report_action(self)
+
 
 class CaramiaProductionInherit(models.Model):
     _inherit = 'cara.mia.produccion'
 
     factura_id = fields.Many2one(
-        'cara.mia.facturacion', 
-        string='Factura N°', 
-        readonly=True, 
-        tracking=True
+        'cara.mia.facturacion',
+        string='Factura N°',
+        readonly=True,
+        tracking=True,
     )

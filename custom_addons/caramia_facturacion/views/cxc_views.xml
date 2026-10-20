@@ -1,70 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ======================================================= -->
-    <!-- VISTA KANBAN/DASHBOARD CABECERA DE TOTALES (ARRIBA)      -->
-    <!-- ======================================================= -->
-    <record id="view_cara_mia_cartera_dashboard_kanban" model="ir.ui.view">
-        <field name="name">cara.mia.cliente.cartera.resumen.kanban</field>
-        <field name="model">cara.mia.cliente.cartera.resumen</field>
+    <!-- FORMULARIO DE LA CUENTA DE COBRO -->
+    <record id="view_cuenta_cobro_form" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.form</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_dashboard" create="false">
-                <field name="cliente_id"/>
-                <field name="monto_total"/>
-                <field name="total_abonado"/>
-                <field name="saldo_pendiente"/>
-                <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click p-3 border rounded shadow-sm bg-white">
-                            <div class="o_kanban_record_top mb-2">
-                                <strong class="o_kanban_record_title fs-5 text-primary">
-                                    <field name="cliente_id"/>
-                                </strong>
-                            </div>
-                            <div class="row text-center mt-2">
-                                <div class="col-4 border-end">
-                                    <span class="text-muted d-block small">TOTAL FACTURA</span>
-                                    <strong class="text-dark"><field name="monto_total" widget="monetary"/></strong>
-                                </div>
-                                <div class="col-4 border-end">
-                                    <span class="text-muted d-block small">TOTAL ABONO</span>
-                                    <strong class="text-success"><field name="total_abonado" widget="monetary"/></strong>
-                                </div>
-                                <div class="col-4">
-                                    <span class="text-muted d-block small">SALDO</span>
-                                    <strong class="text-danger fs-6"><field name="saldo_pendiente" widget="monetary"/></strong>
-                                </div>
-                            </div>
-                        </div>
-                    </t>
-                </templates>
-            </kanban>
+            <form string="Cuenta de Cobro">
+                <header>
+                    <button name="action_registrar_pago" string="Registrar pago" type="object"
+                            class="oe_highlight" invisible="estado not in ('vigente', 'vencida')"/>
+                    <button name="action_anular" string="Anular cuenta" type="object"
+                            invisible="estado not in ('vigente', 'vencida')"/>
+                    <field name="estado" widget="statusbar" statusbar_visible="vigente,vencida,saldada"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Anulada" bg_color="text-bg-danger"
+                            invisible="estado != 'anulada'"/>
+                    <widget name="web_ribbon" title="Saldada" bg_color="text-bg-success"
+                            invisible="estado != 'saldada'"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="alerta_cobro" invisible="1"/>
+                    <div class="alert alert-warning" role="alert" invisible="not alerta_cobro">
+                        <strong>Cuenta en alerta:</strong> lleva
+                        <field name="dias_sin_abono" nolabel="1" class="d-inline"/> días sin abonos.
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" string="CUENTA DE COBRO"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="cliente_id"/>
+                            <field name="factura_id"/>
+                            <field name="forma_pago"/>
+                        </group>
+                        <group>
+                            <field name="fecha_facturacion"/>
+                            <field name="fecha_vencimiento"/>
+                            <field name="monto_total"/>
+                            <field name="total_abonado"/>
+                            <field name="saldo_pendiente" class="fw-bold fs-4"/>
+                            <field name="fecha_ultimo_pago"/>
+                        </group>
+                    </group>
+                    <group string="Anulación" invisible="estado != 'anulada'">
+                        <field name="motivo_anulacion"/>
+                        <field name="fecha_anulacion"/>
+                        <field name="usuario_anulacion_id"/>
+                    </group>
+                    <notebook>
+                        <page string="Pagos y Abonos">
+                            <field name="pago_ids" readonly="estado == 'anulada'">
+                                <list editable="bottom">
+                                    <field name="fecha"/>
+                                    <field name="tipo" widget="badge" optional="show"/>
+                                    <field name="monto" sum="Total abonado"/>
+                                    <field name="metodo"/>
+                                    <field name="referencia"/>
+                                    <field name="observacion"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Observaciones">
+                            <field name="observaciones" placeholder="Notas sobre esta cuenta de cobro…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
         </field>
     </record>
 
-    <!-- ======================================================= -->
-    <!-- ALTERNATIVA: VISTA LISTA CON AGRUPACIÓN AUTOMÁTICA      -->
-    <!-- ======================================================= -->
-    <record id="view_cara_mia_cliente_cartera_resumen_list" model="ir.ui.view">
-        <field name="name">cara.mia.cliente.cartera.resumen.list</field>
-        <field name="model">cara.mia.cliente.cartera.resumen</field>
+    <!-- LISTA: CUENTAS POR COBRAR (vigentes y vencidas) -->
+    <record id="view_cuenta_cobro_list" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.list</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
         <field name="arch" type="xml">
-            <list string="CUENTAS POR COBRAR ACTIVAS" create="false" edit="false" delete="false">
-                <field name="cliente_id" string="CLIENTE"/>
-                <field name="currency_id" column_invisible="True"/>
-                <field name="monto_total" string="TOTAL FACTURA" sum="TOTAL FACTURA" widget="monetary"/>
-                <field name="total_abonado" string="TOTAL ABONO" sum="TOTAL ABONO" widget="monetary"/>
-                <field name="saldo_pendiente" string="SALDO" sum="SALDO GENERAL" widget="monetary" decoration-bf="1" decoration-danger="saldo_pendiente &gt; 0"/>
+            <list string="Cuentas por Cobrar" limit="1000"
+                  decoration-danger="estado == 'vencida'" decoration-warning="alerta_cobro">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="fecha_facturacion" optional="hide"/>
+                <field name="fecha_vencimiento"/>
+                <field name="forma_pago" optional="hide"/>
+                <field name="monto_total" sum="Total general"/>
+                <field name="total_abonado" sum="Total abonado"/>
+                <field name="saldo_pendiente" sum="Saldo pendiente"/>
+                <field name="dias_sin_abono" optional="show"/>
+                <field name="alerta_cobro" column_invisible="1"/>
+                <field name="estado" widget="badge" decoration-danger="estado == 'vencida'"
+                    decoration-info="estado == 'vigente'" />
+                <field name="currency_id" column_invisible="1"/>
             </list>
         </field>
     </record>
 
-    <!-- Acción por Defecto que abre Kanban (Dashboard Arriba) y Lista Abajo -->
-    <record id="action_cara_mia_resumen_cuentas_activas" model="ir.actions.act_window">
-        <field name="name">Cuentas por Cobrar Activas</field>
-        <field name="res_model">cara.mia.cliente.cartera.resumen</field>
-        <field name="view_mode">kanban,list</field>
-        <field name="view_id" ref="view_cara_mia_cartera_dashboard_kanban"/>
+    <!-- LISTA: HISTORIAL DE PAGOS (saldadas y anuladas) -->
+    <record id="view_cuenta_cobro_historial_list" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.historial.list</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Pagos" limit="1000" decoration-muted="estado == 'anulada'">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="fecha_vencimiento" optional="hide"/>
+                <field name="fecha_ultimo_pago"/>
+                <field name="monto_total" sum="Total"/>
+                <field name="total_abonado" sum="Abonado"/>
+                <field name="saldo_pendiente" sum="Saldo"/>
+                <field name="fecha_anulacion" optional="show"/>
+                <field name="motivo_anulacion" optional="show"/>
+                <field name="estado" widget="badge"
+                       decoration-success="estado == 'saldada'"
+                       decoration-danger="estado == 'anulada'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
     </record>
 
+    <!-- PIVOT: TOTAL GENERAL Y SALDO POR CLIENTE -->
+    <record id="view_cuenta_cobro_pivot" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.pivot</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <pivot string="Cuentas por Cobrar">
+                <field name="cliente_id" type="row"/>
+                <field name="monto_total" type="measure"/>
+                <field name="total_abonado" type="measure"/>
+                <field name="saldo_pendiente" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- BUSCADOR -->
+    <record id="view_cuenta_cobro_search" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.search</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="N° Factura"/>
+                <field name="cliente_id"/>
+                <field name="observaciones"/>
+                <field name="fecha_vencimiento"/>
+                <field name="fecha_facturacion"/>
+                <field name="saldo_pendiente" string="Saldo mayor o igual a" filter_domain="[('saldo_pendiente', '&gt;=', self)]"/>
+                <filter name="f_vigente" string="Vigente" domain="[('estado', '=', 'vigente')]"/>
+                <filter name="f_vencida" string="Vencida" domain="[('estado', '=', 'vencida')]"/>
+                <filter name="f_saldada" string="Saldada" domain="[('estado', '=', 'saldada')]"/>
+                <filter name="f_anulada" string="Anulada" domain="[('estado', '=', 'anulada')]"/>
+                <separator/>
+                <filter name="con_saldo" string="Con saldo pendiente" domain="[('saldo_pendiente', '&gt;', 0)]"/>
+                <filter name="f_alerta" string="En alerta (sin abonos)" domain="[('alerta_cobro', '=', True)]"/>
+                <filter name="vence_semana" string="Vence en 7 días"
+                        domain="[('fecha_vencimiento', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('fecha_vencimiento', '&lt;=', (context_today() + datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_cliente" string="Cliente" context="{'group_by': 'cliente_id'}"/>
+                    <filter name="g_estado" string="Estado" context="{'group_by': 'estado'}"/>
+                    <filter name="g_pago" string="Forma de pago" context="{'group_by': 'forma_pago'}"/>
+                    <filter name="g_venc" string="Vencimiento (mes)" context="{'group_by': 'fecha_vencimiento:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACCIONES -->
+    <record id="action_cuentas_por_cobrar" model="ir.actions.act_window">
+        <field name="name">Cuentas por Cobrar</field>
+        <field name="res_model">cara.mia.cuenta.cobro</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="domain">[('estado', 'in', ('vigente', 'vencida'))]</field>
+        <field name="search_view_id" ref="view_cuenta_cobro_search"/>
+    </record>
+
+    <record id="action_saldos_clientes" model="ir.actions.act_window">
+        <field name="name">Saldos por Cliente</field>
+        <field name="res_model">cara.mia.cuenta.cobro</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="domain">[('estado', 'in', ('vigente', 'vencida'))]</field>
+        <field name="search_view_id" ref="view_cuenta_cobro_search"/>
+        <field name="context">{'group_by': ['cliente_id']}</field>
+    </record>
+
+    <record id="action_historial_pagos" model="ir.actions.act_window">
+        <field name="name">Historial de Pagos</field>
+        <field name="res_model">cara.mia.cuenta.cobro</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('estado', 'in', ('saldada', 'anulada'))]</field>
+        <field name="search_view_id" ref="view_cuenta_cobro_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_cuenta_cobro_historial_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_cuenta_cobro_form')})]"/>
+    </record>
+    <record id="action_registrar_pago" model="ir.actions.act_window">
+        <field name="name">Registrar pago</field>
+        <field name="res_model">cara.mia.pago.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <!-- MENÚS -->
+    <menuitem id="menu_cuentas_por_cobrar" name="Cuentas por Cobrar" parent="menu_cara_mia_cobros"
+              action="action_cuentas_por_cobrar" sequence="10"/>
+    <menuitem id="menu_saldos_clientes" name="Saldos por Cliente" parent="menu_cara_mia_cobros"
+              action="action_saldos_clientes" sequence="20"/>
+    <menuitem id="menu_registrar_pago" name="Registrar Pago" parent="menu_cara_mia_cobros"
+              action="action_registrar_pago_wizard" sequence="30"/>
+   
 </odoo>

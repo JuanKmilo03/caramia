@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_cuentas_vencidas" model="ir.cron">
+        <field name="name">Cobros: actualizar estados y enviar alertas</field>
+        <field name="model_id" ref="model_cara_mia_cuenta_cobro"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_actualizar_vencidas()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <!-- Días sin abonos para que una cuenta vigente entre en alerta -->
+    <record id="param_dias_alerta_sin_abono" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.dias_alerta_sin_abono</field>
+        <field name="value">7</field>
+    </record>
+    <!-- Cada cuántos días se repite la notificación mientras siga en alerta -->
+    <record id="param_dias_reenvio_alerta" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.dias_reenvio_alerta</field>
+        <field name="value">4</field>
+    </record>
+
+        <!-- Días antes del vencimiento en que se avisa -->
+    <record id="param_dias_aviso_vencimiento" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.dias_aviso_vencimiento</field>
+        <field name="value">2</field>
+    </record>
+</odoo>

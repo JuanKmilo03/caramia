@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ANULAR CUENTA: confirmación + motivo obligatorio -->
+    <record id="view_cuenta_anular_wizard_form" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.anular.wizard.form</field>
+        <field name="model">cara.mia.cuenta.anular.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Anular cuenta de cobro">
+                <div class="alert alert-warning" role="alert">
+                    <strong>¿Confirma que desea anular esta cuenta de cobro?</strong><br/>
+                    La cuenta pasará al Historial de Pagos y no admitirá más pagos.
+                    Esta acción no se puede deshacer.
+                </div>
+                <group>
+                    <field name="cuenta_id"/>
+                    <field name="motivo" placeholder="Explique por qué se anula esta cuenta…"/>
+                </group>
+                <footer>
+                    <button name="action_confirmar_anulacion" string="Confirmar anulación" type="object"
+                            class="btn-danger"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- REGISTRAR PAGO A UNA O VARIAS FACTURAS -->
+    <record id="view_pago_wizard_form" model="ir.ui.view">
+        <field name="name">cara.mia.pago.wizard.form</field>
+        <field name="model">cara.mia.pago.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Registrar pago">
+                <field name="currency_id" invisible="1"/>
+                <field name="cuenta_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="cliente_id"/>
+                        <field name="monto"/>
+                        <field name="saldo_cliente"/>
+                    </group>
+                    <group>
+                        <field name="fecha"/>
+                        <field name="metodo"/>
+                        <field name="referencia"/>
+                        <field name="observacion"/>
+                    </group>
+                </group>
+                <div class="text-muted mb-2">
+                    Al escribir el monto recibido se reparte desde la factura más antigua.
+                    También puede ajustar manualmente el valor a aplicar en cada factura.
+                </div>
+                <field name="linea_ids">
+                    <list editable="bottom" create="false" delete="false">
+                        <field name="cuenta_id"/>
+                        <field name="fecha_vencimiento"/>
+                        <field name="estado" widget="badge"
+                               decoration-success="estado == 'vigente'"
+                               decoration-danger="estado == 'vencida'"/>
+                        <field name="saldo_pendiente"/>
+                        <field name="monto_aplicar"/>
+                        <field name="currency_id" column_invisible="1"/>
+                    </list>
+                </field>
+                <group class="oe_subtotal_footer">
+                    <field name="total_aplicado" class="oe_subtotal_footer_separator"/>
+                </group>
+                <footer>
+                    <button name="action_registrar" string="Registrar pago" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_registrar_pago_wizard" model="ir.actions.act_window">
+        <field name="name">Registrar pago</field>
+        <field name="res_model">cara.mia.pago.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

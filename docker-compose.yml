@@ -1,5 +1,4 @@
 services:
-  # 1. Servicio Base de Datos
   db:
     image: postgres:15
     environment:
@@ -9,7 +8,6 @@ services:
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
 
-  # 2. Servicio ERP Odoo
   odoo:
     build: .
     image: caramia-odoo:18.0
@@ -22,7 +20,6 @@ services:
       - ./config/odoo.conf:/etc/odoo/odoo.conf
       - ./custom_addons:/mnt/extra-addons
 
-  # 3. Servicio FastAPI (Asistente de IA)
   fastapi_ai:
     build: ./fastapi_service
     ports:
