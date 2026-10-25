@@ -1,140 +1,123 @@
 import os
 import json
+import redis
 from openai import AsyncOpenAI
-from odoo_client import odoo_db
+from tools.registry import TODAS_LAS_HERRAMIENTAS
+
+# Memoria a Corto Plazo
+
+redis_host = os.getenv("REDIS_HOST", "localhost")
+# decode_responses=True hace que Redis nos devuelva texto (strings) en lugar de bytes
+redis_client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=True)
 
 client = AsyncOpenAI(
     api_key=os.getenv("AI_API_KEY"),
     base_url="https://api.groq.com/openai/v1" 
 )
+MODELO = os.getenv("AI_MODEL", "openai/gpt-oss-20b")
 
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "consultar_clientes",
-            "description": "Consulta la lista de clientes registrados en la fábrica Cara Mia.",
-            "parameters": {"type": "object", "properties": {}}
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "crear_cliente",
-            "description": "Crea un nuevo cliente en la base de datos de Odoo.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "nombre_cliente": {"type": "string", "description": "Nombre del cliente"},
-                    "telefono_cliente": {"type": "string", "description": "Teléfono del cliente"},
-                    "direccion": {"type": "string", "description": "Dirección del cliente"},
-                    "sello": {"type": "string", "description": "Sello o marca"}
-                },
-                "required": ["nombre_cliente"]
-            }
-        }
-    }
-]
-
-async def procesar_chat(mensaje: str) -> str:
-    try:
-        # PRIMERA LLAMADA: Tu modelo original
-        respuesta = await client.chat.completions.create(
-            model="openai/gpt-oss-20b", 
-            messages=[
-                {
-                    "role": "system", 
-                    "content": """Eres el asistente del ERP Cara Mia. Tienes acceso real al sistema mediante herramientas.
-                    REGLA SUPREMA: Si el usuario te pide crear, agregar o registrar un cliente, ES OBLIGATORIO que uses la función 'crear_cliente' con los datos solicitados. NUNCA digas que no puedes hacerlo."""
-                },
-                {"role": "user", "content": mensaje}
-            ],
-            tools=tools,
-            tool_choice="auto" 
-        )
+def optimizar_tokens(mensajes, limite=8):
+    """Mantiene el System Prompt y los últimos N mensajes, evitando romper lógicas de tools."""
+    if len(mensajes) <= limite + 1:
+        return mensajes
         
-        mensaje_ia = respuesta.choices[0].message
+    system_prompt = mensajes[0]
+    corte = -limite
+    while corte < 0 and mensajes[corte].get("role") == "tool":
+        corte -= 1
+        
+    return [system_prompt] + mensajes[corte:]
 
-        print("=== RESPUESTA DE LA IA ===", flush=True)
-        print(f"Herramientas invocadas: {mensaje_ia.tool_calls}", flush=True)
-        print("==========================", flush=True)
-
-        if hasattr(mensaje_ia, 'tool_calls') and mensaje_ia.tool_calls:
-            
-            # Limpiamos el mensaje de campos ocultos que causan error
-            lista_herramientas = []
-            for t in mensaje_ia.tool_calls:
-                lista_herramientas.append({
-                    "id": t.id,
-                    "type": "function",
-                    "function": {
-                        "name": t.function.name,
-                        "arguments": t.function.arguments
-                    }
-                })
-                
-            mensaje_ia_seguro = {
-                "role": "assistant",
-                "content": mensaje_ia.content if mensaje_ia.content else "",
-                "tool_calls": lista_herramientas
+def obtener_historial(user_id: int):
+    """Lee el historial desde Redis o crea uno nuevo si no existe."""
+    key = f"chat_historial:{user_id}"
+    datos_guardados = redis_client.get(key)
+    
+    if datos_guardados:
+        return json.loads(datos_guardados)
+    else:
+        return [
+            {
+                "role": "system", 
+                "content": """Eres el asistente del ERP Cara Mia. Recibirás datos desde Odoo.
+                REGLAS:
+                - Si el usuario pide crear un cliente, usa OBLIGATORIAMENTE 'crear_cliente'.
+                - Si piden listar clientes, usa 'consultar_clientes'.
+                - Si consultas, y el usuario pide solo "ver clientes", da una lista ÚNICAMENTE con nombres.
+                - NUNCA expongas JSON al usuario.
+                - Si el usuario pregunta por un cliente específico (ej: "¿Qué sabes de Juan?"), busca en el historial de la conversación si ya consultaste la base de datos recientemente y usa esa información para responder de forma detallada.
+                - REGLA DE ORO: Solo puedes ejecutar UNA (1) acción a la vez. Si el usuario te pide crear múltiples registros (ej: 3 clientes), ejecuta la herramienta SOLO para el primero. En tu mensaje final, avísale que creaste el primero y pregúntale si deseas que continúes con el siguiente."""
             }
+        ]
+
+def guardar_historial(user_id: int, mensajes: list):
+    """Guarda el historial en Redis y le da 24 horas de vida (TTL)."""
+    key = f"chat_historial:{user_id}"
+    # 86400 segundos = 24 horas. Después de eso, Redis lo borra automáticamente.
+    redis_client.setex(key, 86400, json.dumps(mensajes))
+
+async def procesar_chat(mensaje: str, user_id: int):
+    mensajes = obtener_historial(user_id)
+    mensajes.append({"role": "user", "content": mensaje})
+    
+    mensajes = optimizar_tokens(mensajes)
+
+    respuesta = await client.chat.completions.create(
+        model=MODELO,
+        messages=mensajes,
+        tools=TODAS_LAS_HERRAMIENTAS,
+        tool_choice="auto" 
+    )
+    
+    mensaje_ia = respuesta.choices[0].message
+
+    if hasattr(mensaje_ia, 'tool_calls') and mensaje_ia.tool_calls:
+        tool = mensaje_ia.tool_calls[0]
+        
+        try:
+            argumentos = json.loads(tool.function.arguments)
+        except json.JSONDecodeError:
+            argumentos = {}
             
-            for tool in mensaje_ia.tool_calls:
-                
-                if tool.function.name == "consultar_clientes":
-                    campos = ['cliente_id', 'nombre_cliente', 'telefono_cliente', 'sello']
-                    clientes = odoo_db.buscar_datos('cara.mia.cliente', [], campos)
-                    datos_string = json.dumps(clientes) if clientes else "No hay clientes en Cara Mia."
-                    
-                    respuesta_final = await client.chat.completions.create(
-                        model="openai/gpt-oss-20b",
-                        messages=[
-                            # Le devolvemos su identidad para que no enloquezca
-                            {"role": "system", "content": "Eres el asistente de Cara Mia. Resume esta información de forma natural al usuario y NO uses herramientas."},
-                            {"role": "user", "content": mensaje},
-                            mensaje_ia_seguro, 
-                            {"role": "tool", "tool_call_id": tool.id, "name": tool.function.name, "content": datos_string}
-                        ]
-                    )
-                    return respuesta_final.choices[0].message.content
+        mensaje_ia_seguro = {
+            "role": "assistant",
+            "content": mensaje_ia.content,
+            "tool_calls": [{"id": tool.id, "type": "function", "function": {"name": tool.function.name, "arguments": tool.function.arguments}}]
+        }
 
-                elif tool.function.name == "crear_cliente":
-                    try:
-                        argumentos = json.loads(tool.function.arguments)
-                    except json.JSONDecodeError:
-                        argumentos = {}
-                        
-                    print(f"Datos a guardar: {argumentos}", flush=True) 
-                    
-                    valores = {"nombre_cliente": argumentos.get("nombre_cliente", "Cliente Desconocido")}
-                    if "telefono_cliente" in argumentos:
-                        valores["telefono_cliente"] = argumentos["telefono_cliente"]
-                    if "direccion" in argumentos:
-                        valores["direccion"] = argumentos["direccion"]
-                    if "sello" in argumentos:
-                        valores["sello"] = argumentos["sello"]
-                
-                    nuevo_id = odoo_db.crear_registro('cara.mia.cliente', valores)
-                
-                    if nuevo_id:
-                        datos_string = f"Éxito: Cliente creado en Odoo con ID {nuevo_id}."
-                    else:
-                        datos_string = "Error: Hubo un problema al guardar en la base de datos de Odoo."
-                
-                    respuesta_final = await client.chat.completions.create(
-                        model="openai/gpt-oss-20b", 
-                        messages=[
-                            # Instrucción estricta para la confirmación
-                            {"role": "system", "content": "Eres el asistente de Cara Mia. El cliente ya fue creado con éxito. Dale un mensaje breve y amable al usuario confirmando la acción. NO uses herramientas ni vuelvas a llamar a crear_cliente."},
-                            {"role": "user", "content": mensaje},
-                            mensaje_ia_seguro, 
-                            {"role": "tool", "tool_call_id": tool.id, "name": tool.function.name, "content": datos_string}
-                        ]
-                    )
-                    return respuesta_final.choices[0].message.content
+        mensajes.append(mensaje_ia_seguro)
+        guardar_historial(user_id, mensajes) # Guardamos el progreso en Redis
 
-        return mensaje_ia.content
+        return {
+            "tipo": "accion",
+            "accion": tool.function.name,
+            "parametros": argumentos,
+            "tool_id": tool.id,
+            "mensaje_ia_seguro": mensaje_ia_seguro
+        }
 
-    except Exception as e:
-        print(f"ERROR CRÍTICO: {str(e)}", flush=True)
-        return "Hubo un error interno al procesar tu solicitud."
+    mensajes.append({"role": "assistant", "content": mensaje_ia.content})
+    guardar_historial(user_id, mensajes) # Guardamos el progreso en Redis
+    
+    return {
+        "tipo": "texto",
+        "respuesta": mensaje_ia.content
+    }
+
+async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_id: str, tool_name: str, resultado_odoo: str, user_id: int):
+    mensajes = obtener_historial(user_id)
+    mensajes.append({"role": "tool", "tool_call_id": tool_id, "name": tool_name, "content": resultado_odoo})
+
+    mensajes = optimizar_tokens(mensajes)
+
+    respuesta_final = await client.chat.completions.create(
+        model=MODELO,
+        messages=mensajes
+    )
+    
+    contenido_final = respuesta_final.choices[0].message.content
+    
+    mensajes.append({"role": "assistant", "content": contenido_final})
+    guardar_historial(user_id, mensajes) # Guardamos el estado final en Redis
+    
+    return contenido_final

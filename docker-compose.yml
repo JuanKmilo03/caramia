@@ -8,10 +8,17 @@ services:
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:alpine
+    container_name: caramia_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
   odoo:
     build: .
     image: caramia-odoo:18.0
-    command: odoo -c /etc/odoo/odoo.conf -u caramia_production --dev=xml
+    command: odoo -c /etc/odoo/odoo.conf --dev=xml
     depends_on:
       - db
     ports:
@@ -19,6 +26,7 @@ services:
     volumes:
       - ./config/odoo.conf:/etc/odoo/odoo.conf
       - ./custom_addons:/mnt/extra-addons
+      - odoo-web-data:/var/lib/odoo
 
   fastapi_ai:
     build: ./fastapi_service
@@ -26,12 +34,12 @@ services:
       - "8000:8000"
     depends_on:
       - odoo
+      - redis
     environment:
-      - ODOO_URL=${ODOO_URL}
-      - ODOO_DB=${ODOO_DB}
-      - ODOO_USER=${ODOO_USER}
-      - ODOO_PASSWORD=${ODOO_PASSWORD}
+      - REDIS_HOST=redis
       - AI_API_KEY=${AI_API_KEY}
+      - AI_MODEL=${AI_MODEL}
 
 volumes:
   odoo-db-data:
+  odoo-web-data:

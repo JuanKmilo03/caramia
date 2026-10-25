@@ -238,7 +238,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="22" style="background-color: #ffccff;">
+                            <td colspan="22" style="background-color: #ffccff; height: 16px;">
                                 <span t-field="o.descripcion" />
                             </td>
                         </tr>
