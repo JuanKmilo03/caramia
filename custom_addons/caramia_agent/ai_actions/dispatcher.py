@@ -1,13 +1,20 @@
-# Módulo: ai_actions/dispatcher.py
 
-# Importamos las funciones de nuestros especialistas
-from .clientes_actions import ejecutar_crear_cliente, ejecutar_consultar_clientes
+from .clientes_actions import (
+    ejecutar_crear_cliente, 
+    ejecutar_consultar_clientes, 
+    ejecutar_actualizar_cliente,
+    ejecutar_eliminar_cliente
+)
 
 # EL MAPA DE ACCIONES (Cuando FastAPI mande una orden, aquí sabemos qué función usar)
 MAPA_ACCIONES = {
+    #Clientes
     "crear_cliente": ejecutar_crear_cliente,
     "consultar_clientes": ejecutar_consultar_clientes,
-    # Mañana añadirás: "crear_factura": ejecutar_crear_factura
+    "actualizar_cliente": ejecutar_actualizar_cliente,
+    "eliminar_cliente": ejecutar_eliminar_cliente
+
+    #Empleados
 }
 
 def procesar_accion_ia(env, accion, parametros):

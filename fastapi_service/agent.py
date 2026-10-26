@@ -44,6 +44,8 @@ def obtener_historial(user_id: int):
                 - Si el usuario pide crear un cliente, usa OBLIGATORIAMENTE 'crear_cliente'.
                 - Si piden listar clientes, usa 'consultar_clientes'.
                 - Si consultas, y el usuario pide solo "ver clientes", da una lista ÚNICAMENTE con nombres.
+                - Si piden actualizar o modificar, usa 'actualizar_cliente'.
+                - Si piden borrar o eliminar, usa 'eliminar_cliente'.
                 - NUNCA expongas JSON al usuario.
                 - Si el usuario pregunta por un cliente específico (ej: "¿Qué sabes de Juan?"), busca en el historial de la conversación si ya consultaste la base de datos recientemente y usa esa información para responder de forma detallada.
                 - REGLA DE ORO: Solo puedes ejecutar UNA (1) acción a la vez. Si el usuario te pide crear múltiples registros (ej: 3 clientes), ejecuta la herramienta SOLO para el primero. En tu mensaje final, avísale que creaste el primero y pregúntale si deseas que continúes con el siguiente."""
