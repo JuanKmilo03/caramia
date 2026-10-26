@@ -39,16 +39,14 @@ def obtener_historial(user_id: int):
         return [
             {
                 "role": "system", 
-                "content": """Eres el asistente del ERP Cara Mia. Recibirás datos desde Odoo.
-                REGLAS:
-                - Si el usuario pide crear un cliente, usa OBLIGATORIAMENTE 'crear_cliente'.
-                - Si piden listar clientes, usa 'consultar_clientes'.
-                - Si consultas, y el usuario pide solo "ver clientes", da una lista ÚNICAMENTE con nombres.
-                - Si piden actualizar o modificar, usa 'actualizar_cliente'.
-                - Si piden borrar o eliminar, usa 'eliminar_cliente'.
-                - NUNCA expongas JSON al usuario.
-                - Si el usuario pregunta por un cliente específico (ej: "¿Qué sabes de Juan?"), busca en el historial de la conversación si ya consultaste la base de datos recientemente y usa esa información para responder de forma detallada.
-                - REGLA DE ORO: Solo puedes ejecutar UNA (1) acción a la vez. Si el usuario te pide crear múltiples registros (ej: 3 clientes), ejecuta la herramienta SOLO para el primero. En tu mensaje final, avísale que creaste el primero y pregúntale si deseas que continúes con el siguiente."""
+                "content": """Eres el asistente inteligente del ERP Cara Mia. Tu objetivo es ayudar a gestionar la base de datos de Odoo mediante las herramientas que tienes conectadas.
+                
+                REGLAS DE COMPORTAMIENTO:
+                1. NUNCA expongas código JSON o formatos crudos al usuario. Presenta la información de forma natural.
+                2. MEMORIA: Si el usuario hace preguntas de seguimiento, revisa el historial para responder sin consultar de nuevo.
+                3. REGLA DE ORO (Límites): Solo puedes ejecutar UNA (1) acción de herramienta a la vez. Para peticiones múltiples, ejecuta solo la primera y pregunta si continúas.
+                4. USO DE HERRAMIENTAS: Cuando decidas usar una herramienta, NO agregues comentarios, pensamientos ni etiquetas de canal (como <|channel|>commentary). Ejecuta la herramienta de forma directa y estricta.
+                """
             }
         ]
 
@@ -108,18 +106,29 @@ async def procesar_chat(mensaje: str, user_id: int):
 
 async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_id: str, tool_name: str, resultado_odoo: str, user_id: int):
     mensajes = obtener_historial(user_id)
-    mensajes.append({"role": "tool", "tool_call_id": tool_id, "name": tool_name, "content": resultado_odoo})
+    
+    # 1. Agregamos el resultado que devolvió Odoo (el éxito o el error)
+    mensajes.append({"role": "tool", "tool_call_id": tool_id, "name": tool_name, "content": str(resultado_odoo)})
 
-    mensajes = optimizar_tokens(mensajes)
+    # 2. Creamos una lista temporal solo para esta llamada a Groq
+    mensajes_para_groq = mensajes.copy()
+    mensajes_para_groq.append({
+        "role": "system",
+        "content": "El sistema Odoo acaba de devolver el resultado de la acción. Tu ÚNICA tarea ahora es leer ese resultado y explicárselo al usuario de forma natural. NO intentes arreglar el error ni usar herramientas."
+    })
 
+    mensajes_para_groq = optimizar_tokens(mensajes_para_groq)
+
+    # 3. Llamamos a Groq SIN pasarle TODAS_LAS_HERRAMIENTAS
     respuesta_final = await client.chat.completions.create(
         model=MODELO,
-        messages=mensajes
+        messages=mensajes_para_groq
     )
     
     contenido_final = respuesta_final.choices[0].message.content
     
+    # 4. Guardamos en el historial real (la respuesta final, pero sin la regla temporal)
     mensajes.append({"role": "assistant", "content": contenido_final})
-    guardar_historial(user_id, mensajes) # Guardamos el estado final en Redis
+    guardar_historial(user_id, mensajes) 
     
     return contenido_final

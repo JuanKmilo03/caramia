@@ -1,7 +1,3 @@
-# Módulo: tools/clientes_tools.py
-
-# Aquí guardamos ÚNICAMENTE las definiciones (El "Menú") que la IA necesita leer 
-# para entender qué puede hacer con los clientes.
 
 HERRAMIENTAS_CLIENTES = [
     {
