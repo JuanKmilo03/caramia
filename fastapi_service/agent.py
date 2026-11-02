@@ -2,10 +2,10 @@ import os
 import json
 import redis
 from openai import AsyncOpenAI
+from datetime import datetime, timedelta
 from tools.registry import TODAS_LAS_HERRAMIENTAS
 
 # Memoria a Corto Plazo
-
 redis_host = os.getenv("REDIS_HOST", "localhost")
 # decode_responses=True hace que Redis nos devuelva texto (strings) en lugar de bytes
 redis_client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=True)
@@ -29,24 +29,50 @@ def optimizar_tokens(mensajes, limite=8):
     return [system_prompt] + mensajes[corte:]
 
 def obtener_historial(user_id: int):
-    """Lee el historial desde Redis o crea uno nuevo si no existe."""
+    """Lee el historial desde Redis y actualiza el reloj interno en tiempo real."""
     key = f"chat_historial:{user_id}"
     datos_guardados = redis_client.get(key)
     
+    # 1. Pre-calculamos fechas exactas con Python SIEMPRE, sin importar si hay historial o no
+    hoy = datetime.now()
+    fecha_hoy = hoy.strftime("%Y-%m-%d")
+    dia_semana = hoy.strftime("%A")
+    
+    hace_7_dias = (hoy - timedelta(days=7)).strftime("%Y-%m-%d")
+    hace_15_dias = (hoy - timedelta(days=15)).strftime("%Y-%m-%d")
+    hace_1_mes = (hoy - timedelta(days=30)).strftime("%Y-%m-%d")
+    
+    # 2. Construimos el System Prompt Dinámico
+    system_prompt_dinamico = f"""Eres el asistente inteligente del ERP Cara Mia. Tu objetivo es ayudar a gestionar la base de datos de Odoo mediante las herramientas que tienes conectadas.
+    
+    CONTEXTO TEMPORAL EXACTO (Usa estrictamente estas fechas si el usuario pide períodos relativos):
+    - Hoy ({dia_semana}): {fecha_hoy}
+    - Hace 7 días (semana pasada): {hace_7_dias}
+    - Hace 15 días (quincena): {hace_15_dias}
+    - Hace 1 mes: {hace_1_mes}
+
+    REGLAS DE COMPORTAMIENTO:
+    1. NUNCA expongas código JSON o formatos crudos al usuario. Presenta la información de forma natural.
+    2. MEMORIA: Si el usuario hace preguntas de seguimiento, revisa el historial para responder sin consultar de nuevo.
+    3. REGLA DE ORO (Límites): Solo puedes ejecutar UNA (1) acción de herramienta a la vez. Para peticiones múltiples, ejecuta solo la primera y pregunta si continúas.
+    4. USO DE HERRAMIENTAS: Cuando decidas usar una herramienta, NO agregues comentarios, pensamientos ni etiquetas.
+    5. NUNCA inventes parámetros obligatorios. Si falta un dato, pregunta.
+    """
+    
+    # 3. Lógica de sobrescritura
     if datos_guardados:
-        return json.loads(datos_guardados)
+        mensajes = json.loads(datos_guardados)
+        # Reemplazamos el primer mensaje (el system prompt congelado) por el dinámico
+        if mensajes and mensajes[0].get("role") == "system":
+            mensajes[0]["content"] = system_prompt_dinamico
+        else:
+            mensajes.insert(0, {"role": "system", "content": system_prompt_dinamico})
+        return mensajes
     else:
         return [
             {
                 "role": "system", 
-                "content": """Eres el asistente inteligente del ERP Cara Mia. Tu objetivo es ayudar a gestionar la base de datos de Odoo mediante las herramientas que tienes conectadas.
-                
-                REGLAS DE COMPORTAMIENTO:
-                1. NUNCA expongas código JSON o formatos crudos al usuario. Presenta la información de forma natural.
-                2. MEMORIA: Si el usuario hace preguntas de seguimiento, revisa el historial para responder sin consultar de nuevo.
-                3. REGLA DE ORO (Límites): Solo puedes ejecutar UNA (1) acción de herramienta a la vez. Para peticiones múltiples, ejecuta solo la primera y pregunta si continúas.
-                4. USO DE HERRAMIENTAS: Cuando decidas usar una herramienta, NO agregues comentarios, pensamientos ni etiquetas de canal (como <|channel|>commentary). Ejecuta la herramienta de forma directa y estricta.
-                """
+                "content": system_prompt_dinamico
             }
         ]
 
@@ -86,7 +112,7 @@ async def procesar_chat(mensaje: str, user_id: int):
         }
 
         mensajes.append(mensaje_ia_seguro)
-        guardar_historial(user_id, mensajes) # Guardamos el progreso en Redis
+        guardar_historial(user_id, mensajes)
 
         return {
             "tipo": "accion",
@@ -97,7 +123,7 @@ async def procesar_chat(mensaje: str, user_id: int):
         }
 
     mensajes.append({"role": "assistant", "content": mensaje_ia.content})
-    guardar_historial(user_id, mensajes) # Guardamos el progreso en Redis
+    guardar_historial(user_id, mensajes)
     
     return {
         "tipo": "texto",
@@ -119,10 +145,12 @@ async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_
 
     mensajes_para_groq = optimizar_tokens(mensajes_para_groq)
 
-    # 3. Llamamos a Groq SIN pasarle TODAS_LAS_HERRAMIENTAS
+    # 3. Llamamos a Groq PASÁNDOLE LAS HERRAMIENTAS (Obligatorio por validación de la API)
     respuesta_final = await client.chat.completions.create(
         model=MODELO,
-        messages=mensajes_para_groq
+        messages=mensajes_para_groq,
+        tools=TODAS_LAS_HERRAMIENTAS,
+        tool_choice="auto"
     )
     
     contenido_final = respuesta_final.choices[0].message.content

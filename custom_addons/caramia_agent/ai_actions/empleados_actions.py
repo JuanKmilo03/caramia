@@ -1,7 +1,5 @@
 import json
 
-import json
-
 def ejecutar_crear_empleado(env, parametros):
     try:
         nombre_labor = parametros.get('nombre_labor')

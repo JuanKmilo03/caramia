@@ -1,4 +1,3 @@
-
 HERRAMIENTAS_CLIENTES = [
     {
         "type": "function",
@@ -46,11 +45,15 @@ HERRAMIENTAS_CLIENTES = [
         "type": "function",
         "function": {
             "name": "eliminar_cliente",
-            "description": "Elimina un cliente de la base de datos de Odoo.",
+            "description": "Elimina un cliente de la base de datos de Odoo. Requiere confirmación de seguridad.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_cliente": {"type": "string", "description": "Nombre exacto del cliente a eliminar"}
+                    "nombre_cliente": {"type": "string", "description": "Nombre exacto del cliente a eliminar"},
+                    "confirmado": {
+                        "type": "boolean",
+                        "description": "Bandera de seguridad. SIEMPRE envíalo como false en el primer intento. Solo envíalo como true si ya validaste y el usuario confirmó explícitamente que desea borrarlo."
+                    }
                 },
                 "required": ["nombre_cliente"]
             }

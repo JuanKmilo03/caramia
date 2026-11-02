@@ -9,31 +9,26 @@ def ejecutar_crear_cliente(env, parametros):
 
 def ejecutar_consultar_clientes(env, parametros):
     try:
-        # Traemos toda la info útil disponible (limitamos a 10 para no saturar)
         clientes = env['cara.mia.cliente'].search_read(
             [], 
             ['id', 'nombre_cliente', 'telefono_cliente', 'direccion', 'sello'],
         )
         
         if clientes:
-            # Le pasamos a la IA los datos puros en formato JSON para que ella los analice
             return f"Datos crudos de Odoo: {json.dumps(clientes)}"
         else:
             return "No hay clientes registrados."
     except Exception as e:
         return f"Error buscando en Odoo: {str(e)}"
 
-
 def ejecutar_actualizar_cliente(env, parametros):
     try:
         nombre_actual = parametros.get('nombre_actual')
-        # Buscamos al cliente (ilike permite buscar ignorando mayúsculas/minúsculas)
         cliente = env['cara.mia.cliente'].search([('nombre_cliente', 'ilike', nombre_actual)], limit=1)
         
         if not cliente:
             return f"Error: No se encontró ningún cliente llamado '{nombre_actual}'."
 
-        # Preparamos solo los datos que la IA decidió enviar
         valores = {}
         if 'nuevo_telefono' in parametros:
             valores['telefono_cliente'] = parametros['nuevo_telefono']
@@ -54,14 +49,20 @@ def ejecutar_actualizar_cliente(env, parametros):
 def ejecutar_eliminar_cliente(env, parametros):
     try:
         nombre = parametros.get('nombre_cliente')
+        confirmado = parametros.get('confirmado', False)
+
         cliente = env['cara.mia.cliente'].search([('nombre_cliente', 'ilike', nombre)], limit=1)
         
         if not cliente:
             return f"Error: No se encontró ningún cliente llamado '{nombre}' para eliminar."
             
+        # MAGIA DE CONFIRMACIÓN PARA LA IA
+        if not confirmado:
+            return f"⚠️ ATENCIÓN: Encontré al cliente '{cliente.nombre_cliente}'. Esta acción lo borrará permanentemente de la base de datos. Pídele al usuario que confirme explícitamente si desea eliminarlo. Si el usuario acepta, vuelve a llamar a esta herramienta con 'confirmado' en true."
+            
         nombre_eliminado = cliente.nombre_cliente
-        cliente.unlink() # Comando de Odoo para borrar el registro
+        cliente.unlink() 
         return f"Éxito: El cliente '{nombre_eliminado}' ha sido eliminado de la base de datos."
         
     except Exception as e:
-        return f"Error eliminando en Odoo (¿Tiene facturas asociadas?): {str(e)}"
+        return f"Error eliminando en Odoo (¿Tiene facturas, órdenes o movimientos asociados?): {str(e)}"
