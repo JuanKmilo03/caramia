@@ -62,6 +62,10 @@ def ejecutar_eliminar_empleado(env, parametros):
         if not empleado:
             return f"Error: No se encontró ningún empleado con la cédula '{cedula}'."
             
+        confirmado = parametros.get('confirmado', False)
+        if not confirmado:
+            return f"ATENCION: Encontre al empleado '{empleado.nombre_empleado}'. Esta accion lo borrara permanentemente. Pidele al usuario que confirme explicitamente si desea eliminarlo. Si acepta, vuelve a llamar a esta herramienta con 'confirmado' en true."
+
         nombre = empleado.nombre_empleado
         empleado.unlink()
         return f"Éxito: El empleado '{nombre}' ha sido eliminado."

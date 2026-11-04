@@ -1,3 +1,4 @@
+import logging
 
 from .clientes_actions import (
     ejecutar_crear_cliente, 
@@ -67,6 +68,8 @@ from .costos_actions import (
     ejecutar_consultar_rentabilidad,
     ejecutar_aprobar_cotizacion
 )
+
+from .feedback_actions import ejecutar_guardar_correccion
 # EL MAPA DE ACCIONES (Cuando FastAPI mande una orden, aquí sabemos qué función usar)
 MAPA_ACCIONES = {
     #Clientes
@@ -129,18 +132,45 @@ MAPA_ACCIONES = {
     #Costos
     "crear_cotizacion_base": ejecutar_crear_cotizacion,
     "consultar_rentabilidad_cotizacion": ejecutar_consultar_rentabilidad,
-    "aprobar_cotizacion_a_produccion": ejecutar_aprobar_cotizacion
+    "aprobar_cotizacion_a_produccion": ejecutar_aprobar_cotizacion,
+
+    #Feedback
+    "guardar_correccion": ejecutar_guardar_correccion
 
 }
+
+_logger = logging.getLogger("caramia.agent")
+
+def _registrar_log(env, accion, parametros, resultado, exito):
+    try:
+        if 'caramia.agent.log' in env:
+            env['caramia.agent.log'].sudo().create({
+                'accion': accion,
+                'parametros': str(parametros),
+                'resultado': str(resultado)[:4000],
+                'exito': bool(exito),
+            })
+    except Exception:
+        pass
 
 def procesar_accion_ia(env, accion, parametros):
     """
     Recibe la sesión de Odoo (env), el nombre de la acción y los datos.
     Busca en el mapa y ejecuta la función correspondiente.
     """
+    uid = getattr(env, "uid", None)
+    _logger.info("IA accion=%s uid=%s params=%s", accion, uid, parametros)
     if accion in MAPA_ACCIONES:
         funcion_especialista = MAPA_ACCIONES[accion]
-        # Ejecutamos la función y devolvemos su resultado
-        return funcion_especialista(env, parametros)
+        try:
+            resultado = funcion_especialista(env, parametros)
+            _logger.info("IA accion=%s resultado=%s", accion, str(resultado)[:500])
+            _registrar_log(env, accion, parametros, resultado, True)
+            return resultado
+        except Exception as e:
+            _logger.exception("IA accion=%s error", accion)
+            _registrar_log(env, accion, parametros, str(e), False)
+            return f"Error ejecutando '{accion}': {str(e)}"
     else:
+        _logger.warning("IA accion desconocida=%s", accion)
         return f"Acción desconocida o no programada en el despachador: {accion}"

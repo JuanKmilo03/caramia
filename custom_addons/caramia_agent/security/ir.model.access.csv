@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_caramia_agent_log_user,caramia.agent.log.user,model_caramia_agent_log,base.group_user,1,0,1,0
+access_caramia_agent_knowledge_user,caramia.agent.knowledge.user,model_caramia_agent_knowledge,base.group_user,1,1,1,1
+access_caramia_agent_correction_user,caramia.agent.correction.user,model_caramia_agent_correction,base.group_user,1,1,1,1

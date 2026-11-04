@@ -21,6 +21,9 @@ services:
     command: odoo -c /etc/odoo/odoo.conf --dev=xml
     depends_on:
       - db
+    environment:
+      - AGENT_SECRET=${AGENT_SECRET}
+      - FASTAPI_URL=http://fastapi_ai:8000
     ports:
       - "8069:8069"
     volumes:
@@ -39,6 +42,7 @@ services:
       - REDIS_HOST=redis
       - AI_API_KEY=${AI_API_KEY}
       - AI_MODEL=${AI_MODEL}
+      - AGENT_SECRET=${AGENT_SECRET}
 
 volumes:
   odoo-db-data:

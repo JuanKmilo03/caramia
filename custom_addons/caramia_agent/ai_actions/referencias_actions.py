@@ -89,7 +89,11 @@ def ejecutar_eliminar_referencia(env, parametros):
             return f"Error: No se encontró la referencia '{nombre}'."
             
         nombre_guardado = ref.nombre_modelo
-        
+
+        confirmado = parametros.get('confirmado', False)
+        if not confirmado:
+            return f"ATENCION: Encontre la referencia '{nombre_guardado}'. Esta accion la borrara permanentemente. Pidele al usuario que confirme explicitamente si desea eliminarla. Si acepta, vuelve a llamar a esta herramienta con 'confirmado' en true."
+
         # En Odoo, unlink() falla automáticamente si hay restricciones de Foreign Key 
         # (ej: si tiene órdenes de producción gracias a tu ondelete='restrict')
         ref.unlink()

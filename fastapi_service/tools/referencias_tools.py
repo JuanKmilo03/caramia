@@ -53,7 +53,8 @@ HERRAMIENTAS_REFERENCIAS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_modelo": {"type": "string", "description": "Nombre de la referencia a borrar"}
+                    "nombre_modelo": {"type": "string", "description": "Nombre de la referencia a borrar"},
+                    "confirmado": {"type": "boolean", "description": "Bandera de seguridad. Enviar true solo si el usuario confirmó explícitamente."}
                 },
                 "required": ["nombre_modelo"]
             }

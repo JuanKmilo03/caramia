@@ -25,10 +25,16 @@ def optimizar_tokens(mensajes, limite=8):
     corte = -limite
     while corte < 0 and mensajes[corte].get("role") == "tool":
         corte -= 1
-        
-    return [system_prompt] + mensajes[corte:]
+    # Asegurar que no quedan mensajes 'tool' huérfanos al inicio del bloque
+    while corte < 0 and mensajes[corte].get("role") == "tool":
+        corte -= 1
+    recorte = mensajes[corte:]
+    # Eliminar tool messages iniciales sin assistant previo
+    while recorte and recorte[0].get("role") == "tool":
+        recorte.pop(0)
+    return [system_prompt] + recorte
 
-def obtener_historial(user_id: int):
+def obtener_historial(user_id: int, contexto: str = ""):
     """Lee el historial desde Redis y actualiza el reloj interno en tiempo real."""
     key = f"chat_historial:{user_id}"
     datos_guardados = redis_client.get(key)
@@ -57,6 +63,9 @@ def obtener_historial(user_id: int):
     3. REGLA DE ORO (Límites): Solo puedes ejecutar UNA (1) acción de herramienta a la vez. Para peticiones múltiples, ejecuta solo la primera y pregunta si continúas.
     4. USO DE HERRAMIENTAS: Cuando decidas usar una herramienta, NO agregues comentarios, pensamientos ni etiquetas.
     5. NUNCA inventes parámetros obligatorios. Si falta un dato, pregunta.
+    6. CONFIRMACION: Antes de ejecutar cualquier accion de creacion, edicion o eliminacion, resume al usuario lo que vas a hacer y pide confirmacion explicita. Solo ejecuta la herramienta cuando el usuario haya confirmado.
+    7. Si el usuario corrige informacion o indica una preferencia, usa la herramienta guardar_correccion para recordarlo.
+    8. Las respuestas pueden leerse en voz alta: se conciso, evita markdown complejo y listas muy largas.
     """
     
     # 3. Lógica de sobrescritura
@@ -82,8 +91,8 @@ def guardar_historial(user_id: int, mensajes: list):
     # 86400 segundos = 24 horas. Después de eso, Redis lo borra automáticamente.
     redis_client.setex(key, 86400, json.dumps(mensajes))
 
-async def procesar_chat(mensaje: str, user_id: int):
-    mensajes = obtener_historial(user_id)
+async def procesar_chat(mensaje: str, user_id: int, contexto: str = ""):
+    mensajes = obtener_historial(user_id, contexto)
     mensajes.append({"role": "user", "content": mensaje})
     
     mensajes = optimizar_tokens(mensajes)
@@ -130,8 +139,8 @@ async def procesar_chat(mensaje: str, user_id: int):
         "respuesta": mensaje_ia.content
     }
 
-async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_id: str, tool_name: str, resultado_odoo: str, user_id: int):
-    mensajes = obtener_historial(user_id)
+async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_id: str, tool_name: str, resultado_odoo: str, user_id: int, contexto: str = ""):
+    mensajes = obtener_historial(user_id, contexto)
     
     # 1. Agregamos el resultado que devolvió Odoo (el éxito o el error)
     mensajes.append({"role": "tool", "tool_call_id": tool_id, "name": tool_name, "content": str(resultado_odoo)})
@@ -150,7 +159,7 @@ async def confirmar_accion(mensaje_original: str, mensaje_ia_seguro: dict, tool_
         model=MODELO,
         messages=mensajes_para_groq,
         tools=TODAS_LAS_HERRAMIENTAS,
-        tool_choice="auto"
+        tool_choice="none"
     )
     
     contenido_final = respuesta_final.choices[0].message.content

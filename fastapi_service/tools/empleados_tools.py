@@ -33,7 +33,8 @@ HERRAMIENTAS_EMPLEADOS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "cedula": {"type": "string", "description": "Cédula del empleado a eliminar"}
+                    "cedula": {"type": "string", "description": "Cédula del empleado a eliminar"},
+                    "confirmado": {"type": "boolean", "description": "Bandera de seguridad. Enviar true solo si el usuario confirmó explícitamente."}
                 },
                 "required": ["cedula"]
             }

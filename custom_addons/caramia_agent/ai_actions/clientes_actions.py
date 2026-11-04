@@ -2,7 +2,9 @@ import json
 
 def ejecutar_crear_cliente(env, parametros):
     try:
-        nuevo_cliente = env['cara.mia.cliente'].create(parametros)
+        campos_permitidos = {'nombre_cliente', 'telefono_cliente', 'direccion', 'sello'}
+        valores = {k: v for k, v in (parametros or {}).items() if k in campos_permitidos}
+        nuevo_cliente = env['cara.mia.cliente'].create(valores)
         return f"Éxito: Cliente creado con ID {nuevo_cliente.id}"
     except Exception as e:
         return f"Error en BD Odoo: {str(e)}"
