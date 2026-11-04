@@ -35,7 +35,7 @@ class CaramiaProduction(models.Model):
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
     referencia_id = fields.Many2one(
         'cara.mia.referencia',
-        string='Referencia / Modelo',
+        string='Referencia de Calzado',
         required=True,
         tracking=True,
         domain="[('estado', '=', 'activo')]",

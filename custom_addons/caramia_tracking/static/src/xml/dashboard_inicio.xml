@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="caramia_tracking.DashboardTemplate" owl="1">
+        <div class="o_action_manager" style="background-color: #f9f9fb; padding: 20px;">
+            <div class="container-fluid">
+                
+                <!-- Encabezado y Botones -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">Buenos días, <t t-esc="user.name"/></h2>
+                        <small class="text-muted">Así avanza la operación de Cara Mía hoy, <t t-esc="state.dashboardData.hoy"/></small>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2">Exportar</button>
+                        <button class="btn btn-warning text-white fw-bold" t-on-click="createOrder">
+                            <i class="fa fa-plus"/> Nueva orden
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tarjetas KPI -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 h-100 p-3">
+                            <h6 class="text-muted">Pares programados semana</h6>
+                            <h2 class="fw-bold"><t t-esc="state.dashboardData.semana.programado"/></h2>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 h-100 p-3">
+                            <h6 class="text-muted">Órdenes Activas</h6>
+                            <h2 class="fw-bold"><t t-esc="state.dashboardData.activas"/> <span class="badge bg-info ms-2"><t t-esc="state.dashboardData.entregas.pendientes"/> prioritarias</span></h2>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 h-100 p-3">
+                            <h6 class="text-muted">Pares Finalizados (Mes)</h6>
+                            <h2 class="fw-bold"><t t-esc="state.dashboardData.mes.finalizado"/></h2>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card shadow-sm border-0 h-100 p-3">
+                            <h6 class="text-muted">Órdenes Estancadas</h6>
+                            <h2 class="fw-bold text-danger"><t t-esc="state.dashboardData.estancadas"/> <i class="fa fa-warning ms-2"/></h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Inferior: Listas -->
+                <div class="row">
+                    <!-- Órdenes Prioritarias -->
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0 p-3 h-100">
+                            <h5 class="fw-bold mb-3">Órdenes prioritarias</h5>
+                            <table class="table table-borderless table-hover">
+                                <tbody>
+                                    <tr t-foreach="state.dashboardData.lista" t-as="orden" t-key="orden.id" style="cursor: pointer;" t-on-click="() => this.openOrder(orden.id)">
+                                        <td>
+                                            <span class="fw-bold"><t t-esc="orden.name"/></span><br/>
+                                            <small class="text-muted"><t t-esc="orden.cliente"/></small>
+                                        </td>
+                                        <td class="align-middle fw-bold"><t t-esc="orden.pares"/> pares</td>
+                                        <td class="align-middle">
+                                            <span t-if="orden.vencida" class="badge bg-danger">Vencida</span>
+                                            <span t-elif="orden.estancada" class="badge bg-warning">Estancada</span>
+                                            <span t-else="" class="badge bg-light text-dark">Al día</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -3,23 +3,29 @@ from odoo.exceptions import ValidationError
 
 class CaramiaCuentaAnularWizard(models.TransientModel):
     _name = 'cara.mia.cuenta.anular.wizard'
-    _description = 'Asistente para Anular Cuenta de Cobro'
+    _description = 'Anular Cuenta de Cobro'
 
     cuenta_id = fields.Many2one('cara.mia.cuenta.cobro', string='Cuenta de Cobro', required=True)
-    motivo = fields.Text(string='Motivo de Anulación', required=True)
+    currency_id = fields.Many2one(related='cuenta_id.currency_id')
+    total_abonado = fields.Monetary(related='cuenta_id.total_abonado', string='Abonado hasta ahora')
+    motivo = fields.Text(string='Motivo de la anulación', required=True)
 
     def action_confirmar_anulacion(self):
         self.ensure_one()
-        if not self.motivo:
-            raise ValidationError("Debe detallar el motivo por el cual se anula la cuenta.")
-        
         cuenta = self.cuenta_id
+        if cuenta.estado not in ('vigente', 'vencida'):
+            raise UserError("Solo se pueden anular cuentas vigentes o vencidas.")
+        motivo = (self.motivo or '').strip()
+        if not motivo:
+            raise ValidationError("Debe indicar el motivo de la anulación.")
         cuenta.write({
             'estado': 'anulada',
-            'motivo_anulacion': self.motivo
+            'motivo_anulacion': motivo,
+            'fecha_anulacion': fields.Datetime.now(),
+            'usuario_anulacion_id': self.env.uid,
         })
-        
-        if cuenta.factura_id:
-            cuenta.factura_id.write({'estado': 'anulada'})
-            
+        factura = cuenta.factura_id
+        if factura:
+            factura.write({'estado': 'anulada'})
+            factura.linea_ids.produccion_id.write({'factura_id': False})
         return {'type': 'ir.actions.act_window_close'}

@@ -8,18 +8,16 @@
         <field name="arch" type="xml">
             <form string="Anular cuenta de cobro">
                 <div class="alert alert-warning" role="alert">
-                    <strong>¿Confirma que desea anular esta cuenta de cobro?</strong><br/>
-                    La cuenta pasará al Historial de Pagos y no admitirá más pagos.
-                    Esta acción no se puede deshacer.
-                </div>
+                    <strong>¿Confirma que desea anular esta cuenta de cobro?</strong><br /> La
+                    cuenta pasará al Historial de Pagos y no admitirá más pagos. Esta acción no se
+                    puede deshacer. </div>
                 <group>
-                    <field name="cuenta_id"/>
-                    <field name="motivo" placeholder="Explique por qué se anula esta cuenta…"/>
+                    <field name="cuenta_id" />
+                    <field name="motivo" placeholder="Explique por qué se anula esta cuenta…" />
                 </group>
                 <footer>
-                    <button name="action_confirmar_anulacion" string="Confirmar anulación" type="object"
-                            class="btn-danger"/>
-                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                   <button name="action_confirmar_anulacion" string="Confirmar anulación" type="object" class="btn-danger"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" />
                 </footer>
             </form>
         </field>
@@ -31,19 +29,19 @@
         <field name="model">cara.mia.pago.wizard</field>
         <field name="arch" type="xml">
             <form string="Registrar pago">
-                <field name="currency_id" invisible="1"/>
-                <field name="cuenta_id" invisible="1"/>
+                <field name="currency_id" invisible="1" />
+                <field name="cuenta_id" invisible="1" />
                 <group>
                     <group>
-                        <field name="cliente_id"/>
-                        <field name="monto"/>
-                        <field name="saldo_cliente"/>
+                        <field name="cliente_id" readonly="context.get('solo_cuenta_id')" />
+                        <field name="monto" />
+                        <field name="saldo_cliente" />
                     </group>
                     <group>
-                        <field name="fecha"/>
-                        <field name="metodo"/>
-                        <field name="referencia"/>
-                        <field name="observacion"/>
+                        <field name="fecha" />
+                        <field name="metodo" />
+                        <field name="referencia" />
+                        <field name="observacion" />
                     </group>
                 </group>
                 <div class="text-muted mb-2">
@@ -52,23 +50,24 @@
                 </div>
                 <field name="linea_ids">
                     <list editable="bottom" create="false" delete="false">
-                        <field name="cuenta_id"/>
-                        <field name="fecha_vencimiento"/>
+                        <field name="cuenta_id" />
+                        <field name="ordenes_asociadas" />
+                        <field name="fecha_vencimiento" />
                         <field name="estado" widget="badge"
-                               decoration-success="estado == 'vigente'"
-                               decoration-danger="estado == 'vencida'"/>
-                        <field name="saldo_pendiente"/>
-                        <field name="monto_aplicar"/>
-                        <field name="currency_id" column_invisible="1"/>
+                            decoration-success="estado == 'vigente'"
+                            decoration-danger="estado == 'vencida'" />
+                        <field name="saldo_pendiente" />
+                        <field name="monto_aplicar" />
+                        <field name="currency_id" column_invisible="1" />
                     </list>
                 </field>
                 <group class="oe_subtotal_footer">
-                    <field name="total_aplicado" class="oe_subtotal_footer_separator"/>
+                    <field name="total_aplicado" class="oe_subtotal_footer_separator" />
                 </group>
                 <footer>
                     <button name="action_registrar" string="Registrar pago" type="object"
-                            class="btn-primary"/>
-                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                        class="btn-primary" />
+                    <button string="Cancelar" special="cancel" class="btn-secondary" />
                 </footer>
             </form>
         </field>

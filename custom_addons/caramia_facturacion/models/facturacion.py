@@ -8,27 +8,27 @@ class CaramiaFacturacion(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'fecha_facturacion desc, id desc'
 
-    name = fields.Char(string='N° Factura', required=True, copy=False, readonly=True, default='Nuevo', tracking=True)
+    name = fields.Char(string='N° Factura', required=True, copy=False, readonly=True,
+                       default='Nuevo', tracking=True)
 
-    # Selección del Cliente y datos automáticos
     cliente_id = fields.Many2one('cara.mia.cliente', string='Cliente', required=True, tracking=True)
-    cliente_identificador = fields.Char(related='cliente_id.cliente_id', string='ID Cliente', readonly=True)
-    cliente_telefono = fields.Char(related='cliente_id.telefono_cliente', string='Teléfono', readonly=True)
-    cliente_direccion = fields.Text(related='cliente_id.direccion', string='Dirección', readonly=True)
+    cliente_identificador = fields.Char(related='cliente_id.cliente_id', string='ID Cliente')
+    cliente_telefono = fields.Char(related='cliente_id.telefono_cliente', string='Teléfono')
+    cliente_direccion = fields.Text(related='cliente_id.direccion', string='Dirección')
 
-    # Líneas de la facturación (Múltiples órdenes)
-    linea_ids = fields.One2many('cara.mia.facturacion.linea', 'facturacion_id', string='Artículos / Órdenes')
+    linea_ids = fields.One2many('cara.mia.facturacion.linea', 'facturacion_id',
+                                string='Artículos / Órdenes')
 
-    # Fechas y Detalles
-    fecha_facturacion = fields.Date(string='Fecha de Facturación', default=fields.Date.context_today, required=True, tracking=True)
+    fecha_facturacion = fields.Date(string='Fecha de Facturación',
+                                    default=fields.Date.context_today, required=True, tracking=True)
     fecha_vencimiento = fields.Date(string='Fecha de Vencimiento', required=True)
     forma_pago = fields.Selection([
         ('contado', 'Contado'),
         ('credito', 'Crédito'),
     ], string='Forma de Pago', required=True, default='contado')
 
-    # Cálculos y Valores
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
+    total_pares = fields.Integer(string='Total Pares', compute='_compute_totales', store=True)
     total_general = fields.Monetary(string='Total', compute='_compute_totales', store=True)
     saldo_pendiente = fields.Monetary(string='Saldo', compute='_compute_saldo', store=True)
 
@@ -39,13 +39,16 @@ class CaramiaFacturacion(models.Model):
         ('anulada', 'Anulada'),
     ], string='Estado', default='borrador', tracking=True)
 
-    # Cuentas de cobro generadas al emitir (solo una puede estar activa)
     cuenta_ids = fields.One2many('cara.mia.cuenta.cobro', 'factura_id', string='Cuentas de Cobro')
 
+    # ------------------------------------------------------------------
+    # Cálculos
+    # ------------------------------------------------------------------
     @api.depends('linea_ids.total_linea')
     def _compute_totales(self):
         for rec in self:
             rec.total_general = sum(rec.linea_ids.mapped('total_linea'))
+            rec.total_pares = sum(rec.linea_ids.mapped('cantidad'))
 
     @api.depends('estado', 'total_general', 'cuenta_ids.saldo_pendiente', 'cuenta_ids.estado')
     def _compute_saldo(self):
@@ -53,7 +56,7 @@ class CaramiaFacturacion(models.Model):
             cuenta = rec._cuenta_vigente()
             if cuenta:
                 rec.saldo_pendiente = cuenta.saldo_pendiente
-            elif rec.estado == 'pagada':
+            elif rec.estado in ('pagada', 'anulada'):
                 rec.saldo_pendiente = 0.0
             else:
                 rec.saldo_pendiente = rec.total_general
@@ -63,26 +66,48 @@ class CaramiaFacturacion(models.Model):
         self.ensure_one()
         return self.cuenta_ids.filtered(lambda c: c.estado != 'anulada')[:1]
 
+    @api.onchange('fecha_facturacion', 'forma_pago')
+    def _onchange_vencimiento(self):
+        if self.forma_pago == 'contado' and self.fecha_facturacion:
+            self.fecha_vencimiento = self.fecha_facturacion
+
+    # ------------------------------------------------------------------
+    # Órdenes de producción ligadas a la factura
+    # ------------------------------------------------------------------
+    def _marcar_producciones(self):
+        for rec in self:
+            rec.linea_ids.produccion_id.write({'factura_id': rec.id})
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', 'Nuevo') == 'Nuevo':
-                vals['name'] = self.env['ir.sequence'].next_by_code('cara.mia.facturacion.seq') or 'Nuevo'
-        return super().create(vals_list)
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'cara.mia.facturacion.seq') or 'Nuevo'
+        records = super().create(vals_list)
+        records._marcar_producciones()
+        return records
 
+    def write(self, vals):
+        if 'linea_ids' not in vals:
+            return super().write(vals)
+        antes = self.linea_ids.produccion_id
+        res = super().write(vals)
+        (antes - self.linea_ids.produccion_id).write({'factura_id': False})
+        self._marcar_producciones()
+        return res
+
+    # ------------------------------------------------------------------
+    # Acciones
+    # ------------------------------------------------------------------
     def action_emitir(self):
-        for rec in self:
+        for rec in self.filtered(lambda f: f.estado == 'borrador'):
             if not rec.linea_ids:
-                raise ValidationError("Debe agregar al menos una orden de producción para emitir la factura/remisión.")
+                raise ValidationError(
+                    "Debe agregar al menos una orden de producción para emitir la factura/remisión.")
             if rec.total_general <= 0:
                 raise ValidationError("El total de la factura debe ser mayor a cero.")
-
             rec.write({'estado': 'emitida'})
-
-            for linea in rec.linea_ids:
-                if linea.produccion_id:
-                    linea.produccion_id.write({'factura_id': rec.id})
-
             rec._crear_cuenta_cobro()
 
     def _crear_cuenta_cobro(self):
@@ -91,16 +116,16 @@ class CaramiaFacturacion(models.Model):
         for rec in self.filtered(lambda f: f.estado == 'emitida' and not f._cuenta_vigente()):
             Cuenta.create({'factura_id': rec.id})
 
-    def action_cancelar(self):
+    def action_anular(self):
         for rec in self:
             if rec._cuenta_vigente():
                 raise UserError(
                     "La factura %s tiene una cuenta de cobro activa.\n"
-                    "Anule primero la cuenta de cobro para poder devolverla a borrador." % rec.name
-                )
-            rec.write({'estado': 'borrador'})
+                    "Anule primero la cuenta de cobro para poder anular la factura." % rec.name)
+            rec.write({'estado': 'anulada'})
+            rec.linea_ids.produccion_id.write({'factura_id': False})
 
-    def action_ver_cuenta(self):
+    def action_ver_cuenta_cobro(self):
         self.ensure_one()
         cuenta = self._cuenta_vigente() or self.cuenta_ids[:1]
         if not cuenta:
@@ -111,19 +136,14 @@ class CaramiaFacturacion(models.Model):
             'res_model': 'cara.mia.cuenta.cobro',
             'res_id': cuenta.id,
             'view_mode': 'form',
+            'views': [(False, 'form')],
         }
 
     def action_imprimir_remision(self):
-        # Llama a la acción del reporte PDF que creamos anteriormente
         return self.env.ref('caramia_facturacion.action_report_remision_doble').report_action(self)
 
 
 class CaramiaProductionInherit(models.Model):
     _inherit = 'cara.mia.produccion'
 
-    factura_id = fields.Many2one(
-        'cara.mia.facturacion',
-        string='Factura N°',
-        readonly=True,
-        tracking=True,
-    )
+    factura_id = fields.Many2one('cara.mia.facturacion', string='Factura N°', readonly=True, tracking=True)

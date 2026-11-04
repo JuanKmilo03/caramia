@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cara_mia_whatsapp_config,cara.mia.whatsapp.config,model_cara_mia_whatsapp_config,base.group_user,1,1,1,1
+access_cara_mia_whatsapp_wizard,cara.mia.whatsapp.wizard,model_cara_mia_whatsapp_wizard,base.group_user,1,1,1,1
+access_cara_mia_whatsapp_wizard_linea,cara.mia.whatsapp.wizard.linea,model_cara_mia_whatsapp_wizard_linea,base.group_user,1,1,1,1

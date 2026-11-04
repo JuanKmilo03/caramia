@@ -114,7 +114,7 @@
                                 </td>
                             </tr>
                         </table>
-                        <t t-if="doc.production_id.description">
+                        <t t-if="doc.production_id.descripcion">
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <p class="text-uppercase text-muted font-weight-bold mb-1"

@@ -15,6 +15,8 @@
             'caramia_tracking/static/src/js/tracking_dashboard.js',
             'caramia_tracking/static/src/xml/tracking_dashboard.xml',
             'caramia_tracking/static/src/scss/tracking_dashboard.scss',
+            'caramia_tracking/static/src/js/dashboard_inicio.js',
+            'caramia_tracking/static/src/xml/dashboard_inicio.xml',
         ],
     },
     'installable': True,

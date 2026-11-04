@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="caramia_facturacion.CarteraListView" t-inherit="web.ListView" t-inherit-mode="primary">
+        <xpath expr="//t[@t-component='props.Renderer']" position="before">
+            <div class="d-flex flex-wrap gap-3 px-3 pt-3 pb-2">
+                <div class="card bg-danger-subtle text-danger-emphasis border-0 rounded-4"
+                     style="min-width: 220px;">
+                    <div class="card-body py-2 px-3">
+                        <div class="small text-uppercase fw-semibold opacity-75">Saldo total adeudado</div>
+                        <div class="fs-3 fw-bold" t-out="formatear(resumen.saldo)"/>
+                    </div>
+                </div>
+                <div class="card bg-success-subtle text-success-emphasis border-0 rounded-4"
+                     style="min-width: 220px;">
+                    <div class="card-body py-2 px-3">
+                        <div class="small text-uppercase fw-semibold opacity-75">Total abonado a la fecha</div>
+                        <div class="fs-3 fw-bold" t-out="formatear(resumen.abonado)"/>
+                    </div>
+                </div>
+            </div>
+        </xpath> 
+    </t>
+</templates>

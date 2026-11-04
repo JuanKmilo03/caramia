@@ -3,33 +3,6 @@ from odoo.exceptions import UserError, ValidationError
 
 from ..models.cuenta_cobro import METODOS_PAGO
 
-
-class CaramiaCuentaAnularWizard(models.TransientModel):
-    _name = 'cara.mia.cuenta.anular.wizard'
-    _description = 'Anular Cuenta de Cobro'
-
-    cuenta_id = fields.Many2one('cara.mia.cuenta.cobro', string='Cuenta de Cobro', required=True)    
-    currency_id = fields.Many2one(related='cuenta_id.currency_id')
-    total_abonado = fields.Monetary(related='cuenta_id.total_abonado', string='Abonado hasta ahora')
-    motivo = fields.Text(string='Motivo de la anulación', required=True)
-
-    def action_confirmar(self):
-        self.ensure_one()
-        cuenta = self.cuenta_id
-        if cuenta.estado not in ('vigente', 'vencida'):
-            raise UserError("Solo se pueden anular cuentas vigentes o vencidas.")
-        motivo = (self.motivo or '').strip()
-        if not motivo:
-            raise ValidationError("Debe indicar el motivo de la anulación.")
-        cuenta.write({
-            'estado': 'anulada',
-            'motivo_anulacion': motivo,
-            'fecha_anulacion': fields.Datetime.now(),
-            'usuario_anulacion_id': self.env.uid,
-        })
-        return {'type': 'ir.actions.act_window_close'}
-
-
 class CaramiaPagoWizard(models.TransientModel):
     _name = 'cara.mia.pago.wizard'
     _description = 'Registrar Pago a una o varias Facturas'
@@ -54,11 +27,16 @@ class CaramiaPagoWizard(models.TransientModel):
 
     @api.model
     def _lineas_vals(self, cliente_id, cuenta_id=False):
-        """Cuentas abiertas del cliente: la prioritaria primero, luego por vencimiento."""
-        cuentas = self.env['cara.mia.cuenta.cobro'].search([
+        """Cuentas abiertas del cliente: la prioritaria primero, luego por vencimiento.
+        Si viene 'solo_cuenta_id' en el contexto, lista únicamente esa factura."""
+        dominio = [
             ('cliente_id', '=', cliente_id),
             ('estado', 'in', ('vigente', 'vencida')),
-        ], order='fecha_vencimiento, id')
+        ]
+        solo = self.env.context.get('solo_cuenta_id')
+        if solo:
+            dominio.append(('id', '=', solo))
+        cuentas = self.env['cara.mia.cuenta.cobro'].search(dominio, order='fecha_vencimiento, id')
         prioritaria = cuentas.filtered(lambda c: c.id == cuenta_id)
         cuentas = prioritaria | (cuentas - prioritaria)
         return [(0, 0, {'cuenta_id': c.id}) for c in cuentas]
@@ -118,6 +96,10 @@ class CaramiaPagoWizardLinea(models.TransientModel):
     cuenta_id = fields.Many2one('cara.mia.cuenta.cobro', string='Factura', required=True)    
     currency_id = fields.Many2one(related='cuenta_id.currency_id')
     fecha_vencimiento = fields.Date(related='cuenta_id.fecha_vencimiento', string='Vence')
+    ordenes_asociadas = fields.Text(
+        related='cuenta_id.ordenes_asociadas', 
+        string='Órdenes y Referencias'
+    )
     estado = fields.Selection(related='cuenta_id.estado', string='Estado')
     saldo_pendiente = fields.Monetary(related='cuenta_id.saldo_pendiente', string='Saldo')
     monto_aplicar = fields.Monetary(string='Aplicar', default=0.0)

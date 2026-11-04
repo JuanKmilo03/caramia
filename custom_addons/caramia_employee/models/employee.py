@@ -1,7 +1,6 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
-
-# 1. MODELO DE PRÉSTAMOS / DESCUENTOS (Líneas dentro del empleado)
 class CaramiaPrestamo(models.Model):
     _name = 'cara.mia.prestamo'
     _description = 'Préstamo / Descuento a Empleado'
@@ -99,6 +98,22 @@ class CaramiaEmployee(models.Model):
         default=True,
         help='Si se activa, el dinero de la liquidación se pagará en cada nómina.'
     )
+    
+    
+    @api.constrains('empleado_id', 'telefono_empleado')
+    def _check_cedula_telefono(self):
+        for record in self:
+            if record.empleado_id:
+                if not record.empleado_id.isdigit():
+                    raise ValidationError("La Cédula solo debe contener números, sin letras ni espacios.")
+                if len(record.empleado_id) > 10:
+                    raise ValidationError("La Cédula no puede tener más de 10 dígitos.")
+
+            if record.telefono_empleado:
+                if not record.telefono_empleado.isdigit():
+                    raise ValidationError("El Teléfono solo debe contener números, sin letras ni caracteres especiales.")
+                if len(record.telefono_empleado) > 10:
+                    raise ValidationError("El Teléfono no puede tener más de 10 dígitos.")
 
     @api.depends('prestamo_ids', 'prestamo_ids.state', 'prestamo_ids.monto')
     def _compute_prestamos_totales(self):
