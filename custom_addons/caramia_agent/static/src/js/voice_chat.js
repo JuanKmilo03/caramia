@@ -14,16 +14,21 @@
         }
         inputArea.dataset.voiceReady = '1';
 
-        // Boton de microfono
+        const estado = document.createElement('span');
+        estado.id = 'voice-status-ia';
+        estado.style.marginLeft = '6px';
+        estado.style.fontSize = '12px';
+        estado.style.color = '#555';
+        inputArea.appendChild(estado);
+
         const btnMic = document.createElement('button');
         btnMic.id = 'btn-mic-ia';
         btnMic.type = 'button';
-        btnMic.title = 'Hablar';
+        btnMic.title = 'Grabar audio';
         btnMic.textContent = '\uD83C\uDF99';
         btnMic.style.marginLeft = '6px';
         inputArea.appendChild(btnMic);
 
-        // Boton para detener la voz
         const btnStop = document.createElement('button');
         btnStop.id = 'btn-stop-tts-ia';
         btnStop.type = 'button';
@@ -32,71 +37,62 @@
         btnStop.style.marginLeft = '4px';
         inputArea.appendChild(btnStop);
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let isListening = false;
-        let finalTranscript = '';
+        let mediaRecorder = null;
+        let chunks = [];
+        let isRecording = false;
 
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'es-ES';
-            recognition.interimResults = true;
-            recognition.maxAlternatives = 1;
-            recognition.continuous = false;
-
-            btnMic.addEventListener('click', function () {
-                // Cancelar voz actual
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            btnMic.addEventListener('click', async function () {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                 }
-                if (isListening) {
-                    recognition.stop();
+                if (isRecording) {
+                    mediaRecorder.stop();
                     return;
                 }
-                finalTranscript = '';
-                inputChat.value = '';
-                isListening = true;
-                btnMic.textContent = '\uD83D\uDD34';
                 try {
-                    recognition.start();
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    chunks = [];
+                    mediaRecorder.ondataavailable = function (e) {
+                        if (e.data.size > 0) chunks.push(e.data);
+                    };
+                    mediaRecorder.onstart = function () {
+                        isRecording = true;
+                        btnMic.textContent = '\u23F9';
+                        estado.textContent = 'Grabando... pulsa para detener';
+                    };
+                    mediaRecorder.onstop = async function () {
+                        isRecording = false;
+                        btnMic.textContent = '\uD83C\uDF99';
+                        estado.textContent = 'Transcribiendo...';
+                        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                        const fd = new FormData();
+                        fd.append('file', blob, 'audio.webm');
+                        try {
+                            const res = await fetch('/caramia/stt', { method: 'POST', body: fd });
+                            const data = await res.json();
+                            if (data.texto) {
+                                inputChat.value = data.texto;
+                                estado.textContent = 'Revisa y pulsa Enviar';
+                            } else {
+                                estado.textContent = 'Error: ' + (data.detail || data.error || JSON.stringify(data));
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            estado.textContent = 'Error de conexión';
+                        }
+                        stream.getTracks().forEach(function (t) { t.stop(); });
+                    };
+                    mediaRecorder.start();
                 } catch (e) {
-                    console.error('Speech start error', e);
-                    isListening = false;
-                    btnMic.textContent = '\uD83C\uDF99';
+                    console.error('getUserMedia error', e);
+                    estado.textContent = 'Sin permiso de micrófono';
                 }
             });
-
-            recognition.onresult = function (event) {
-                let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const t = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += t + ' ';
-                    } else {
-                        interim += t;
-                    }
-                }
-                inputChat.value = (finalTranscript + interim).trim();
-            };
-
-            recognition.onend = function () {
-                isListening = false;
-                btnMic.textContent = '\uD83C\uDF99';
-                const msg = (finalTranscript || inputChat.value).trim();
-                if (msg) {
-                    inputChat.value = msg;
-                    // Enviar una sola vez
-                    btnEnviar.click();
-                }
-                finalTranscript = '';
-            };
-
-            recognition.onerror = function (event) {
-                isListening = false;
-                btnMic.textContent = '\uD83C\uDF99';
-                console.error('Speech recognition error', event.error);
-            };
         } else {
             btnMic.style.display = 'none';
+            estado.textContent = 'Audio no soportado';
         }
 
         btnStop.addEventListener('click', function () {
@@ -116,7 +112,7 @@
                         if (!text || text.indexOf('Procesando') !== -1) return;
                         try {
                             const utter = new SpeechSynthesisUtterance(text);
-                            utter.lang = 'es-ES';
+                            utter.lang = 'es-CO';
                             window.speechSynthesis.cancel();
                             window.speechSynthesis.speak(utter);
                         } catch (e) {

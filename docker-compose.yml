@@ -44,6 +44,8 @@ services:
       - AI_API_KEY=${AI_API_KEY}
       - AI_MODEL=${AI_MODEL}
       - AGENT_SECRET=${AGENT_SECRET}
+      - STT_PROVIDER=${STT_PROVIDER}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
 volumes:
   odoo-db-data:

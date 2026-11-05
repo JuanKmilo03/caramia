@@ -9,7 +9,15 @@ class CaramiaCustomer(models.Model):
     cliente_id = fields.Char(string='ID Cliente', required=True, copy=False, readonly=True, default='Nuevo')
     telefono_cliente = fields.Char(string='Teléfono')
     direccion = fields.Text(string='Dirección')
-    sello = fields.Char(string='Sello / Marca', required=True)
+    sello = fields.Char(string='Sello / Marca', required=True)   
+    iniciales = fields.Char(compute='_compute_iniciales')
+
+    @api.depends('nombre_cliente')
+    def _compute_iniciales(self):
+        for rec in self:
+            palabras = (rec.nombre_cliente or '').split()
+            rec.iniciales = ''.join(p[0] for p in palabras[:2]).upper() or '?'
+    
     
     @api.model_create_multi
     def create(self, vals_list):

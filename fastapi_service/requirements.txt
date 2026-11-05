@@ -5,3 +5,5 @@ python-dotenv
 openai
 redis
 httpx
+python-multipart
+faster-whisper
