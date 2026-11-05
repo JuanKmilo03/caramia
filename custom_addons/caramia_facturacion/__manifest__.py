@@ -14,6 +14,7 @@
         'wizard/cuenta_cobro_wizard_views.xml',
         'views/facturacion_views.xml',
         'views/cxc_views.xml',
+        'views/customer_facturas_views.xml',
         'reports/facturacion_report.xml',
     ],
     'assets': {

@@ -214,6 +214,7 @@
     <record id="view_cartera_cliente_form" model="ir.ui.view">
         <field name="name">cara.mia.cliente.cartera.form</field>
         <field name="model">cara.mia.cliente</field>
+        <field name="priority">99</field>
         <field name="arch" type="xml">
             <form string="Cartera del Cliente" create="0" delete="0" edit="0">
                 <header>

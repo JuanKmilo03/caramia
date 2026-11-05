@@ -286,6 +286,11 @@ class CaramiaCliente(models.Model):
         'cara.mia.cuenta.cobro', 'cliente_id', string='Facturas Activas',
         domain=[('estado', 'in', ESTADOS_ABIERTOS)])
 
+    facturacion_ids = fields.One2many('cara.mia.facturacion', 'cliente_id', string='Todas las Facturas')
+    factura_activa_ids = fields.One2many(
+        'cara.mia.facturacion', 'cliente_id', string='Facturas Activas',
+        domain=[('estado', 'in', ('borrador', 'emitida'))])
+
     total_facturado_cuentas = fields.Monetary(string='Total Facturado', compute='_compute_cartera_cliente')
     total_abonado_cuentas = fields.Monetary(string='Total Abonado', compute='_compute_cartera_cliente')
     saldo_pendiente_cuentas = fields.Monetary(string='Saldo Total Adeudado',

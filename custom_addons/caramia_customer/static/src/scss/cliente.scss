@@ -1,5 +1,16 @@
-$cm-a: #4f46e5;   // índigo
-$cm-b: #db2777;   // rosa
+$cm-a: #c98f2e;   // gold-dim (login)
+$cm-b: #ebad33;   // gold (login)
+$ink: #14161c;
+$ink-800: #1c1f28;
+$ink-700: #262a36;
+$paper: #f3f0e7;
+$paper-dim: #d9d5c8;
+$gold: #ebad33;
+$gold-dim: #c98f2e;
+$text: #eceae3;
+$text-muted: #8b8d97;
+$line: rgba(236, 234, 227, 0.12);
+
 $cm-radius: 1.25rem;
 
 @keyframes cm-fade-up {
@@ -29,7 +40,7 @@ $cm-radius: 1.25rem;
         margin-bottom: 1.5rem;
         border-radius: $cm-radius;
         color: #fff;
-        background: linear-gradient(120deg, $cm-a, #7c3aed, $cm-b);
+        background: linear-gradient(120deg, $cm-a, $ink-800, $cm-b);
         background-size: 200% 200%;
         animation: cm-gradient 12s ease infinite, cm-fade-up .5s ease both;
         box-shadow: 0 12px 30px -10px rgba($cm-a, .55);
@@ -60,6 +71,10 @@ $cm-radius: 1.25rem;
         transition: transform .3s ease;
         &:hover { transform: rotate(-6deg) scale(1.08); }
         .o_field_widget { color: #fff; font-weight: 700; }
+        .o_field_widget, .o_field_widget .o_input, .o_field_widget input {
+            padding: 0; margin: 0; border: 0; text-align: center;
+            background: transparent; box-shadow: none;
+        }
     }
 
     .cm-hero-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
@@ -73,7 +88,7 @@ $cm-radius: 1.25rem;
         .o_field_widget { color: #fff; width: auto; }
     }
 
-    .cm-hero-name { margin: .5rem 0 .25rem; font-weight: 700; }
+    .cm-hero-name { margin: .5rem 0 .25rem; font-weight: 700; font-family: $sans; font-size: 2.2rem; }
     .cm-hero-sub  { opacity: .9; display: flex; align-items: center; }
 
     // Inputs transparentes sobre el degradado
@@ -106,8 +121,8 @@ $cm-radius: 1.25rem;
         display: flex; align-items: flex-start; gap: 1rem;
         padding: 1.25rem;
         border-radius: $cm-radius;
-        background: var(--bs-body-bg);
-        border: 1px solid var(--bs-border-color);
+        background: #f3f0e7;
+        border: 1px solid #d9d5c8;
         box-shadow: 0 2px 8px rgba(#000, .04);
         animation: cm-fade-up .55s var(--cm-delay, 0s) ease both;
         transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
@@ -128,6 +143,7 @@ $cm-radius: 1.25rem;
         font-size: 1.2rem; color: #fff;
         background: linear-gradient(135deg, $cm-a, $cm-b);
         transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+        .o_field_widget, .o_field_widget input { padding: 0; margin: 0; border: 0; text-align: center; background: transparent; }
     }
 
     .cm-card-body {
@@ -136,7 +152,7 @@ $cm-radius: 1.25rem;
             display: block; margin: 0 0 .15rem;
             font-size: .72rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: .8px;
-            color: var(--bs-secondary-color);
+            color: #8b8d97;
         }
     }
 }
@@ -159,6 +175,16 @@ $cm-radius: 1.25rem;
         &:hover::after { left: 130%; transition: left .6s ease; }
     }
     .o_form_button_cancel { border-radius: 50rem; }
+    .o_form_button_create, .o_list_button_add {
+        border-radius: 50rem;
+        background: linear-gradient(135deg, $gold-dim, $gold);
+        color: $ink;
+        font-family: $sans;
+        font-weight: 600;
+        border: 0;
+        transition: transform .2s ease, box-shadow .2s ease;
+        &:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -6px rgba($gold, .6); }
+    }
 }
 
 /* ================= KANBAN ================= */
@@ -187,10 +213,11 @@ $cm-radius: 1.25rem;
         font-weight: 700; font-size: 1.1rem; color: #fff;
         background: linear-gradient(135deg, $cm-a, $cm-b);
         transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+        .o_field_widget, .o_field_widget input { padding: 0; margin: 0; border: 0; text-align: center; background: transparent; }
     }
     .cm-kinfo { min-width: 0; }
     .cm-kname { font-weight: 700; font-size: 1.05rem; }
-    .cm-kmeta { font-size: .85rem; color: var(--bs-secondary-color); }
+    .cm-kmeta { font-size: .85rem; color: #8b8d97; }
     .cm-ktag {
         display: inline-block; margin-top: .35rem;
         padding: .1rem .65rem; border-radius: 50rem;

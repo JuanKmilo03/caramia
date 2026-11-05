@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_caramia_customer_form_facturas" model="ir.ui.view">
+        <field name="name">cara.mia.cliente.form.facturas</field>
+        <field name="model">cara.mia.cliente</field>
+        <field name="inherit_id" ref="caramia_customer.view_caramia_customer_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Facturas (todas)">
+                        <field name="facturacion_ids">
+                            <list>
+                                <field name="name" string="N° Factura" />
+                                <field name="fecha_facturacion" />
+                                <field name="estado" />
+                                <field name="total_general" />
+                                <field name="total_pares" />
+                            </list>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>
