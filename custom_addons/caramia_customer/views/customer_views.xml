@@ -1,59 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- FORMULARIO -->
     <record id="view_caramia_customer_form" model="ir.ui.view">
         <field name="name">cara.mia.cliente.form</field>
         <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
-            <form string="Cliente">
+            <form string="Cliente" class="o_caramia_cliente_form">
                 <sheet>
-                    <div class="oe_title">
-                        <label for="cliente_id" string="ID Cliente"/>
-                        <h1>
-                            <field name="cliente_id" readonly="1"/>
-                        </h1>
-                        <label for="nombre_cliente" string="Nombre / Razón Social"/>
-                        <h2>
-                            <field name="nombre_cliente" placeholder="Nombre completo del cliente" required="1"/>
-                        </h2>
+                    <field name="iniciales" invisible="1"/>
+
+                    <div class="cm-hero">
+                        <div class="cm-avatar"><field name="iniciales" readonly="1"/></div>
+                        <div class="cm-hero-info">
+                            <span class="cm-id-pill">
+                                <i class="fa fa-id-badge me-1"/>
+                                <field name="cliente_id" readonly="1"/>
+                            </span>
+                            <h1 class="cm-hero-name">
+                                <field name="nombre_cliente" required="1"
+                                       placeholder="Nombre completo del cliente"/>
+                            </h1>
+                            <div class="cm-hero-sub">
+                                <i class="fa fa-tag me-1"/>
+                                <field name="sello" required="1" placeholder="Sello / Marca"/>
+                            </div>
+                        </div>
                     </div>
-                    <group>
-                        <group>
-                            <field name="telefono_cliente" string="Teléfono"/>
-                            <field name="direccion" string="Dirección"/>
-                        </group>
-                        <group>
-                            <field name="sello" string="Sello / Marca"/>
-                        </group>
-                    </group>
+
+                    <div class="cm-cards">
+                        <div class="cm-card" style="--cm-delay: .05s">
+                            <div class="cm-card-icon"><i class="fa fa-phone"/></div>
+                            <div class="cm-card-body">
+                                <label for="telefono_cliente" string="Teléfono"/>
+                                <field name="telefono_cliente" placeholder="Ej. 300 123 4567"/>
+                            </div>
+                        </div>
+                        <div class="cm-card" style="--cm-delay: .15s">
+                            <div class="cm-card-icon"><i class="fa fa-map-marker"/></div>
+                            <div class="cm-card-body">
+                                <label for="direccion" string="Dirección"/>
+                                <field name="direccion" placeholder="Dirección del cliente"/>
+                            </div>
+                        </div>
+                    </div>
                 </sheet>
             </form>
         </field>
     </record>
 
+    <!-- LISTA -->
     <record id="view_caramia_customer_list" model="ir.ui.view">
         <field name="name">cara.mia.cliente.list</field>
         <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
             <list string="Clientes">
-                <field name="cliente_id"/>
-                <field name="nombre_cliente"/>
-                <field name="direccion"/>
+                <field name="cliente_id" widget="badge" decoration-info="1"/>
+                <field name="nombre_cliente" decoration-bf="1"/>
                 <field name="telefono_cliente"/>
-                <field name="sello"/>
+                <field name="direccion" optional="show"/>
+                <field name="sello" widget="badge" decoration-primary="1"/>
             </list>
         </field>
     </record>
 
+    <!-- KANBAN (tarjetas) -->
+    <record id="view_caramia_customer_kanban" model="ir.ui.view">
+        <field name="name">cara.mia.cliente.kanban</field>
+        <field name="model">cara.mia.cliente</field>
+        <field name="arch" type="xml">
+            <kanban class="o_caramia_cliente_kanban">
+                <field name="nombre_cliente"/>
+                <field name="cliente_id"/>
+                <field name="telefono_cliente"/>
+                <field name="direccion"/>
+                <field name="sello"/>
+                <field name="iniciales"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="cm-kcard">
+                            <div class="cm-kavatar"><field name="iniciales"/></div>
+                            <div class="cm-kinfo">
+                                <div class="cm-kname"><field name="nombre_cliente"/></div>
+                                <div class="cm-kmeta"><i class="fa fa-id-badge me-1"/><field name="cliente_id"/></div>
+                                <div class="cm-kmeta" t-if="record.telefono_cliente.raw_value">
+                                    <i class="fa fa-phone me-1"/><field name="telefono_cliente"/>
+                                </div>
+                                <span class="cm-ktag" t-if="record.sello.raw_value">
+                                    <field name="sello"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- BUSCADOR -->
     <record id="view_caramia_customer_search" model="ir.ui.view">
         <field name="name">cara.mia.cliente.search</field>
         <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
             <search string="Buscar Clientes">
+                <field name="nombre_cliente" string="Cliente"/>
                 <field name="cliente_id"/>
-                <field name="nombre_cliente"/>
                 <field name="direccion"/>
                 <field name="telefono_cliente"/>
                 <field name="sello"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_sello" string="Sello / Marca" context="{'group_by': 'sello'}"/>
+                </group>
             </search>
         </field>
     </record>
@@ -61,21 +117,14 @@
     <record id="action_caramia_customer" model="ir.actions.act_window">
         <field name="name">Clientes</field>
         <field name="res_model">cara.mia.cliente</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_caramia_customer_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Registrar primer cliente
-            </p>
+            <p class="o_view_nocontent_smiling_face">Registrar primer cliente</p>
         </field>
     </record>
 
-    <menuitem id="menu_caramia_customer_root"
-              name="Clientes"
-              sequence="10"/>
-
-    <menuitem id="menu_caramia_customer_list"
-              name="Lista de Clientes"
-              parent="menu_caramia_customer_root"
-              action="action_caramia_customer"
-              sequence="10"/>
+    <menuitem id="menu_caramia_customer_root" name="Clientes" sequence="10"/>
+    <menuitem id="menu_caramia_customer_list" name="Lista de Clientes"
+              parent="menu_caramia_customer_root" action="action_caramia_customer" sequence="10"/>
 </odoo>

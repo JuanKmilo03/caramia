@@ -66,6 +66,7 @@ def obtener_historial(user_id: int, contexto: str = ""):
     6. CONFIRMACION: Antes de ejecutar cualquier accion de creacion, edicion o eliminacion, resume al usuario lo que vas a hacer y pide confirmacion explicita. Solo ejecuta la herramienta cuando el usuario haya confirmado.
     7. Si el usuario corrige informacion o indica una preferencia, usa la herramienta guardar_correccion para recordarlo.
     8. Las respuestas pueden leerse en voz alta: se conciso, evita markdown complejo y listas muy largas.
+    9. Antes de crear una orden de produccion, asegurate de tener TODOS los datos: cliente, referencia, tallas (y opcionalmente color, material, sello). Si falta alguno, pidelo al usuario antes de usar la herramienta.
     """
     
     # 3. Lógica de sobrescritura
@@ -97,12 +98,26 @@ async def procesar_chat(mensaje: str, user_id: int, contexto: str = ""):
     
     mensajes = optimizar_tokens(mensajes)
 
-    respuesta = await client.chat.completions.create(
-        model=MODELO,
-        messages=mensajes,
-        tools=TODAS_LAS_HERRAMIENTAS,
-        tool_choice="auto" 
-    )
+    try:
+        respuesta = await client.chat.completions.create(
+            model=MODELO,
+            messages=mensajes,
+            tools=TODAS_LAS_HERRAMIENTAS,
+            tool_choice="auto" 
+        )
+    except Exception as e:
+        msg = str(e)
+        print(f"ERROR CHAT: {msg}", flush=True)
+        # Mensaje amigable si el modelo no envio parametros requeridos
+        if "did not match schema" in msg or "missing properties" in msg:
+            return {
+                "tipo": "texto",
+                "respuesta": "Me faltan datos para crear la orden. Necesito: nombre del cliente, referencia, tallas (y opcionalmente color, material y sello). ¿Me los puedes dar?"
+            }
+        return {
+            "tipo": "texto",
+            "respuesta": f"Hubo un error al procesar la solicitud: {msg}"
+        }
     
     mensaje_ia = respuesta.choices[0].message
 

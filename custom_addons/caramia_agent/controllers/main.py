@@ -36,6 +36,24 @@ class AgenteController(http.Controller):
             pass
         return contexto
 
+    @http.route('/caramia/stt', type='http', auth='user', methods=['POST'], csrf=False)
+    def transcribir_audio(self, **kw):
+        import requests as _r
+        url = os.getenv("FASTAPI_URL", "http://fastapi_ai:8000") + "/api/stt"
+        headers = {}
+        secret = os.getenv("AGENT_SECRET", "")
+        if secret:
+            headers["X-Agent-Secret"] = secret
+        try:
+            archivo = request.httprequest.files.get('file')
+            if not archivo:
+                return request.make_response('{"error":"sin archivo"}', headers=[('Content-Type','application/json')], status=400)
+            files = {'file': (archivo.filename, archivo.read(), archivo.content_type or 'audio/webm')}
+            resp = _r.post(url, files=files, headers=headers, timeout=60)
+            return request.make_response(resp.text, headers=[('Content-Type','application/json')], status=resp.status_code)
+        except Exception as e:
+            return request.make_response('{"error":"%s"}' % str(e), headers=[('Content-Type','application/json')], status=500)
+
     @http.route('/caramia/chat', type='json', auth='user')
     def enviar_mensaje_ia(self, mensaje):
         url_fastapi = os.getenv("FASTAPI_URL", "http://fastapi_ai:8000") + "/api/chat"

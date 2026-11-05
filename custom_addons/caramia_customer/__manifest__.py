@@ -9,6 +9,11 @@
         'data/ir_sequence_data.xml',
         'views/customer_views.xml',
     ],
+    'assets': {
+    'web.assets_backend': [
+        'caramia_customer/static/src/scss/cliente.scss',
+    ],
+},
     'installable': True,
     'application': True,
     'license': 'LGPL-3',
