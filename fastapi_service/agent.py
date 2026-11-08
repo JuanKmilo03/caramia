@@ -12,7 +12,7 @@ redis_client = redis.Redis(host=redis_host, port=6379, db=0, decode_responses=Tr
 
 client = AsyncOpenAI(
     api_key=os.getenv("AI_API_KEY"),
-    base_url="https://api.groq.com/openai/v1" 
+    base_url=os.getenv("AI_URL"),
 )
 MODELO = os.getenv("AI_MODEL", "openai/gpt-oss-20b")
 
