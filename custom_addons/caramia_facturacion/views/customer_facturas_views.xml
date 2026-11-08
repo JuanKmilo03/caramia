@@ -9,7 +9,7 @@
                 <notebook>
                     <page string="Facturas (todas)">
                         <field name="facturacion_ids">
-                            <list>
+                            <list class="o_cm_facturas_list" limit="20">
                                 <field name="name" string="N° Factura" />
                                 <field name="fecha_facturacion" />
                                 <field name="estado" />

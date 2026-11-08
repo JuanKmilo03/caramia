@@ -5,7 +5,7 @@
         <field name="name">cara.mia.produccion.history.list</field>
         <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
-            <list string="Historial de Producción" create="false" delete="false">
+            <list string="Historial de Producción" create="false" delete="false" class="caramia_production_list">
                 <field name="name"/>
                 <field name="cliente_id"/>
                 <field name="referencia_id"/>

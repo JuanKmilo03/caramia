@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- VISTA KANBAN POR ESTADO -->
+    <record id="view_caramia_production_kanban" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.kanban</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="arch" type="xml">
+            <kanban class="caramia_production_kanban"
+                    default_group_by="state"
+                    group_create="false"
+                    groups_draggable="false"
+                    records_draggable="true"
+                    quick_create="false"
+                    limit="30">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="referencia_id"/>
+                <field name="total_pares"/>
+                <field name="state"/>
+                <field name="prioridad_alta"/>
+                <field name="rango_fechas"/>
+                <field name="fecha_estimada" invisible="1"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div class="caramia-card">
+                            <div class="caramia-card__top">
+                                <span class="caramia-card__code" t-out="record.name.value"/>
+                                <span t-if="record.prioridad_alta.raw_value" class="caramia-pill">
+                                    Prioridad alta
+                                </span>
+                            </div>
+
+                            <div class="caramia-card__client" t-out="record.cliente_id.value"/>
+                            <div class="caramia-card__ref" t-out="record.referencia_id.value"/>
+
+                            <div class="caramia-card__foot">
+                                <span class="caramia-card__pairs">
+                                    <svg class="caramia-shoe" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path fill="currentColor" d="M2.5 14.8c0-.6.5-1.1 1.1-1.1h2.1l1.8-2.3c.3-.4.8-.6 1.3-.5l3.1.5c.4.1.8.3 1 .7l.9 1.2 3.8 1.1c2.6.7 4.4 1.7 4.4 3.1 0 .8-.7 1.5-1.5 1.5H4.2c-.9 0-1.7-.8-1.7-1.7v-2.5Z"/>
+                                        <path fill="currentColor" d="M4 18.5h16v1.2H4z" opacity=".55"/>
+                                    </svg>
+                                    <t t-out="record.total_pares.value"/> pares
+                                </span>
+                                <span class="caramia-card__date" t-out="record.rango_fechas.value"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- BUSCADOR COHERENTE CON EL NUEVO DISEÑO -->
+    <record id="view_caramia_production_search_redesign" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.search.redesign</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="arch" type="xml">
+            <search string="Órdenes de producción">
+                <field name="name" string="Orden"/>
+                <field name="cliente_id"/>
+                <field name="referencia_id"/>
+                <field name="fecha_estimada"/>
+                <field name="prioridad_alta"/>
+
+                <filter name="f_draft" string="Borrador"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="f_progress" string="En proceso"
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter name="f_done" string="Finalizado"
+                        domain="[('state', '=', 'done')]"/>
+                <filter name="f_canceled" string="Cancelado"
+                        domain="[('state', '=', 'canceled')]"/>
+                <separator/>
+                <filter name="f_priority" string="Prioridad alta"
+                        domain="[('prioridad_alta', '=', True)]"/>
+                <filter name="f_overdue" string="Entrega vencida"
+                        domain="[('fecha_estimada', '&lt;', context_today().strftime('%Y-%m-%d')),
+                                 ('state', 'in', ('draft', 'in_progress', 'stopped'))]"/>
+                <filter name="f_week" string="Entrega próximos 7 días"
+                        domain="[('fecha_estimada', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('fecha_estimada', '&lt;=', (context_today() + datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
+                                 ('state', 'in', ('draft', 'in_progress', 'stopped'))]"/>
+
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_state" string="Estado"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="g_cliente" string="Cliente"
+                            context="{'group_by': 'cliente_id'}"/>
+                    <filter name="g_ref" string="Referencia"
+                            context="{'group_by': 'referencia_id'}"/>
+                    <filter name="g_priority" string="Prioridad alta"
+                            context="{'group_by': 'prioridad_alta'}"/>
+                    <filter name="g_entrega" string="Entrega (mes)"
+                            context="{'group_by': 'fecha_estimada:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

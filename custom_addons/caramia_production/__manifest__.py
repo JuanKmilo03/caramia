@@ -10,6 +10,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
+        'views/production_kanban_views.xml',
         'views/production_views.xml',
         'wizard/lista_compras_wizard_views.xml',
         'views/production_compra_views.xml',
@@ -18,6 +19,12 @@
         'reports/production_templates.xml',
         'reports/lista_compras_production_report.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'caramia_production/static/src/scss/production_redesign.scss',
+            'caramia_production/static/src/xml/production_redesign.xml',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

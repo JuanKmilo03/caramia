@@ -1,6 +1,9 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+MESES = ('ene', 'feb', 'mar', 'abr', 'may', 'jun',
+         'jul', 'ago', 'sep', 'oct', 'nov', 'dic')
+
 class CaramiaProduction(models.Model):
     _name = 'cara.mia.produccion'
     _description = 'Orden de Producción'
@@ -93,6 +96,48 @@ class CaramiaProduction(models.Model):
         ('done', 'Finalizado'),
         ('canceled', 'Cancelado'),
     ], string='Estado', default='draft', tracking=True)
+
+    prioridad_alta = fields.Boolean(
+        string='Prioridad alta',
+        default=False,
+        tracking=True,
+    )
+    rango_fechas = fields.Char(
+        string='Rango de fechas',
+        compute='_compute_rango_fechas',
+        store=True,
+    )
+
+    @api.depends('state', 'fecha_creacion', 'fecha_estimada', 'fecha_finalizacion')
+    def _compute_rango_fechas(self):
+        for rec in self:
+            if rec.state == 'done':
+                rec.rango_fechas = 'Completada'
+            elif rec.state == 'canceled':
+                rec.rango_fechas = 'Cancelada'
+            elif not rec.fecha_estimada:
+                rec.rango_fechas = 'Sin fecha'
+            else:
+                inicio = rec.fecha_creacion or rec.fecha_estimada
+                fin = rec.fecha_estimada
+                if inicio == fin:
+                    rec.rango_fechas = f'{fin.day} {MESES[fin.month - 1]}'
+                elif inicio.month == fin.month and inicio.year == fin.year:
+                    rec.rango_fechas = f'{inicio.day}–{fin.day} {MESES[fin.month - 1]}'
+                else:
+                    rec.rango_fechas = (
+                        f'{inicio.day} {MESES[inicio.month - 1]} – '
+                        f'{fin.day} {MESES[fin.month - 1]}'
+                    )
+
+    @api.model
+    def _group_expand_state(self, states, domain, order):
+        """Mantiene visibles las 4 columnas principales, incluso vacías.
+
+        Si caramia_tracking está instalado y existen órdenes en 'stopped',
+        Odoo añadirá esa quinta columna automáticamente.
+        """
+        return ['draft', 'in_progress', 'done', 'canceled']
 
     @api.depends(
         'talla_21', 'talla_22', 'talla_23', 'talla_24', 'talla_25',

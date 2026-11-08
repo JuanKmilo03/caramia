@@ -10,42 +10,42 @@
                 <sheet>
                     <field name="iniciales" invisible="1" />
 
-                    <div class="cm-hero">
-                        <div class="cm-avatar">
-                            <field name="iniciales" readonly="1" />
-                        </div>
-                        <div class="cm-hero-info">
-                            <span class="cm-id-pill">
-                                <i class="fa fa-id-badge me-1" />
-                                <field name="cliente_id" readonly="1" />
-                            </span>
-                            <h1 class="cm-hero-name">
-                                <field name="nombre_cliente" required="1"
-                                    placeholder="Nombre completo del cliente" />
-                            </h1>
-                            <div class="cm-hero-sub">
-                                <i class="fa fa-tag me-1" />
-                                <field name="sello" required="1" placeholder="Sello / Marca" />
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="cm-cards">
-                        <div class="cm-card" style="--cm-delay: .05s">
-                            <div class="cm-card-icon">
-                                <i class="fa fa-phone" />
+                        <!-- Tarjeta 1: información del cliente -->
+                        <div class="cm-card cm-main" style="--cm-delay: 0s">
+                            <div class="cm-avatar">
+                                <field name="iniciales" readonly="1" />
                             </div>
-                            <div class="cm-card-body">
-                                <label for="telefono_cliente" string="Teléfono" />
+                            <div class="cm-main-info">
+                                <span class="cm-id-pill">
+                                    <i class="fa fa-id-badge" />
+                                    <field name="cliente_id" readonly="1" />
+                                </span>
+                                <h1 class="cm-name">
+                                    <field name="nombre_cliente" required="1"
+                                        placeholder="Nombre completo del cliente" />
+                                </h1>
+                                <div class="cm-sub">
+                                    <i class="fa fa-tag" />
+                                    <field name="sello" required="1" placeholder="Sello / Marca" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 2: teléfono -->
+                        <div class="cm-card cm-side" style="--cm-delay: .08s">
+                            <div class="cm-side-icon"><i class="fa fa-phone" /></div>
+                            <div class="cm-side-body">
+                                <label for="telefono_cliente" class="o_form_label" string="Teléfono" />
                                 <field name="telefono_cliente" placeholder="Ej. 300 123 4567" />
                             </div>
                         </div>
-                        <div class="cm-card" style="--cm-delay: .15s">
-                            <div class="cm-card-icon">
-                                <i class="fa fa-map-marker" />
-                            </div>
-                            <div class="cm-card-body">
-                                <label for="direccion" string="Dirección" />
+
+                        <!-- Tarjeta 3: dirección -->
+                        <div class="cm-card cm-side" style="--cm-delay: .16s">
+                            <div class="cm-side-icon"><i class="fa fa-map-marker" /></div>
+                            <div class="cm-side-body">
+                                <label for="direccion" class="o_form_label" string="Dirección" />
                                 <field name="direccion" placeholder="Dirección del cliente" />
                             </div>
                         </div>
@@ -60,7 +60,7 @@
         <field name="name">cara.mia.cliente.list</field>
         <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
-            <list string="Clientes">
+            <list string="Clientes" class="o_caramia_cliente_list">
                 <field name="cliente_id" widget="badge" decoration-info="1" />
                 <field name="nombre_cliente" decoration-bf="1" />
                 <field name="telefono_cliente" />

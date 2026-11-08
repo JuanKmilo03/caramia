@@ -254,6 +254,14 @@ class CaramiaProductionTracking(models.Model):
             row.update(label=f'{meses[ini.month - 1]} {ini.year}', actual=(i == 0))
             serie_mensual.append(row)
 
+        serie_anual = []
+        for i in range(-4, 1):
+            ini = today.replace(month=1, day=1) + relativedelta(years=i)
+            fin = ini + relativedelta(years=1, days=-1)
+            row = sums(ini, fin)
+            row.update(label=str(ini.year), actual=(i == 0))
+            serie_anual.append(row)
+
         dom_act = [('state', 'in', ESTADOS_ACTIVOS), ('fecha_estimada', '!=', False)]
         pend_pares = self._read_group(dom_act, [], ['total_pares:sum'])[0][0] or 0
         limite = today + timedelta(days=7)
@@ -265,8 +273,15 @@ class CaramiaProductionTracking(models.Model):
                 ('fecha_estimada', '>=', today), ('fecha_estimada', '<=', limite)]),
         }
 
+        # Cuentas pendientes por cobro (si el módulo de facturación está instalado)
+        try:
+            Cuenta = self.env['cara.mia.cuenta.cobro']
+            cuentas_pendientes = Cuenta.search_count([('estado', 'in', ('vigente', 'vencida'))])
+        except KeyError:
+            cuentas_pendientes = 0
+
         lista = []
-        for rec in self.search(dom_act, order='fecha_estimada asc, id', limit=12):
+        for rec in self.search(dom_act, order='fecha_estimada asc, id', limit=6):
             lista.append({
                 'id': rec.id,
                 'name': rec.name,
@@ -288,7 +303,9 @@ class CaramiaProductionTracking(models.Model):
             'mes': mes,
             'serie_semanal': serie_semanal,
             'serie_mensual': serie_mensual,
+            'serie_anual': serie_anual,
             'entregas': entregas,
+            'cuentas_pendientes': cuentas_pendientes,
             'estancadas': self.search_count([('esta_estancada', '=', True)]),
             'activas': self.search_count([('state', 'in', ESTADOS_ACTIVOS)]),
             'lista': lista,

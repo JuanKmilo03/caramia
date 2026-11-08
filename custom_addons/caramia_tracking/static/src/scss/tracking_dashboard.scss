@@ -1,5 +1,240 @@
+// ============================================================
+// PALETA CARAMIA
+// ============================================================
+$cm-navy:       #0f172a;
+$cm-gold:       #b88a1e;
+$cm-gold-dark:  #9a7114;
+$cm-green:      #2f7d4f;
+$cm-red:        #c0392b;
+$cm-gray:       #9aa0a6;
+$cm-bg:         #f9f9f9;
+$cm-surface:    #ffffff;
+$cm-surface-alt:#f3f3f3;
+$cm-border:     #e5e0d5;
+$cm-text:       #1f2937;
+$cm-muted:      #7a7468;
+
+$cm-serif:      "Source Serif 4", "Lora", Georgia, serif;
+$cm-sans:       inherit;
+
+$cm-radius-sm:  6px;
+$cm-radius:     10px;
+$cm-radius-lg:  14px;
+
+$cm-shadow:     0 1px 2px rgba(15, 23, 42, .05), 0 8px 24px rgba(15, 23, 42, .04);
+$cm-shadow-hover: 0 2px 4px rgba(15, 23, 42, .08), 0 14px 32px rgba(15, 23, 42, .09);
+$cm-transition: 180ms ease;
+
+// ============================================================
+// BASE
+// ============================================================
 .o_caramia_dashboard {
-    // Filas de la tabla de próximas entregas
-    .o_ct_tr_vencida > td   { background-color: #FBD3D3 !important; }   // rojo pastel: vencida
-    .o_ct_tr_estancada > td { background-color: #FDDDB8 !important; }   // naranja: estancada
+    background: $cm-bg;
+    font-family: $cm-sans;
+
+    .o_ct_tr_vencida > td   { background-color: rgba($cm-red, .12) !important; }
+    .o_ct_tr_estancada > td { background-color: rgba(#d97706, .12) !important; }
+
+    // Título principal
+    .cm-title {
+        font-family: $cm-serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $cm-navy;
+        margin: 0 0 .25rem;
+        line-height: 1.2;
+    }
+
+    // Saludo
+    .cm-greeting {
+        font-family: $cm-serif;
+        font-size: 1.15rem;
+        font-weight: 500;
+        color: $cm-muted;
+        letter-spacing: 0;
+        margin: 0 0 .5rem;
+        line-height: 1.5;
+    }
+
+    .cm-subtitle {
+        color: $cm-gold;
+        font-weight: 600;
+        font-size: .85rem;
+        letter-spacing: .02em;
+    }
+
+    // Cards
+    .card {
+        border: 1px solid $cm-border;
+        border-radius: $cm-radius-lg;
+        background: $cm-surface;
+        box-shadow: $cm-shadow;
+        transition: transform $cm-transition, box-shadow $cm-transition, border-color $cm-transition;
+        animation: cm-rise .45s ease both;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: $cm-shadow-hover;
+            border-color: darken($cm-border, 6%);
+        }
+
+        .card-title {
+            font-family: $cm-serif;
+            font-weight: 600;
+            color: $cm-navy;
+            font-size: 1rem;
+        }
+
+        .card-body {
+            padding: 1.1rem 1.25rem;
+        }
+    }
+
+    // KPI cards
+    .cm-kpi {
+        .fs-1 {
+            font-family: $cm-serif;
+            font-weight: 700;
+            color: $cm-navy;
+            line-height: 1;
+        }
+        .text-muted {
+            font-size: .78rem;
+            font-weight: 600;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: $cm-muted !important;
+        }
+        .text-danger { color: $cm-red !important; }
+        .text-warning { color: $cm-gold-dark !important; }
+    }
+
+    // Botón actualizar
+    .btn-secondary {
+        border-color: $cm-border;
+        background: $cm-surface;
+        color: $cm-navy;
+        font-weight: 600;
+        transition: background $cm-transition, border-color $cm-transition, color $cm-transition;
+
+        &:hover {
+            border-color: $cm-navy;
+            background: $cm-navy;
+            color: #fff;
+        }
+    }
+
+    .btn-link {
+        color: $cm-gold-dark;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+            color: $cm-gold;
+            text-decoration: underline;
+        }
+    }
+
+    // Tabla
+    .table {
+        font-size: .82rem;
+
+        thead th {
+            border-bottom: 1px solid $cm-border;
+            background: $cm-surface-alt;
+            color: $cm-muted;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        tbody tr {
+            transition: background $cm-transition;
+
+            &:hover {
+                background: #fbfaf7;
+            }
+        }
+
+        .text-end { font-variant-numeric: tabular-nums; }
+    }
+
+    // Progress bars
+    .progress {
+        height: 6px;
+        border-radius: 999px;
+        background: #ece8df;
+        overflow: hidden;
+
+        .progress-bar {
+            border-radius: inherit;
+            background: $cm-gold !important;
+            transition: width .6s ease;
+        }
+        .bg-success { background: $cm-green !important; }
+    }
+
+    // Gráfico de barras
+    .cm-chart-bar {
+        background: $cm-gold;
+        border-radius: 3px 3px 0 0;
+        transition: height .6s ease, background $cm-transition;
+
+        &:hover {
+            background: $cm-gold-dark;
+        }
+    }
+    .cm-chart-bar-success {
+        background: $cm-green;
+    }
+
+    // Badges
+    .badge.bg-primary { background: $cm-navy !important; }
+    .badge.bg-success { background: $cm-green !important; }
+
+    .badge.text-bg-danger {
+        background: rgba($cm-red, .12) !important;
+        color: $cm-red !important;
+    }
+
+    // Animaciones
+    @keyframes cm-fade-in {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: none; }
+    }
+    @keyframes cm-rise {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    // Staggered delays for cards
+    .row.g-3 > .col-12,
+    .row.g-3 > .col-6,
+    .row.g-3 > .col-lg-3 {
+        animation: cm-rise .45s ease both;
+
+        &:nth-child(1) { animation-delay: .05s; }
+        &:nth-child(2) { animation-delay: .1s; }
+        &:nth-child(3) { animation-delay: .15s; }
+        &:nth-child(4) { animation-delay: .2s; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_caramia_dashboard {
+        .cm-greeting,
+        .card,
+        .row.g-3 > .col-12,
+        .row.g-3 > .col-6,
+        .row.g-3 > .col-lg-3 {
+            animation: none !important;
+        }
+        .card:hover {
+            transform: none;
+        }
+        .progress .progress-bar {
+            transition: none;
+        }
+    }
 }

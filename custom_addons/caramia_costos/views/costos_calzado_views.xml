@@ -120,7 +120,7 @@
         <field name="name">caramia.costo.tree</field>
         <field name="model">caramia.costo</field>
         <field name="arch" type="xml">
-            <list string="Costos de Calzado">
+            <list string="Costos de Calzado" class="caramia_production_list">
                 <field name="name" />
                 <field name="fecha" />
                 <field name="referencia_id" />

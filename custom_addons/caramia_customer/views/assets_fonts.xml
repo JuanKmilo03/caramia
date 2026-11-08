@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tipografías de la marca: serif elegante + sans limpia + mono para IDs -->
+    <template id="assets_caramia_fonts" inherit_id="web.layout" name="Cara Mia · Fuentes">
+        <xpath expr="//head" position="inside">
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+            <link rel="stylesheet"
+                href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&amp;family=Inter:wght@400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" />
+        </xpath>
+    </template>
+</odoo>

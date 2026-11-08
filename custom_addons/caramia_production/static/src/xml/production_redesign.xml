@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <!-- Conteo en círculo y menú de columna con ⋯ -->
+    <t t-inherit="web.KanbanHeader" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_column_title') and @t-if='!group.isFolded']/span[last()]" position="replace">
+            <t t-if="props.list.resModel === 'cara.mia.produccion'">
+                <span t-if="!progressBar and !props.list.model.useSampleModel"
+                      class="caramia-count" t-esc="group.count"/>
+            </t>
+            <t t-else="">
+                <span t-if="!progressBar and !props.list.model.useSampleModel"
+                      t-esc="'(' + group.count + ')'"/>
+            </t>
+        </xpath>
+    </t>
+
+</templates>

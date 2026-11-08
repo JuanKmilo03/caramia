@@ -184,18 +184,31 @@
         </field>
     </record>
 
+    <!-- PRIORIDAD ALTA EN EL FORMULARIO -->
+    <record id="view_caramia_production_form_redesign" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.form.redesign</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="inherit_id" ref="view_caramia_production_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='sello']" position="after">
+                <field name="prioridad_alta" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
     <!-- VISTA LISTA: Órdenes Activas -->
     <record id="view_caramia_production_list" model="ir.ui.view">
         <field name="name">cara.mia.produccion.list</field>
         <field name="model">cara.mia.produccion</field>
         <field name="arch" type="xml">
-            <list string="Órdenes de Producción">
+            <list string="Órdenes de Producción" class="caramia_production_list">
                 <field name="name" />
                 <field name="cliente_id" />
                 <field name="referencia_id" />
-                <field name="total_pares" />
-                <field name="fecha_creacion" />
-                <field name="fecha_estimada" />
+                <field name="total_pares" sum="Total pares" />
+                <field name="fecha_creacion" optional="hide" />
+                <field name="rango_fechas" string="Entrega" />
+                <field name="prioridad_alta" widget="boolean_toggle" optional="hide" />
                 <field name="state" widget="badge"
                     decoration-info="state == 'draft'"
                     decoration-warning="state == 'in_progress'"
@@ -209,10 +222,12 @@
     <record id="action_caramia_production_active" model="ir.actions.act_window">
         <field name="name">Órdenes de Producción</field>
         <field name="res_model">cara.mia.produccion</field>
-        <field name="view_mode">list,form</field>
-        <field name="domain">[('state', 'not in', ('done', 'canceled'))]</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[]</field>
+        <field name="search_view_id" ref="view_caramia_production_search_redesign" />
         <field name="view_ids"
             eval="[(5, 0, 0), 
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_caramia_production_kanban')}),
             (0, 0, {'view_mode': 'list', 'view_id': ref('view_caramia_production_list')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_caramia_production_form')})]" />
     </record>

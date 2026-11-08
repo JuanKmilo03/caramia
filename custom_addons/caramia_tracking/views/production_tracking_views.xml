@@ -49,6 +49,26 @@
         </field>
     </record>
 
+    <!-- KANBAN: barra de avance (el campo progreso vive en este módulo) -->
+    <record id="view_caramia_production_kanban_tracking" model="ir.ui.view">
+        <field name="name">cara.mia.produccion.kanban.tracking</field>
+        <field name="model">cara.mia.produccion</field>
+        <field name="inherit_id" ref="caramia_production.view_caramia_production_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/field[@name='state']" position="after">
+                <field name="progreso"/>
+            </xpath>
+            <xpath expr="//t[@t-name='card']//div[hasclass('caramia-card__ref')]" position="after">
+                <div class="caramia-progress" role="progressbar"
+                     t-att-aria-valuenow="record.progreso.raw_value"
+                     aria-valuemin="0" aria-valuemax="100">
+                    <span class="caramia-progress__bar"
+                          t-attf-style="width: #{record.progreso.raw_value}%"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
     <!-- BUSCADOR AVANZADO (se aplica a la lista principal y a los listados del tablero) -->
     <record id="view_caramia_production_search" model="ir.ui.view">
         <field name="name">cara.mia.produccion.search</field>

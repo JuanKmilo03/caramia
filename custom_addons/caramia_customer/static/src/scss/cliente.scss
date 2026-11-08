@@ -1,5 +1,8 @@
-$cm-a: #c98f2e;   // gold-dim (login)
-$cm-b: #ebad33;   // gold (login)
+/* ==========================================================================
+   Cara Mia · Clientes
+   Paleta del login: ink / paper / gold
+   ========================================================================== */
+
 $ink: #14161c;
 $ink-800: #1c1f28;
 $ink-700: #262a36;
@@ -11,228 +14,592 @@ $text: #eceae3;
 $text-muted: #8b8d97;
 $line: rgba(236, 234, 227, 0.12);
 
-$cm-radius: 1.25rem;
+$serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+$sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+$mono: 'Space Mono', ui-monospace, 'Courier New', monospace;
+$ease: cubic-bezier(0.16, 0.8, 0.24, 1);
+$radius: 1.3rem;
 
 @keyframes cm-fade-up {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes cm-pop {
-    0%   { transform: scale(.6); opacity: 0; }
-    70%  { transform: scale(1.08); }
-    100% { transform: scale(1); opacity: 1; }
-}
-@keyframes cm-gradient {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0%   { opacity: 0; transform: scale(0.6); }
+    70%  { transform: scale(1.07); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
-/* ================= FORMULARIO ================= */
+@keyframes cm-glow {
+    0%, 100% { opacity: 0.45; }
+    50%      { opacity: 0.85; }
+}
+
+/* Aspecto compartido de tablas (lista principal y facturas del cliente) */
+@mixin cm-list-look {
+    .o_list_renderer {
+        background: #fffdf8;
+        border: 1px solid $paper-dim;
+        border-radius: 0.95rem;
+        /* Odoo usa este contenedor para el scroll horizontal: no lo bloqueamos */
+        overflow: auto;
+    }
+
+    /* Delegamos franjas, hover y orden en las variables de Bootstrap/Odoo
+       para que la flechita de orden y el estado activo usen los mismos tonos */
+    .o_list_table {
+        margin: 0;
+        --table-color: #{$ink};
+        --table-bg: transparent;
+        --table-border-color: #{$paper-dim};
+        --table-striped-bg: #{rgba($paper-dim, 0.28)};
+        --table-striped-color: #{$ink};
+        --table-hover-bg: #{rgba($gold, 0.1)};
+        --table-hover-color: #{$ink};
+        --table-active-bg: #{rgba($gold, 0.16)};
+        --table-active-color: #{$ink};
+        --ListRenderer-thead-bg-color: #ece7d9;
+        --ListRenderer-thead-bg-active-color: #e0d9c5;
+        --ListRenderer-thead-border-end-color: #{$paper-dim};
+
+        thead th {
+            color: $ink;
+            font-family: $sans;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border-bottom: 1px solid $paper-dim;
+        }
+
+        thead th.table-active { color: $gold-dim; }
+
+        .o_list_sortable_caret { color: $gold-dim; }
+
+        tbody td {
+            color: $ink;
+            font-family: $sans;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+    }
+}
+
+/* ==========================================================================
+   FORMULARIO
+   ========================================================================== */
 .o_caramia_cliente_form {
-    .o_form_sheet { padding-top: 1rem; background: transparent; box-shadow: none; border: 0; }
 
-    .cm-hero {
+    .o_form_sheet_bg { padding-top: 0.75rem; }
+
+    .o_form_sheet {
+        padding: 1.25rem;
+        background: #ffffff;
+        border: 1px solid $paper-dim;
+        border-radius: $radius;
+        box-shadow: 0 12px 30px -28px rgba($ink, 0.6);
+    }
+
+    /* ---------- fila superior: 3 tarjetas ---------- */
+    .cm-cards {
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.8rem;
+        align-items: stretch;
+        margin-bottom: 1.1rem;
+    }
+
+    .cm-card {
+        position: relative;
+        border-radius: $radius;
+        animation: cm-fade-up 0.5s var(--cm-delay, 0s) $ease both;
+        transition: transform 0.28s $ease, box-shadow 0.28s $ease, border-color 0.28s $ease;
+    }
+
+    /* ---------- tarjeta 1: información del cliente ---------- */
+    .cm-main {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        border-radius: $cm-radius;
-        color: #fff;
-        background: linear-gradient(120deg, $cm-a, $ink-800, $cm-b);
-        background-size: 200% 200%;
-        animation: cm-gradient 12s ease infinite, cm-fade-up .5s ease both;
-        box-shadow: 0 12px 30px -10px rgba($cm-a, .55);
-        position: relative;
+        gap: 1rem;
+        padding: 1.05rem 1.2rem;
         overflow: hidden;
+        color: $text;
+        border: 1px solid rgba($gold, 0.22);
+        background:
+            radial-gradient(130% 160% at 92% -10%, rgba($gold, 0.32) 0%, rgba($gold, 0) 55%),
+            linear-gradient(135deg, $ink-700 0%, $ink-800 48%, $ink 100%);
+        box-shadow: 0 18px 36px -28px rgba($ink, 0.95);
 
-        &::after {              // destello decorativo
+        &::after {
             content: "";
             position: absolute;
-            width: 260px; height: 260px;
-            right: -70px; top: -110px;
+            right: -30px;
+            bottom: -80px;
+            width: 190px;
+            height: 190px;
             border-radius: 50%;
-            background: rgba(#fff, .12);
             pointer-events: none;
+            background: radial-gradient(circle, rgba($gold, 0.3) 0%, rgba($gold, 0) 70%);
+            animation: cm-glow 7s ease-in-out infinite;
+        }
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 44px -28px rgba($gold-dim, 0.7);
         }
     }
 
     .cm-avatar {
+        position: relative;
+        z-index: 1;
         flex: 0 0 auto;
-        width: 84px; height: 84px;
-        display: flex; align-items: center; justify-content: center;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
-        font-size: 2rem; font-weight: 700; letter-spacing: 1px;
-        background: rgba(#fff, .2);
-        border: 3px solid rgba(#fff, .65);
-        backdrop-filter: blur(4px);
-        animation: cm-pop .6s .2s cubic-bezier(.34, 1.56, .64, 1) both;
-        transition: transform .3s ease;
-        &:hover { transform: rotate(-6deg) scale(1.08); }
-        .o_field_widget { color: #fff; font-weight: 700; }
-        .o_field_widget, .o_field_widget .o_input, .o_field_widget input {
-            padding: 0; margin: 0; border: 0; text-align: center;
-            background: transparent; box-shadow: none;
+        color: $ink;
+        font-family: $serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        background: linear-gradient(145deg, $gold, $gold-dim);
+        box-shadow: 0 0 0 4px rgba($gold, 0.16), 0 10px 20px -12px rgba($gold, 0.9);
+        animation: cm-pop 0.55s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        transition: transform 0.3s $ease;
+
+        .o_field_widget,
+        .o_field_widget .o_input,
+        .o_field_widget input {
+            padding: 0;
+            margin: 0;
+            color: $ink;
+            font-weight: 700;
+            text-align: center;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
         }
     }
 
-    .cm-hero-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .cm-main:hover .cm-avatar { transform: rotate(-5deg) scale(1.06); }
 
-    .cm-id-pill {
-        display: inline-flex; align-items: center;
-        padding: .15rem .75rem;
-        border-radius: 50rem;
-        font-size: .8rem; font-weight: 600; letter-spacing: .5px;
-        background: rgba(#fff, .2);
-        .o_field_widget { color: #fff; width: auto; }
+    .cm-main-info {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-width: 0;
     }
 
-    .cm-hero-name { margin: .5rem 0 .25rem; font-weight: 700; font-family: $sans; font-size: 2.2rem; }
-    .cm-hero-sub  { opacity: .9; display: flex; align-items: center; }
+    .cm-id-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.12rem 0.7rem;
+        color: $gold;
+        font-family: $mono;
+        font-size: 0.7rem;
+        letter-spacing: 0.6px;
+        background: rgba($gold, 0.1);
+        border: 1px solid rgba($gold, 0.25);
+        border-radius: 50rem;
 
-    // Inputs transparentes sobre el degradado
-    .cm-hero {
+        .o_field_widget { width: auto; color: $gold; }
+
+        .o_field_widget input {
+            padding: 0;
+            color: $gold;
+            background: transparent;
+            border: 0;
+        }
+    }
+
+    .cm-name {
+        margin: 0.45rem 0 0.1rem;
+        color: $paper;
+        font-family: $serif;
+        font-size: 1.85rem;
+        font-weight: 600;
+        line-height: 1.15;
+
+        .o_field_widget input {
+            color: $paper;
+            font-family: $serif;
+            font-size: 1.85rem;
+            font-weight: 600;
+        }
+    }
+
+    .cm-sub {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: rgba($paper, 0.68);
+        font-size: 0.85rem;
+
+        .fa { color: $gold; }
+    }
+
+    /* inputs sobre la tarjeta oscura */
+    .cm-main {
         .o_field_widget .o_input,
         .o_field_widget input {
-            color: #fff;
+            padding: 0.1rem 0;
+            color: $paper;
+            font-family: $sans;
             background: transparent;
-            border-color: transparent;
-            border-bottom: 1px solid rgba(#fff, .35);
-            transition: border-color .25s, background .25s;
-            &::placeholder { color: rgba(#fff, .6); }
-            &:hover, &:focus {
-                border-bottom-color: #fff;
-                background: rgba(#fff, .08);
+            border: 0;
+            border-bottom: 1px solid rgba($paper, 0.22);
+            border-radius: 0;
+            box-shadow: none;
+            transition: border-color 0.25s $ease, background 0.25s $ease;
+
+            &::placeholder { color: rgba($paper, 0.38); }
+
+            &:hover,
+            &:focus {
+                background: transparent;
+                border-bottom-color: $gold;
                 box-shadow: none;
             }
         }
-        .cm-hero-name .o_input { font-size: 1.9rem; }
     }
 
-    /* ----- tarjetas de contacto ----- */
-    .cm-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1rem;
-    }
+    /* ---------- tarjetas 2 y 3: teléfono y dirección ---------- */
+    .cm-side {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 1rem 1.05rem;
+        background: #fffdf8;
+        border: 1px solid $paper-dim;
+        box-shadow: 0 6px 18px -16px rgba($ink, 0.7);
 
-    .cm-card {
-        display: flex; align-items: flex-start; gap: 1rem;
-        padding: 1.25rem;
-        border-radius: $cm-radius;
-        background: #f3f0e7;
-        border: 1px solid #d9d5c8;
-        box-shadow: 0 2px 8px rgba(#000, .04);
-        animation: cm-fade-up .55s var(--cm-delay, 0s) ease both;
-        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        &:hover,
+        &:focus-within {
+            transform: translateY(-3px);
+            border-color: rgba($gold-dim, 0.55);
+            box-shadow: 0 16px 30px -18px rgba($gold-dim, 0.6);
 
-        &:hover, &:focus-within {
-            transform: translateY(-4px);
-            border-color: rgba($cm-a, .45);
-            box-shadow: 0 14px 28px -12px rgba($cm-a, .35);
-            .cm-card-icon { transform: rotate(-8deg) scale(1.1); }
+            .cm-side-icon {
+                color: $ink;
+                background: linear-gradient(140deg, $gold, $gold-dim);
+                transform: rotate(-6deg) scale(1.05);
+            }
         }
     }
 
-    .cm-card-icon {
+    .cm-side-icon {
         flex: 0 0 auto;
-        width: 46px; height: 46px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: .9rem;
-        font-size: 1.2rem; color: #fff;
-        background: linear-gradient(135deg, $cm-a, $cm-b);
-        transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
-        .o_field_widget, .o_field_widget input { padding: 0; margin: 0; border: 0; text-align: center; background: transparent; }
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $gold-dim;
+        font-size: 1rem;
+        background: rgba($gold, 0.14);
+        border-radius: 0.8rem;
+        transition: transform 0.3s $ease, background 0.3s $ease, color 0.3s $ease;
     }
 
-    .cm-card-body {
-        flex: 1; min-width: 0;
-        label {
-            display: block; margin: 0 0 .15rem;
-            font-size: .72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: .8px;
-            color: #8b8d97;
+    .cm-side-body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.1rem;
+    }
+
+    .cm-side .o_form_label {
+        margin: 0;
+        color: $text-muted;
+        font-family: $sans;
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 1.1px;
+        text-transform: uppercase;
+        cursor: default;
+    }
+
+    .cm-side {
+        .o_field_widget { width: 100%; }
+
+        .o_field_widget .o_input,
+        .o_field_widget input,
+        .o_field_widget textarea {
+            width: 100%;
+            padding: 0.18rem 0;
+            color: $ink;
+            font-family: $sans;
+            font-size: 0.95rem;
+            background: transparent;
+            border: 0;
+            border-bottom: 1px solid $paper-dim;
+            border-radius: 0;
+            box-shadow: none;
+            transition: border-color 0.25s $ease;
+
+            &::placeholder { color: #b6b8c0; }
+
+            &:focus {
+                background: transparent;
+                border-bottom-color: $gold-dim;
+                box-shadow: none;
+                outline: none;
+            }
+        }
+
+        .o_field_widget textarea {
+            min-height: 2.3rem;
+            max-height: 4.2rem;
+            line-height: 1.35;
+            resize: vertical;
         }
     }
+
+    @include cm-list-look;
 }
 
-/* ===== Botón Guardar con brillo (fuera del formulario) ===== */
-.o_action_manager:has(.o_caramia_cliente_form) {
-    .o_form_button_save {
-        position: relative; overflow: hidden;
-        border-radius: 50rem;
-        transition: transform .2s ease, box-shadow .2s ease;
-        &:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -6px rgba($cm-a, .6); }
-        &:active { transform: translateY(0) scale(.97); }
-        &::after {
-            content: "";
-            position: absolute; top: 0; left: -75%;
-            width: 50%; height: 100%;
-            background: linear-gradient(100deg, transparent, rgba(#fff, .45), transparent);
-            transform: skewX(-20deg);
-        }
-        &:hover::after { left: 130%; transition: left .6s ease; }
-    }
-    .o_form_button_cancel { border-radius: 50rem; }
-    .o_form_button_create, .o_list_button_add {
-        border-radius: 50rem;
-        background: linear-gradient(135deg, $gold-dim, $gold);
+/* ==========================================================================
+   LISTA DE CLIENTES (modo tabla)
+   ========================================================================== */
+.o_caramia_cliente_list {
+    @include cm-list-look;
+
+    .o_list_button_add {
+        padding: 0.3rem 1.1rem;
         color: $ink;
         font-family: $sans;
         font-weight: 600;
+        background: linear-gradient(135deg, $gold, $gold-dim);
         border: 0;
-        transition: transform .2s ease, box-shadow .2s ease;
-        &:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -6px rgba($gold, .6); }
+        border-radius: 50rem;
+        transition: transform 0.2s $ease, box-shadow 0.2s $ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -8px rgba($gold, 0.7);
+        }
+    }
+
+    .o_field_badge {
+        padding: 0.2rem 0.6rem;
+        color: $gold-dim !important;
+        font-family: $mono;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: rgba($gold, 0.14) !important;
+        border: 1px solid rgba($gold-dim, 0.28);
+        border-radius: 50rem;
     }
 }
 
-/* ================= KANBAN ================= */
+/* Facturas dentro del cliente */
+.o_cm_facturas_list {
+    @include cm-list-look;
+
+    .o_field_badge {
+        padding: 0.2rem 0.6rem;
+        color: $gold-dim !important;
+        font-family: $mono;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: rgba($gold, 0.14) !important;
+        border: 1px solid rgba($gold-dim, 0.28);
+        border-radius: 50rem;
+    }
+}
+
+/* ==========================================================================
+   BOTONES DEL FORMULARIO
+   ========================================================================== */
+.o_action_manager:has(.o_caramia_cliente_form) {
+    .o_form_button_save,
+    .o_form_button_create {
+        color: $ink;
+        font-family: $sans;
+        font-weight: 600;
+        background: linear-gradient(135deg, $gold, $gold-dim);
+        border: 0;
+        border-radius: 50rem;
+        transition: transform 0.2s $ease, box-shadow 0.2s $ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -8px rgba($gold, 0.7);
+        }
+    }
+
+    .o_form_button_cancel { border-radius: 50rem; }
+}
+
+/* ==========================================================================
+   KANBAN (tarjetas de clientes)
+   ========================================================================== */
 .o_caramia_cliente_kanban {
-    .o_kanban_record { border-radius: $cm-radius; overflow: hidden; }
+
+    .o_kanban_record {
+        padding: 0;
+        overflow: hidden;
+        background: #fffdf8;
+        border: 1px solid $paper-dim;
+        border-radius: $radius;
+        box-shadow: 0 6px 18px -16px rgba($ink, 0.7);
+        animation: cm-fade-up 0.45s $ease both;
+        transition: transform 0.28s $ease, box-shadow 0.28s $ease, border-color 0.28s $ease;
+
+        &:hover {
+            transform: translateY(-6px) scale(1.015);
+            border-color: rgba($gold-dim, 0.55);
+            box-shadow: 0 20px 38px -20px rgba($gold-dim, 0.6);
+
+            .cm-kavatar { transform: rotate(-6deg) scale(1.08); }
+            .cm-ktag { background: rgba($gold, 0.22); }
+        }
+    }
+
+    @for $i from 1 through 9 {
+        .o_kanban_record:nth-child(#{$i}) {
+            animation-delay: ($i - 1) * 0.05s;
+        }
+    }
 
     .cm-kcard {
-        display: flex; gap: 1rem; align-items: center;
-        padding: .5rem;
-        animation: cm-fade-up .45s ease both;
-        transition: transform .25s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        min-height: 5.5rem;
+        padding: 1rem 1.1rem;
     }
-    .o_kanban_record:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 14px 26px -12px rgba($cm-a, .4);
-        border-color: rgba($cm-a, .45);
-        .cm-kavatar { transform: rotate(-6deg) scale(1.08); }
-    }
-    .o_kanban_record { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
 
     .cm-kavatar {
         flex: 0 0 auto;
-        width: 56px; height: 56px;
-        display: flex; align-items: center; justify-content: center;
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $ink;
+        font-family: $serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        background: linear-gradient(145deg, $gold, $gold-dim);
         border-radius: 50%;
-        font-weight: 700; font-size: 1.1rem; color: #fff;
-        background: linear-gradient(135deg, $cm-a, $cm-b);
-        transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
-        .o_field_widget, .o_field_widget input { padding: 0; margin: 0; border: 0; text-align: center; background: transparent; }
+        box-shadow: 0 0 0 3px rgba($gold, 0.16);
+        transition: transform 0.3s $ease;
+
+        .o_field_widget,
+        .o_field_widget input {
+            padding: 0;
+            margin: 0;
+            color: $ink;
+            text-align: center;
+            background: transparent;
+            border: 0;
+        }
     }
+
     .cm-kinfo { min-width: 0; }
-    .cm-kname { font-weight: 700; font-size: 1.05rem; }
-    .cm-kmeta { font-size: .85rem; color: #8b8d97; }
+
+    .cm-kname {
+        color: $ink;
+        font-family: $serif;
+        font-size: 1.08rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .cm-kmeta {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.15rem;
+        color: $text-muted;
+        font-family: $sans;
+        font-size: 0.82rem;
+
+        .fa {
+            color: $gold-dim;
+            font-size: 0.75rem;
+        }
+    }
+
     .cm-ktag {
-        display: inline-block; margin-top: .35rem;
-        padding: .1rem .65rem; border-radius: 50rem;
-        font-size: .72rem; font-weight: 600;
-        color: $cm-a; background: rgba($cm-a, .1);
+        display: inline-block;
+        margin-top: 0.45rem;
+        padding: 0.08rem 0.6rem;
+        color: $gold-dim;
+        font-family: $mono;
+        font-size: 0.68rem;
+        letter-spacing: 0.4px;
+        background: rgba($gold, 0.12);
+        border: 1px solid rgba($gold-dim, 0.22);
+        border-radius: 50rem;
+        transition: background 0.25s $ease;
     }
 }
 
-/* ===== Móvil ===== */
-@media (max-width: 575px) {
-    .o_caramia_cliente_form .cm-hero { flex-direction: column; text-align: center; padding: 1.5rem 1rem; }
+/* ==========================================================================
+   PAGINACIÓN (listas largas de clientes y facturas)
+   ========================================================================== */
+.o_caramia_cliente_list .o_pager,
+.o_caramia_cliente_form .o_pager {
+    .o_pager_counter {
+        color: $text-muted;
+        font-family: $mono;
+        font-size: 0.78rem;
+    }
+
+    .btn {
+        color: $ink;
+        border-color: $paper-dim;
+        border-radius: 50rem;
+
+        &:hover:not(:disabled) {
+            color: $gold-dim;
+            border-color: $gold-dim;
+        }
+    }
 }
 
-/* ===== Accesibilidad: respeta "reducir movimiento" ===== */
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1199.98px) {
+    .o_caramia_cliente_form .cm-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .o_caramia_cliente_form .cm-main { grid-column: 1 / -1; }
+}
+
+@media (max-width: 767.98px) {
+    .o_caramia_cliente_form {
+        .o_form_sheet { padding: 0.9rem; }
+
+        .cm-cards { grid-template-columns: 1fr; }
+
+        .cm-main {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .cm-main-info { text-align: center; }
+
+        .cm-sub { justify-content: center; }
+    }
+}
+
+/* ==========================================================================
+   ACCESIBILIDAD: reduce movimiento
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-    .o_caramia_cliente_form, .o_caramia_cliente_form *,
-    .o_caramia_cliente_kanban, .o_caramia_cliente_kanban * { animation: none !important; transition: none !important; }
+    .o_caramia_cliente_form *,
+    .o_caramia_cliente_kanban * {
+        animation: none !important;
+        transition: none !important;
+    }
 }

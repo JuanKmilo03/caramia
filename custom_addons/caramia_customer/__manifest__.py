@@ -3,17 +3,19 @@
     'version': '18.0.1.0.0',
     'category': 'Sales/CRM',
     'summary': 'Gestión aislada e independiente de clientes con ID incremental y sello',
-    'depends': ['base'],
+    'depends': ['base', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
+        'views/assets_fonts.xml',
         'views/customer_views.xml',
     ],
     'assets': {
-    'web.assets_backend': [
-        'caramia_customer/static/src/scss/cliente.scss',
-    ],
-},
+        'web.assets_backend': [
+            'caramia_customer/static/src/scss/cliente.scss',
+        ],
+    },
+
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

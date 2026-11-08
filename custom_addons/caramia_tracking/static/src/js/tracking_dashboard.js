@@ -2,6 +2,7 @@
 import { registry } from "@web/core/registry";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { session } from "@web/session";
 
 class TrackingStats extends Component {
     static template = "caramia_tracking.Stats";
@@ -9,7 +10,7 @@ class TrackingStats extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({ data: null, loading: true });
+        this.state = useState({ data: null, loading: true, chartPeriod: 'semana' });
         onWillStart(() => this.load());
     }
 
@@ -17,6 +18,19 @@ class TrackingStats extends Component {
         this.state.loading = true;
         this.state.data = await this.orm.call("cara.mia.produccion", "get_tracking_dashboard", []);
         this.state.loading = false;
+    }
+
+    get userName() {
+        return session.name || session.username || session.partner_display_name || "";
+    }
+
+    get greeting() {
+        const h = new Date().getHours();
+        let saludo = "Buenos días";
+        if (h >= 12 && h < 19) saludo = "Buenas tardes";
+        else if (h >= 19 || h < 5) saludo = "Buenas noches";
+        const name = this.userName;
+        return name ? `${saludo}, ${name}` : saludo;
     }
 
     refresh() {
@@ -27,7 +41,6 @@ class TrackingStats extends Component {
         const d = this.state.data;
         return [
             { key: "semana", titulo: "Esta semana", ...d.semana },
-            { key: "mes", titulo: "Este mes", ...d.mes },
         ];
     }
 
@@ -35,8 +48,28 @@ class TrackingStats extends Component {
         const d = this.state.data;
         return [
             { key: "s", titulo: "Pares por semana", rows: d.serie_semanal },
-            { key: "m", titulo: "Pares por mes", rows: d.serie_mensual },
         ];
+    }
+
+    setChartPeriod(period) {
+        this.state.chartPeriod = period;
+    }
+
+    get chartPeriod() {
+        return this.state.chartPeriod;
+    }
+
+    get chartRows() {
+        const d = this.state.data;
+        if (this.state.chartPeriod === 'mes') return d.serie_mensual;
+        if (this.state.chartPeriod === 'año') return d.serie_anual;
+        return d.serie_semanal;
+    }
+
+    get chartTitle() {
+        if (this.state.chartPeriod === 'mes') return 'Pares por mes';
+        if (this.state.chartPeriod === 'año') return 'Pares por año';
+        return 'Pares por semana';
     }
 
     pct(value, total) {
