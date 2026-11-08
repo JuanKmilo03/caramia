@@ -2,6 +2,7 @@ import os
 import hmac
 import hashlib
 import requests
+import json
 from odoo import http
 from odoo.http import request
 
@@ -111,3 +112,46 @@ class AgenteController(http.Controller):
                 
         except Exception as e:
             return {"status": "error", "respuesta": f"Fallo interno en Odoo: {str(e)}"}
+
+
+    @http.route('/api/agent/action', type='http', auth='public', methods=['POST'], csrf=False)
+    def ejecutar_accion_desde_fastapi(self, **kwargs):
+        """
+        Ruta exclusiva y blindada para recibir comandos desde FastAPI.
+        """
+        # 1. Barrera de Seguridad: Validar el token interno
+        incoming_secret = request.httprequest.headers.get('X-Agent-Secret')
+        expected_secret = os.getenv("AGENT_SECRET", "")
+        
+        if not expected_secret or incoming_secret != expected_secret:
+            return request.make_response(
+                json.dumps({"error": "Acceso Denegado: Credenciales inválidas"}), 
+                headers=[('Content-Type','application/json')], 
+                status=401
+            )
+            
+        try:
+            # 2. Leer la petición enviada por FastAPI
+            raw_data = request.httprequest.get_data(as_text=True)
+            data = json.loads(raw_data)
+            tool_name = data.get('tool_name')
+            parameters = data.get('parameters', {})
+            
+            # 3. MAGIA: Ejecutar el despachador
+            # Utilizamos sudo() porque la petición de WhatsApp entra de forma 'public'
+            # sudo() permite ejecutar la acción a nivel de base de datos de manera segura
+            resultado_odoo = procesar_accion_ia(request.env(su=True), tool_name, parameters)
+            
+            # 4. Devolver el resultado a FastAPI
+            return request.make_response(
+                json.dumps({"status": "success", "resultado": str(resultado_odoo)}), 
+                headers=[('Content-Type','application/json')], 
+                status=200
+            )
+            
+        except Exception as e:
+            return request.make_response(
+                json.dumps({"status": "error", "error": str(e)}), 
+                headers=[('Content-Type','application/json')], 
+                status=500
+            )
