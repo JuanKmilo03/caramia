@@ -23,7 +23,7 @@ from .produccion_actions import (
 from .referencias_actions import (
     ejecutar_crear_referencia,
     ejecutar_consultar_referencia,
-    ejecutar_editar_estado_referencia,
+    ejecutar_editar_referencia,
     ejecutar_eliminar_referencia
 )
 
@@ -92,7 +92,7 @@ MAPA_ACCIONES = {
     #Referencias
     "crear_referencia": ejecutar_crear_referencia,
     "consultar_referencia": ejecutar_consultar_referencia,
-    "editar_estado_referencia": ejecutar_editar_estado_referencia,
+    "editar_referencia": ejecutar_editar_referencia,
     "eliminar_referencia": ejecutar_eliminar_referencia,
 
     #Catalogos de insumos y labores
