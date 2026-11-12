@@ -18,11 +18,13 @@ ALLOWED_PHONE_NUMBER = os.getenv("ALLOWED_PHONE_NUMBER", "")
 ODOO_API_URL = os.getenv("ODOO_API_URL")
 AGENT_SECRET = os.getenv("AGENT_SECRET", "")
 
-# Configuración STT Genérica (Nube)
-OPENAI_API_KEY = os.getenv("AI_API_KEY")
-AI_URL = os.getenv("AI_URL")
+# Configuración STT (solo proveedor OpenAI / API compatible)
+STT_API_KEY = os.getenv("STT_API_KEY") or os.getenv("AI_API_KEY")
+STT_BASE_URL = os.getenv("STT_BASE_URL") or os.getenv("AI_URL")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper-large-v3")
-stt_client = _AsyncOpenAI(api_key=OPENAI_API_KEY, base_url=AI_URL) if OPENAI_API_KEY else None
+stt_client = (
+    _AsyncOpenAI(api_key=STT_API_KEY, base_url=STT_BASE_URL) if STT_API_KEY else None
+)
 
 # ==========================================
 # 2. FUNCIONES DE APOYO Y VALIDACIÓN
@@ -101,7 +103,7 @@ async def enviar_mensaje_whatsapp(telefono_destino: str, texto: str):
 async def transcribir_audio_interno(audio_bytes: bytes) -> str:
     print(f"🎙️ Iniciando transcripción ({len(audio_bytes)} bytes)...", flush=True)
     if stt_client is None:
-        raise Exception("OPENAI_API_KEY no configurada para STT")
+        raise Exception("STT_API_KEY / AI_API_KEY no configurada para STT")
         
     transcript = await stt_client.audio.transcriptions.create(
         model=WHISPER_MODEL,

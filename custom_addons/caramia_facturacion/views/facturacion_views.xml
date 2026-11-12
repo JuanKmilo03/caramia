@@ -74,7 +74,8 @@
         <field name="name">cara.mia.facturacion.list</field>
         <field name="model">cara.mia.facturacion</field>
         <field name="arch" type="xml">
-            <list string="Remisiones" decoration-info="estado == 'borrador'"
+            <list string="Remisiones" class="o_cam_facturacion_list caramia_facturacion_list"
+                decoration-info="estado == 'borrador'"
                 decoration-success="estado == 'pagada'" decoration-muted="estado == 'anulada'">
                 <field name="name" string="N° Factura" />
                 <field name="cliente_id" />

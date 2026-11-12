@@ -162,19 +162,6 @@ class CaramiaProduction(models.Model):
                     "Debe ingresar al menos un par en alguna talla antes de iniciar la orden."
                 )
 
-    @api.onchange('referencia_id')
-    def _onchange_referencia_id(self):
-        self.labor_ids = [(5, 0, 0)]
-        if self.referencia_id:
-            self.labor_ids = [
-                (0, 0, {
-                    'tipo_labor_id': labor.tipo_labor_id.id,
-                    'tarifa_pago': labor.tarifa_pago or 0.0,
-                })
-                for labor in self.referencia_id.labor_ids
-                if labor.tipo_labor_id
-            ]
-
     @api.onchange('cliente_id')
     def _onchange_cliente_id(self):
         if self.cliente_id and getattr(self.cliente_id, 'sello', False):

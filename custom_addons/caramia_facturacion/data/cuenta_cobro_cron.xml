@@ -10,6 +10,17 @@
         <field name="active" eval="True"/>
     </record>
 
+    <!-- Recordatorios de deuda por WhatsApp (Meta Cloud API) -->
+    <record id="ir_cron_recordatorios_whatsapp" model="ir.cron">
+        <field name="name">Cobros: recordatorios por WhatsApp (Meta)</field>
+        <field name="model_id" ref="model_cara_mia_cuenta_cobro"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_recordatorios_whatsapp()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
     <!-- Días sin abonos para que una cuenta vigente entre en alerta -->
     <record id="param_dias_alerta_sin_abono" model="ir.config_parameter">
         <field name="key">caramia_facturacion.dias_alerta_sin_abono</field>
@@ -21,9 +32,31 @@
         <field name="value">4</field>
     </record>
 
-        <!-- Días antes del vencimiento en que se avisa -->
+    <!-- Días antes del vencimiento en que se avisa -->
     <record id="param_dias_aviso_vencimiento" model="ir.config_parameter">
         <field name="key">caramia_facturacion.dias_aviso_vencimiento</field>
         <field name="value">2</field>
+    </record>
+
+    <!-- WhatsApp: apagado hasta configurar token y phone_number_id -->
+    <record id="param_wa_activo" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.wa_activo</field>
+        <field name="value">0</field>
+    </record>
+    <record id="param_wa_dias_gracia" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.wa_dias_gracia</field>
+        <field name="value">3</field>
+    </record>
+    <record id="param_wa_dias_reenvio" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.wa_dias_reenvio</field>
+        <field name="value">7</field>
+    </record>
+    <record id="param_wa_api_version" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.wa_api_version</field>
+        <field name="value">v22.0</field>
+    </record>
+    <record id="param_wa_template_lang" model="ir.config_parameter">
+        <field name="key">caramia_facturacion.wa_template_lang</field>
+        <field name="value">es</field>
     </record>
 </odoo>

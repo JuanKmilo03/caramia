@@ -1,8 +1,15 @@
+import logging
+import os
+from datetime import timedelta
+
+import requests
 from markupsafe import Markup
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import formatLang
+
+_logger = logging.getLogger(__name__)
 
 METODOS_PAGO = [
     ('efectivo', 'Efectivo'),
@@ -44,6 +51,9 @@ class CaramiaCuentaCobro(models.Model):
     fecha_aviso_por_vencer = fields.Date(string='Aviso de vencimiento próximo', readonly=True, copy=False)
     fecha_aviso_vencida = fields.Date(string='Último aviso de vencida', readonly=True, copy=False)
     observaciones = fields.Text(string='Observaciones')
+
+    fecha_recordatorio_wa = fields.Date(string='Último recordatorio WhatsApp', readonly=True, copy=False)
+    recordatorio_wa_estado = fields.Char(string='Estado recordatorio WhatsApp', readonly=True, copy=False)
 
     estado = fields.Selection([
         ('vigente', 'Vigente'),
@@ -152,20 +162,46 @@ class CaramiaCuentaCobro(models.Model):
         if grupo:
             campo = 'all_user_ids' if 'all_user_ids' in grupo._fields else 'users'
             usuarios = grupo[campo]
-        return (usuarios or self.create_uid).mapped('partner_id')
+        if not usuarios:
+            usuarios = self.create_uid or self.env.user
+        return usuarios
 
     def _notificar(self, asunto, detalle):
         self.ensure_one()
-        partners = self._destinatarios_alerta()
-        if not partners:
+        usuarios = self._destinatarios_alerta()
+        if not usuarios:
             return
-        saldo = formatLang(self.env, self.saldo_pendiente, monetary=True,
-                           currency_obj=self.currency_id)
+        saldo = formatLang(self.env, self.saldo_pendiente, currency_obj=self.currency_id)
         body = Markup(
             '<p>La factura <a href="#" data-oe-model="%s" data-oe-id="%s">%s</a> de <b>%s</b> '
             '%s. Saldo pendiente: <b>%s</b>.</p>'
         ) % (self._name, self.id, self.name, self.cliente_id.display_name, detalle, saldo)
-        self.message_notify(partner_ids=partners.ids, subject=asunto, body=body)
+        partners = usuarios.mapped('partner_id')
+
+        # Mensaje en el chatter del documento: aparece en la bandeja de mensajes
+        # del systray para los usuarios notificados (antes se usaba message_notify,
+        # que solo genera un correo y no deja rastro visible dentro de Odoo).
+        self.message_subscribe(partner_ids=partners.ids)
+        self.message_post(
+            body=body,
+            subject=asunto,
+            partner_ids=partners.ids,
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )
+
+        # Actividad: garantiza el aviso en el reloj de actividades del systray,
+        # incluso si el usuario tiene desactivadas las notificaciones por correo.
+        for usuario in usuarios:
+            if self.activity_ids.filtered(
+                    lambda a: a.user_id == usuario and a.summary == asunto):
+                continue
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                summary=asunto,
+                note=body,
+                user_id=usuario.id,
+            )
 
     def _enviar_alertas(self):
         """Notifica las cuentas en alerta; repite cada N días mientras sigan sin abonos."""
@@ -204,6 +240,160 @@ class CaramiaCuentaCobro(models.Model):
                     rec._notificar('Cuenta vencida: %s' % rec.name,
                                    Markup('está vencida hace <b>%s</b> día(s)') % dias)
                     rec.fecha_aviso_vencida = hoy
+
+    # ------------------------------------------------------------------
+    # Recordatorios por WhatsApp (Meta Cloud API)
+    # ------------------------------------------------------------------
+    @api.model
+    def _wa_param(self, key, default=False):
+        return self.env['ir.config_parameter'].sudo().get_param(
+            'caramia_facturacion.wa_%s' % key, default)
+
+    @api.model
+    def _wa_activo(self):
+        valor = str(self._wa_param('activo', '0')).strip().lower()
+        return valor in ('1', 'true', 'yes', 'on')
+
+    @api.model
+    def _normalizar_telefono_wa(self, telefono):
+        """Deja el número en formato internacional (Colombia por defecto)."""
+        digitos = ''.join(filter(str.isdigit, telefono or ''))
+        if not digitos:
+            return ''
+        if digitos.startswith('00'):
+            digitos = digitos[2:]
+        if len(digitos) == 10:
+            digitos = '57' + digitos
+        return digitos
+
+    def _texto_recordatorio_wa(self):
+        self.ensure_one()
+        saldo = formatLang(self.env, self.saldo_pendiente, currency_obj=self.currency_id)
+        fecha = self.fecha_vencimiento.strftime('%d/%m/%Y') if self.fecha_vencimiento else ''
+        return (
+            'Estimado/a *%s*,\n\n'
+            'Le recordamos desde *Calzado Cara Mía* que tiene una deuda pendiente de '
+            '*%s* correspondiente a la factura *%s*, con fecha de corte *%s*.\n\n'
+            'Por favor comuníquese con nosotros para gestionar su pago. ¡Gracias!'
+        ) % (self.cliente_id.nombre_cliente, saldo, self.name, fecha)
+
+    def _payload_recordatorio_wa(self):
+        self.ensure_one()
+        telefono = self._normalizar_telefono_wa(self.cliente_id.telefono_cliente)
+        plantilla = (self._wa_param('template') or '').strip()
+        payload = {
+            'messaging_product': 'whatsapp',
+            'to': telefono,
+        }
+        if plantilla:
+            saldo = formatLang(self.env, self.saldo_pendiente, currency_obj=self.currency_id)
+            fecha = self.fecha_vencimiento.strftime('%d/%m/%Y') if self.fecha_vencimiento else ''
+            payload.update({
+                'type': 'template',
+                'template': {
+                    'name': plantilla,
+                    'language': {'code': self._wa_param('template_lang', 'es') or 'es'},
+                    'components': [{
+                        'type': 'body',
+                        'parameters': [
+                            {'type': 'text', 'text': self.cliente_id.nombre_cliente or ''},
+                            {'type': 'text', 'text': str(saldo)},
+                            {'type': 'text', 'text': self.name or ''},
+                            {'type': 'text', 'text': fecha},
+                        ],
+                    }],
+                },
+            })
+        else:
+            payload.update({
+                'type': 'text',
+                'text': {'body': self._texto_recordatorio_wa(), 'preview_url': False},
+            })
+        return telefono, payload
+
+    def _enviar_recordatorio_whatsapp(self):
+        """Envía un recordatorio al teléfono registrado del cliente. Devuelve True/False."""
+        self.ensure_one()
+        telefono = self._normalizar_telefono_wa(self.cliente_id.telefono_cliente)
+        if not telefono:
+            self.write({'recordatorio_wa_estado': 'Sin teléfono registrado'})
+            return False
+
+        token = self._wa_param('token') or os.getenv('WHATSAPP_API_TOKEN', '')
+        phone_id = self._wa_param('phone_id') or os.getenv('WHATSAPP_PHONE_ID', '')
+        version = self._wa_param('api_version', 'v22.0') or 'v22.0'
+        if not token or not phone_id:
+            self.write({'recordatorio_wa_estado': 'Falta token o phone_number_id'})
+            return False
+
+        _telefono, payload = self._payload_recordatorio_wa()
+        url = 'https://graph.facebook.com/%s/%s/messages' % (version, phone_id)
+        headers = {
+            'Authorization': 'Bearer %s' % token,
+            'Content-Type': 'application/json',
+        }
+        try:
+            respuesta = requests.post(url, json=payload, headers=headers, timeout=20)
+            datos = respuesta.json() if respuesta.content else {}
+            if respuesta.status_code in (200, 201):
+                self.write({
+                    'fecha_recordatorio_wa': fields.Date.context_today(self),
+                    'recordatorio_wa_estado': 'Enviado',
+                })
+                self.message_post(
+                    body=Markup('<p>Recordatorio de WhatsApp enviado a <b>%s</b> (%s).</p>')
+                    % (self.cliente_id.display_name, telefono),
+                    subtype_xmlid='mail.mt_note',
+                )
+                return True
+            error = (datos.get('error') or {}).get('message') or respuesta.text[:250]
+            self.write({'recordatorio_wa_estado': 'Error: %s' % error})
+            _logger.warning('WhatsApp recordatorio %s: %s', self.name, respuesta.text)
+        except Exception as error:
+            self.write({'recordatorio_wa_estado': 'Error: %s' % str(error)[:250]})
+            _logger.exception('WhatsApp recordatorio %s', self.name)
+        return False
+
+    @api.model
+    def _cron_recordatorios_whatsapp(self):
+        """Recordatorio diario a las cuentas con más de N días desde la fecha de corte."""
+        if not self._wa_activo():
+            return
+        dias_gracia = int(self._wa_param('dias_gracia', 3) or 3)
+        dias_reenvio = int(self._wa_param('dias_reenvio', 7) or 7)
+        hoy = fields.Date.context_today(self)
+        limite = hoy - timedelta(days=dias_gracia)
+        cuentas = self.search([
+            ('estado', 'in', ESTADOS_ABIERTOS),
+            ('saldo_pendiente', '>', 0),
+            ('fecha_vencimiento', '<=', limite),
+        ])
+        for rec in cuentas:
+            if not (rec.cliente_id.telefono_cliente or '').strip():
+                continue
+            if (rec.fecha_recordatorio_wa
+                    and (hoy - rec.fecha_recordatorio_wa).days < dias_reenvio):
+                continue
+            rec._enviar_recordatorio_whatsapp()
+
+    def action_enviar_recordatorio_whatsapp(self):
+        enviados = sum(1 for rec in self if rec._enviar_recordatorio_whatsapp())
+        if enviados:
+            titulo, tipo = 'WhatsApp', 'success'
+            mensaje = 'Recordatorio enviado a %s cliente(s).' % enviados
+        else:
+            titulo, tipo = 'WhatsApp', 'warning'
+            mensaje = 'No se pudo enviar. Revise el teléfono del cliente y la configuración.'
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': titulo,
+                'message': mensaje,
+                'type': tipo,
+                'sticky': False,
+            },
+        }
 
     # ------------------------------------------------------------------
     # Resumen para las tarjetas de la lista de clientes
@@ -263,15 +453,6 @@ class CaramiaCuentaCobro(models.Model):
             'res_id': self.factura_id.id,
             'view_mode': 'form',
             'views': [(False, 'form')],
-        }
-
-    def action_abrir_whatsapp_wizard(self):
-        return {
-            'name': 'Enviar Recordatorios WhatsApp',
-            'type': 'ir.actions.act_window',
-            'res_model': 'cara.mia.whatsapp.wizard',
-            'view_mode': 'form',
-            'target': 'new',
         }
 
 

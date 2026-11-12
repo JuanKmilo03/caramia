@@ -4,7 +4,7 @@
     'summary': 'Gestión de Facturas, Cuentas de Cobro y Abonos',
     'description': 'Módulo para automatizar facturación desde Órdenes de Producción finalizadas y gestionar cuentas por cobrar.',
     'category': 'Accounting',
-    'depends': ['base', 'mail', 'caramia_production', 'caramia_customer', 'caramia_wsp'],
+    'depends': ['base', 'mail', 'caramia_production', 'caramia_customer'],
     'data': [
         'security/cobros_security.xml',
         'security/ir.model.access.csv',
@@ -14,11 +14,16 @@
         'wizard/cuenta_cobro_wizard_views.xml',
         'views/facturacion_views.xml',
         'views/cxc_views.xml',
+      #  'views/res_config_settings_views.xml',
         'views/customer_facturas_views.xml',
         'reports/facturacion_report.xml',
     ],
     'assets': {
     'web.assets_backend': [
+        'caramia_facturacion/static/src/scss/cxc_anim.scss',
+        'caramia_facturacion/static/src/scss/cxc_styles.scss',
+        'caramia_facturacion/static/src/scss/cxc_redesign.scss',
+        'caramia_facturacion/static/src/xml/cxc_redesign.xml',
         'caramia_facturacion/static/src/cartera_list/cartera_list.js',
         'caramia_facturacion/static/src/cartera_list/cartera_list.xml',
     ],

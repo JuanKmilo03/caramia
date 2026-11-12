@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&display=swap');
+/* Fuente serif de marca, servida localmente (sin @import: Odoo concatena
+   los SCSS y un @import dejaría de estar al inicio del bundle). */
+@font-face {
+    font-family: "Fraunces";
+    font-style: italic;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/caramia_login/static/src/fonts/fraunces-italic-latin.woff2") format("woff2");
+}
 
 $ink: #14161c;
 $ink-800: #1c1f28;

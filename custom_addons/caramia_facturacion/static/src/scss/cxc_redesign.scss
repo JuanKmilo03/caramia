@@ -1,0 +1,606 @@
+// ============================================================
+// PALETA CARAMIA — Facturación (misma paleta que producción)
+// ============================================================
+$cm-navy:          #14161c;
+$cm-gold:          #ebad33;
+$cm-gold-dark:     #c98f2e;
+$cm-green:         #2f7d4f;
+$cm-red:           #c0392b;
+$cm-gray:          #9aa0a6;
+$cm-bg:            #f9f9f9;
+$cm-surface:       #ffffff;
+$cm-surface-alt:   #f3f3f3;
+$cm-border:        #e5e0d5;
+$cm-text:          #14161c;
+$cm-muted:         #8b8d97;
+
+$cm-serif:         inherit;
+$cm-sans:          inherit;
+
+$cm-radius-sm:     6px;
+$cm-radius:        10px;
+$cm-radius-lg:     14px;
+
+$cm-shadow:        0 1px 2px rgba(15, 23, 42, .05), 0 8px 24px rgba(15, 23, 42, .04);
+$cm-shadow-hover:  0 2px 4px rgba(15, 23, 42, .08), 0 14px 32px rgba(15, 23, 42, .09);
+$cm-transition:    180ms ease;
+
+// ============================================================
+// FONDO DE PÁGINA
+// ============================================================
+.caramia_facturacion_list,
+.caramia_facturacion_kanban,
+.caramia_facturacion_form {
+    .o_content {
+        background: $cm-bg;
+    }
+}
+
+// ============================================================
+// ENCABEZADO DE PÁGINA
+// ============================================================
+.caramia-page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-shrink: 0;
+    padding: 1.35rem 1.5rem .9rem;
+    background: $cm-bg;
+
+    &__text {
+        min-width: 0;
+    }
+
+    h1 {
+        margin: 0;
+        font-family: $cm-serif;
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.12;
+        letter-spacing: -.015em;
+        color: $cm-navy;
+    }
+
+    p {
+        margin: .4rem 0 0;
+        font-family: $cm-sans;
+        font-size: .8rem;
+        font-weight: 600;
+        letter-spacing: .015em;
+        color: $cm-gold;
+    }
+}
+
+// ============================================================
+// BOTÓN PRIMARIO
+// ============================================================
+.caramia-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    flex-shrink: 0;
+    padding: .68rem 1.15rem;
+    border: 1px solid $cm-gold-dark;
+    border-radius: $cm-radius-sm;
+    background: $cm-gold-dark;
+    color: #fff;
+    font-family: $cm-sans;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .08);
+    transition: background $cm-transition, transform $cm-transition, box-shadow $cm-transition;
+
+    i {
+        font-size: .78rem;
+    }
+
+    &:hover {
+        background: darken($cm-gold-dark, 7%);
+        border-color: darken($cm-gold-dark, 7%);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(154, 113, 20, .22);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: 2px;
+    }
+}
+
+// ============================================================
+// CONTROL PANEL / BUSCADOR
+// ============================================================
+.caramia_facturacion_list,
+.caramia_facturacion_kanban {
+    .o_control_panel {
+        background: $cm-bg;
+        border-bottom: 1px solid $cm-border;
+        padding: .45rem 1.5rem 0;
+    }
+
+    .o_control_panel .o_cp_bottom,
+    .o_control_panel .o_cp_top {
+        background: transparent;
+    }
+
+    .o_searchview {
+        border: 1px solid $cm-border;
+        border-radius: $cm-radius-sm;
+        background: $cm-surface;
+        box-shadow: none;
+    }
+
+    .o_searchview_facet {
+        border-radius: $cm-radius-sm;
+        background: $cm-surface-alt;
+    }
+
+    .o_searchview_dropdown_toggler {
+        border-color: $cm-border;
+        background: $cm-surface;
+    }
+
+    .o_searchview_dropdown_toggler::after {
+        content: "Filtros  ·  Agrupar por  ·  Favoritos";
+        margin-left: .35rem;
+        font-family: $cm-sans;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .02em;
+        color: $cm-navy;
+        white-space: nowrap;
+    }
+
+    .o_cp_switch_buttons {
+        gap: .25rem;
+
+        .o_switch_view {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.25rem;
+            min-height: 2rem;
+            padding: .25rem .55rem;
+            border: 1px solid $cm-border;
+            border-radius: $cm-radius-sm;
+            background: $cm-surface;
+            color: $cm-navy;
+            transition: background $cm-transition, color $cm-transition, border-color $cm-transition;
+
+            &:hover {
+                border-color: $cm-navy;
+                color: $cm-navy;
+            }
+
+            &.active {
+                background: $cm-navy !important;
+                border-color: $cm-navy !important;
+                color: #fff !important;
+            }
+        }
+    }
+}
+
+// ============================================================
+// VISTA LISTA — Facturación
+// ============================================================
+.caramia_facturacion_list {
+    .o_list_renderer {
+        padding: .35rem 1.5rem 1.5rem;
+        background: $cm-bg;
+    }
+
+    .o_list_table {
+        overflow: hidden;
+        border: 1px solid $cm-border;
+        border-radius: $cm-radius;
+        background: $cm-surface;
+    }
+
+    .o_list_table thead th {
+        border-bottom: 1px solid $cm-border;
+        background: $cm-surface-alt;
+        color: $cm-muted;
+        font-family: $cm-sans;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .o_list_table tbody tr {
+        transition: background $cm-transition;
+
+        &:hover {
+            background: #fbfaf7;
+        }
+    }
+
+    .o_data_cell {
+        border-color: $cm-border;
+        color: $cm-text;
+        font-family: $cm-sans;
+        font-size: .78rem;
+    }
+
+    .o_data_cell[name="name"] {
+        color: $cm-gold-dark;
+        font-weight: 700;
+        letter-spacing: .03em;
+    }
+
+    .o_data_cell[name="cliente_id"] {
+        font-family: $cm-serif;
+        font-size: .85rem;
+        font-weight: 600;
+        color: $cm-navy;
+    }
+
+    .o_field_badge {
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-family: $cm-sans;
+        font-size: .65rem;
+        font-weight: 700;
+    }
+
+    .o_field_badge.text-bg-info {
+        background: #ece8df !important;
+        color: $cm-muted !important;
+    }
+
+    .o_field_badge.text-bg-warning {
+        background: rgba($cm-gold, .14) !important;
+        color: $cm-gold-dark !important;
+    }
+
+    .o_field_badge.text-bg-success {
+        background: rgba($cm-green, .12) !important;
+        color: $cm-green !important;
+    }
+
+    .o_field_badge.text-bg-danger {
+        background: rgba($cm-red, .11) !important;
+        color: $cm-red !important;
+    }
+
+    .o_progressbar {
+        gap: .4rem;
+        margin-top: .2rem;
+
+        .o_progress {
+            height: 6px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #ece8df;
+        }
+
+        .o_progress > div {
+            border-radius: inherit;
+            background: $cm-gold !important;
+        }
+
+        .o_progressbar_value {
+            font-family: $cm-sans;
+            font-size: .65rem;
+            color: $cm-muted;
+        }
+    }
+}
+
+// ============================================================
+// KANBAN — Cuentas por Cobro
+// ============================================================
+.caramia_facturacion_kanban {
+    .o_kanban_renderer {
+        padding: .35rem 1.1rem 1.5rem;
+        background: $cm-bg;
+    }
+
+    .o_kanban_group {
+        width: 320px;
+        min-width: 300px;
+        max-width: 340px;
+        margin: 0 .45rem;
+        padding: .55rem .75rem .8rem;
+        border: 1px solid $cm-border;
+        border-top-width: 4px;
+        border-radius: $cm-radius-lg;
+        background: $cm-surface-alt;
+        transition: box-shadow $cm-transition;
+
+        &:hover {
+            box-shadow: $cm-shadow;
+        }
+    }
+
+    // Borde superior de columna por estado de cuenta de cobro
+    .o_kanban_group[data-id="vigente"]   { border-top-color: $cm-gold; }
+    .o_kanban_group[data-id="vencida"]   { border-top-color: $cm-red; }
+    .o_kanban_group[data-id="saldada"]   { border-top-color: $cm-green; }
+    .o_kanban_group[data-id="anulada"]   { border-top-color: $cm-gray; }
+
+    // Borde superior de tarjeta según estado de su columna
+    .o_kanban_group[data-id="vigente"] .caramia-card       { border-top: 3px solid $cm-gold; }
+    .o_kanban_group[data-id="vencida"] .caramia-card       { border-top: 3px solid $cm-red; }
+    .o_kanban_group[data-id="saldada"] .caramia-card       { border-top: 3px solid $cm-green; }
+    .o_kanban_group[data-id="anulada"] .caramia-card       { border-top: 3px solid $cm-gray; }
+
+    .o_kanban_header {
+        padding: .25rem .15rem .55rem;
+        background: $cm-surface-alt;
+    }
+
+    .o_kanban_header .o_column_title {
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        letter-spacing: .01em;
+        color: $cm-navy !important;
+    }
+
+    .o_kanban_config .fa-gear {
+        opacity: 1 !important;
+        color: $cm-muted;
+    }
+
+    .o_kanban_config .fa-gear::before {
+        content: "\f141";
+    }
+
+    .o_kanban_quick_add {
+        display: none !important;
+    }
+
+    .o_kanban_record {
+        margin-bottom: .6rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .o_kanban_record:focus-visible {
+        outline: none;
+
+        .caramia-card {
+            outline: 2px solid $cm-gold;
+            outline-offset: 2px;
+        }
+    }
+}
+
+// Contador de columna
+.caramia-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: .3rem;
+    padding: 0 .35rem;
+    border: 1px solid $cm-border;
+    border-radius: 999px;
+    background: $cm-surface;
+    color: $cm-muted;
+    font-family: $cm-sans;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+// ============================================================
+// KANBAN: TARJETA caramia-card (Facturación)
+// ============================================================
+.caramia-card {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    padding: .8rem .85rem .7rem;
+    border: 1px solid $cm-border;
+    border-radius: $cm-radius;
+    background: $cm-surface;
+    box-shadow: $cm-shadow;
+    transition: transform $cm-transition, box-shadow $cm-transition, border-color $cm-transition;
+
+    &:hover {
+        transform: translateY(-2px);
+        border-color: darken($cm-border, 6%);
+        box-shadow: $cm-shadow-hover;
+    }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+    }
+
+    &__code {
+        color: $cm-gold-dark;
+        font-family: $cm-sans;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    &__client {
+        overflow: hidden;
+        font-family: $cm-serif;
+        font-size: 1.02rem;
+        font-weight: 600;
+        line-height: 1.25;
+        color: $cm-navy;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__ref {
+        overflow: hidden;
+        margin-bottom: .2rem;
+        color: $cm-muted;
+        font-family: $cm-sans;
+        font-size: .74rem;
+        line-height: 1.3;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: .15rem;
+        color: $cm-muted;
+        font-family: $cm-sans;
+        font-size: .7rem;
+        font-weight: 500;
+    }
+
+    &__pairs {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        white-space: nowrap;
+    }
+
+    &__date {
+        overflow: hidden;
+        font-weight: 600;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+// Icono zapatilla y pill
+.caramia-shoe {
+    width: .9rem;
+    height: .9rem;
+    flex-shrink: 0;
+    color: $cm-muted;
+}
+
+.caramia-pill {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: .15rem .45rem;
+    border-radius: 999px;
+    background: rgba($cm-red, .11);
+    color: $cm-red;
+    font-family: $cm-sans;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    white-space: nowrap;
+}
+
+// ============================================================
+// NAVBAR: solo logo y nombre de la app activa
+// ============================================================
+.o_main_navbar {
+    .o_menu_sections {
+        display: none !important;
+    }
+
+    .o_menu_brand {
+        color: #f8fafc;
+        font-weight: 600;
+        border-bottom: 2px solid $cm-gold;
+        padding-bottom: .15rem;
+    }
+}
+
+// ============================================================
+// RESPONSIVE
+// ============================================================
+@media (max-width: 991.98px) {
+    .caramia-page-head {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        h1 {
+            font-size: 1.8rem;
+        }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .caramia-page-head {
+        padding: 1rem 1rem .75rem;
+
+        h1 {
+            font-size: 1.55rem;
+        }
+
+        p {
+            font-size: .74rem;
+        }
+    }
+
+    .caramia-btn-primary {
+        width: 100%;
+    }
+
+    .caramia_facturacion_kanban {
+        .o_kanban_renderer.o_kanban_grouped {
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .o_kanban_group {
+            width: 84vw;
+            min-width: 84vw;
+            max-width: 84vw;
+        }
+    }
+
+    .caramia_facturacion_kanban,
+    .caramia_facturacion_list {
+        .o_control_panel {
+            padding-left: .75rem;
+            padding-right: .75rem;
+        }
+
+        .o_searchview_dropdown_toggler::after {
+            content: none;
+        }
+    }
+
+    .caramia_facturacion_list .o_list_renderer {
+        padding-left: .5rem;
+        padding-right: .5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .caramia-card,
+    .caramia-btn-primary,
+    .caramia_facturacion_kanban .o_kanban_group,
+    .caramia_facturacion_list .o_list_table tbody tr,
+    .caramia_facturacion_kanban .o_switch_view,
+    .caramia_facturacion_list .o_switch_view {
+        transition: none !important;
+    }
+
+    .caramia-card:hover {
+        transform: none;
+    }
+
+    .caramia-btn-primary:hover {
+        transform: none;
+    }
+}

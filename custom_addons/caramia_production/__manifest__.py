@@ -23,6 +23,7 @@
         'web.assets_backend': [
             'caramia_production/static/src/scss/production_redesign.scss',
             'caramia_production/static/src/xml/production_redesign.xml',
+            'caramia_production/static/src/js/kanban_state_names.js',
         ],
     },
     'installable': True,

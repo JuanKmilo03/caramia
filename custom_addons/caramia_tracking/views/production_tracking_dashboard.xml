@@ -5,8 +5,5 @@
         <field name="tag">caramia_tracking.stats</field>
     </record>
 
-    <menuitem id="menu_caramia_tracking_stats" name="Seguimeinto de producción"
-              parent="caramia_production.menu_caramia_production_root"
-              action="action_caramia_tracking_stats" sequence="1"
-              groups="caramia_tracking.group_production_tracking"/>
+    <!-- El dashboard ya no cuelga de Producción; es la pestaña de inicio (ver dashboard_action.xml) -->
 </odoo>

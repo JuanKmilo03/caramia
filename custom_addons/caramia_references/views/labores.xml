@@ -5,6 +5,15 @@
         <field name="model">cara.mia.tipo.labor</field>
         <field name="arch" type="xml">
             <list string="Catálogo de Labores y Tarifas" editable="bottom">
+                <header>
+                    <button name="%(action_caramia_estancamiento_settings)d"
+                        type="action"
+                        string="Avisos de estancamiento"
+                        icon="fa-bell-o"
+                        display="always"
+                        groups="base.group_system"
+                        class="btn-secondary" />
+                </header>
                 <field name="name"/>
                 <field name="tarifa_normal" widget="monetary"/>
                 <field name="tarifa_especial" widget="monetary"/>

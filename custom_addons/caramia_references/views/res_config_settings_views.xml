@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_caramia_estancamiento_settings_form" model="ir.ui.view">
+        <field name="name">caramia.estancamiento.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="arch" type="xml">
+            <form string="Avisos de estancamiento">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Avisos de estancamiento</h1>
+                    </div>
+                    <group string="Límites de días">
+                        <group>
+                            <field name="caramia_dias_borrador" />
+                            <field name="caramia_dias_etapa" />
+                        </group>
+                        <div class="text-muted small">
+                            <p>Una orden se marca como <b>estancada</b> cuando supera
+                                estos límites. El seguimiento de producción revisa los
+                                valores cada vez que calcula el avance y el cron diario
+                                crea una actividad para los responsables.</p>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="execute" string="Guardar" type="object" class="btn-primary" />
+                    <button string="Cancelar" special="cancel" class="btn-secondary" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_caramia_estancamiento_settings" model="ir.actions.act_window">
+        <field name="name">Avisos de estancamiento</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="view_id" ref="view_caramia_estancamiento_settings_form" />
+    </record>
+
+</odoo>

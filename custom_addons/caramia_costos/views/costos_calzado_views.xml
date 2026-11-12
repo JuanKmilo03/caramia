@@ -12,12 +12,13 @@
         <field name="name">caramia.costo.form</field>
         <field name="model">caramia.costo</field>
         <field name="arch" type="xml">
-            <form string="Cotización y Hoja de Costos">
+            <form string="Cotización y Hoja de Costos" class="caramia_costos_form">
                 <header>
                     <button name="action_pass_to_production"
                         string="Pasar a Producción"
                         type="object"
                         class="oe_highlight"
+                        icon="fa-arrow-right"
                         invisible="state != 'draft'" />
                     <button name="action_guardar_como_referencia"
                         class="fa-solid fa-floppy-disk"
@@ -27,10 +28,12 @@
                     <button name="action_borrador"
                         string="Volver a Borrador"
                         type="object"
+                        icon="fa-undo"
                         invisible="state != 'cancel'" />
                     <button name="action_actualizar_desde_referencia"
                         string="↺ Cargar Precios Iniciales"
                         type="object"
+                        icon="fa-refresh"
                         invisible="state not in ('draft', 'approved')" />
                     <field name="state"
                         widget="statusbar"

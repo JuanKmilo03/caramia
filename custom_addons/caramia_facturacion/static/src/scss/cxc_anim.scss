@@ -1,0 +1,49 @@
+/* Animación suave para las pestañas del notebook en Cuentas por Cobro */
+.o_caramia_cxc_form .o_notebook .nav-link {
+    transition: color 200ms ease, background-color 200ms ease, transform 200ms ease;
+}
+.o_caramia_cxc_form .o_notebook .nav-link:hover {
+    transform: translateY(-1px);
+}
+.o_caramia_cxc_form .o_notebook .nav-link.active {
+    animation: cm-tab-in 220ms ease both;
+}
+.o_caramia_cxc_form .o_notebook .tab-pane {
+    animation: cm-fade-in 260ms ease both;
+}
+
+@keyframes cm-tab-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cm-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Animación especifica del desplegable de Cuentas por Cobrar */
+.cm-cuentas-cobrar .o_dropdown_menu,
+.cm-cuentas-cobrar .dropdown-menu {
+    animation: cm-dropdown-in 180ms ease both;
+    border: 1px solid #d9d5c8;
+    border-radius: 0.8rem;
+    box-shadow: 0 10px 30px -12px rgba(20, 22, 28, 0.18);
+}
+.cm-cuentas-cobrar .dropdown-item {
+    transition: background 150ms ease, color 150ms ease;
+}
+.cm-cuentas-cobrar .dropdown-item:hover {
+    background: rgba(235, 173, 51, 0.12);
+    color: #b88a1e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_caramia_cxc_form .o_notebook .nav-link,
+    .o_caramia_cxc_form .o_notebook .tab-pane,
+    .cm-cuentas-cobrar .o_dropdown_menu,
+    .cm-cuentas-cobrar .dropdown-menu,
+    .cm-cuentas-cobrar .dropdown-item {
+        animation: none !important;
+        transition: none !important;
+    }
+}

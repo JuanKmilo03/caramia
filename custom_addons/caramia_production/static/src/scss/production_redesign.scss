@@ -1,9 +1,9 @@
 // ============================================================
 // PALETA CARAMIA (cambia solo estas variables)
 // ============================================================
-$cm-navy:          #0f172a;
-$cm-gold:          #b88a1e;
-$cm-gold-dark:     #9a7114;
+$cm-navy:          #14161c;
+$cm-gold:          #ebad33;
+$cm-gold-dark:     #c98f2e;
 $cm-green:         #2f7d4f;
 $cm-red:           #c0392b;
 $cm-gray:          #9aa0a6;
@@ -11,8 +11,8 @@ $cm-bg:            #f9f9f9;
 $cm-surface:       #ffffff;
 $cm-surface-alt:   #f3f3f3;
 $cm-border:        #e5e0d5;
-$cm-text:          #1f2937;
-$cm-muted:         #7a7468;
+$cm-text:          #14161c;
+$cm-muted:         #8b8d97;
 
 $cm-serif:         inherit;
 $cm-sans:          inherit;
@@ -253,9 +253,59 @@ $cm-transition:    180ms ease;
     .o_kanban_group[data-id="done"] .caramia-card        { border-top: 3px solid $cm-green; }
     .o_kanban_group[data-id="canceled"] .caramia-card    { border-top: 3px solid $cm-red; }
 
+    // Nombre del estado en cada columna del kanban (cuando groupName no llega)
+    .o_kanban_group[data-id="draft"] .o_column_title::before {
+        content: "Borrador";
+        display: block;
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: $cm-navy !important;
+        margin-bottom: 0.15rem;
+    }
+    .o_kanban_group[data-id="in_progress"] .o_column_title::before {
+        content: "En Progreso";
+        display: block;
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: $cm-navy !important;
+        margin-bottom: 0.15rem;
+    }
+    .o_kanban_group[data-id="stopped"] .o_column_title::before {
+        content: "Detenida";
+        display: block;
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: $cm-navy !important;
+        margin-bottom: 0.15rem;
+    }
+    .o_kanban_group[data-id="done"] .o_column_title::before {
+        content: "Hecha";
+        display: block;
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: $cm-navy !important;
+        margin-bottom: 0.15rem;
+    }
+    .o_kanban_group[data-id="canceled"] .o_column_title::before {
+        content: "Cancelada";
+        display: block;
+        font-family: $cm-serif;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: $cm-navy !important;
+        margin-bottom: 0.15rem;
+    }
+
     .o_kanban_header {
         padding: .25rem .15rem .55rem;
         background: $cm-surface-alt;
+        display: block !important;
+        visibility: visible !important;
+        z-index: 2;
     }
 
     .o_kanban_header .o_column_title {
@@ -264,6 +314,17 @@ $cm-transition:    180ms ease;
         font-weight: 600 !important;
         letter-spacing: .01em;
         color: $cm-navy !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-width: 120px;
+        flex-grow: 1;
+        white-space: normal !important;
+    }
+
+    .o_kanban_header .o_column_title .text-truncate {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
     }
 
     .o_kanban_config .fa-gear {
@@ -583,31 +644,6 @@ $cm-transition:    180ms ease;
 }
 
 // ============================================================
-// BARRA SUPERIOR DE ODOO (global del backend)
-// ============================================================
-.o_main_navbar {
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-    background: $cm-navy;
-
-    .o_menu_brand,
-    .nav-link,
-    .o_navbar_systray .btn {
-        color: #f8fafc;
-    }
-
-    .o_menu_brand:hover,
-    .nav-link:hover,
-    .nav-link:focus {
-        color: $cm-gold;
-    }
-
-    .o_menu_brand {
-        font-family: $cm-serif;
-        font-weight: 600;
-        letter-spacing: .01em;
-    }
-}
-
 // ============================================================
 // RESPONSIVE
 // ============================================================
@@ -672,8 +708,75 @@ $cm-transition:    180ms ease;
 }
 
 // ============================================================
-// MOVIMIENTO REDUCIDO
+// HOJA DE COSTOS (caramia_costos)
 // ============================================================
+.caramia_costos_form {
+    .o_form_sheet_bg {
+        background: $cm-bg;
+    }
+
+    .oe_title h1 {
+        font-family: $cm-serif;
+        font-weight: 600;
+        color: $cm-navy;
+    }
+
+    .o_group {
+        border: 1px solid $cm-border;
+        border-radius: $cm-radius;
+        background: $cm-surface;
+        padding: .75rem 1rem;
+        box-shadow: $cm-shadow;
+        margin-bottom: 1rem;
+    }
+
+    .o_group > .o_form_label,
+    .o_group .o_form_label {
+        color: $cm-muted;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .o_form_view .o_form_input,
+    .o_form_view .o_input {
+        border-color: $cm-border;
+        border-radius: $cm-radius-sm;
+
+        &:focus {
+            border-color: $cm-gold;
+            box-shadow: 0 0 0 2px rgba($cm-gold, .15);
+        }
+    }
+
+    .btn.oe_highlight {
+        background: $cm-gold-dark;
+        border-color: $cm-gold-dark;
+        color: #fff;
+        font-weight: 600;
+
+        &:hover {
+            background: darken($cm-gold-dark, 7%);
+            border-color: darken($cm-gold-dark, 7%);
+            color: #fff;
+        }
+    }
+
+    .o_notebook .nav-link {
+        font-weight: 600;
+        color: $cm-muted;
+
+        &.active {
+            color: $cm-navy;
+            border-bottom-color: $cm-gold;
+        }
+    }
+
+    .o_field_monetary, .fw-bold {
+        color: $cm-navy;
+    }
+}
 @media (prefers-reduced-motion: reduce) {
     .caramia-card,
     .caramia-btn-primary,

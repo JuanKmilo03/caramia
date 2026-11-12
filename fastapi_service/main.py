@@ -10,8 +10,6 @@ from agent import procesar_chat, confirmar_accion
 from openai import AsyncOpenAI as _AsyncOpenAI
 import os
 import io
-import tempfile
-import os as _os
 import time
 import hmac
 import hashlib
@@ -29,22 +27,23 @@ ODOO_API_URL = os.getenv("ODOO_API_URL")
 META_API_VERSION = os.getenv("META_API_VERSION")
 
 AGENT_SECRET = os.getenv("AGENT_SECRET", "")
-STT_PROVIDER = os.getenv("STT_PROVIDER", "openai")
+STT_PROVIDER = os.getenv("STT_PROVIDER", "openai").strip().lower()
 
-OPENAI_API_KEY = os.getenv("AI_API_KEY")
+# STT: solo proveedor OpenAI (API compatible). Se pueden usar credenciales
+# propias para voz con STT_API_KEY / STT_BASE_URL; si no, se reutilizan AI_*.
+STT_API_KEY = os.getenv("STT_API_KEY") or os.getenv("AI_API_KEY")
+STT_BASE_URL = os.getenv("STT_BASE_URL") or os.getenv("AI_URL")
+STT_MODEL = os.getenv("WHISPER_MODEL", "whisper-1")
+stt_client = (
+    _AsyncOpenAI(api_key=STT_API_KEY, base_url=STT_BASE_URL) if STT_API_KEY else None
+)
 
-AI_URL = os.getenv("AI_URL")
-stt_client = _AsyncOpenAI(api_key=OPENAI_API_KEY, base_url=AI_URL) if OPENAI_API_KEY else None
-WHISPER_MODEL_NAME = os.getenv("WHISPER_MODEL", "base")
-whisper_model = None
-
-if STT_PROVIDER == "local":
-    try:
-        from faster_whisper import WhisperModel
-        whisper_model = WhisperModel(WHISPER_MODEL_NAME, device="cpu", compute_type="int8")
-        print(f"[STT] faster-whisper cargado: {WHISPER_MODEL_NAME}", flush=True)
-    except Exception as e:
-        print(f"[STT] No se pudo cargar faster-whisper: {e}", flush=True)
+if STT_PROVIDER != "openai":
+    print(
+        f"[STT] Proveedor '{STT_PROVIDER}' no soportado; se usará OpenAI.",
+        flush=True,
+    )
+    STT_PROVIDER = "openai"
 _RATE_LIMIT = {}
 _RATE_WINDOW = 60
 _RATE_MAX = 30
@@ -127,36 +126,16 @@ async def stt_endpoint(file: UploadFile = File(...), x_agent_secret: str | None 
         print(f"[STT] filename={file.filename} content_type={file.content_type} size={len(data)}", flush=True)
         if not data:
             raise HTTPException(status_code=400, detail="archivo vacio")
-        if STT_PROVIDER == "openai":
-            if stt_client is None:
-                raise HTTPException(status_code=500, detail="OPENAI_API_KEY no configurada")
-            transcript = await stt_client.audio.transcriptions.create(
-                model="whisper-1",
-                file=(file.filename or "audio.webm", io.BytesIO(data), file.content_type or "audio/webm"),
-            )
-            texto = transcript.text
-            print(f"[STT] texto={texto}", flush=True)
-        elif STT_PROVIDER == "local":
-            if whisper_model is None:
-                raise HTTPException(status_code=500, detail="Modelo local no cargado")
-            # Guardar a archivo temporal
-            suffix = ".webm"
-            if file.filename and "." in file.filename:
-                suffix = "." + file.filename.rsplit(".", 1)[-1]
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                tmp.write(data)
-                tmp_path = tmp.name
-            try:
-                segments, info = whisper_model.transcribe(tmp_path, beam_size=5, language="es", vad_filter=True)
-                texto = " ".join(seg.text for seg in segments).strip()
-                print(f"[STT] texto={texto}", flush=True)
-            finally:
-                try:
-                    _os.remove(tmp_path)
-                except Exception:
-                    pass
-        else:
+        if STT_PROVIDER != "openai":
             raise HTTPException(status_code=501, detail="Proveedor STT no soportado")
+        if stt_client is None:
+            raise HTTPException(status_code=500, detail="STT_API_KEY / AI_API_KEY no configurada")
+        transcript = await stt_client.audio.transcriptions.create(
+            model=STT_MODEL,
+            file=(file.filename or "audio.webm", io.BytesIO(data), file.content_type or "audio/webm"),
+        )
+        texto = transcript.text
+        print(f"[STT] texto={texto}", flush=True)
         return {"texto": texto}
     except Exception as e:
         print(f"[STT] ERROR {e}", flush=True)

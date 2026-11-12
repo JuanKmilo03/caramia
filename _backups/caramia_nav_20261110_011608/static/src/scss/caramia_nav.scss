@@ -1,0 +1,238 @@
+/* ==========================================================================
+   Cara Mia · Navegación y encabezado de apps
+   Paleta en variables SCSS (hex) para cambiar la paleta fácilmente.
+   Selectores ajustados al DOM real de web.NavBar / web.ControlPanel (Odoo 18).
+   ========================================================================== */
+
+/* ---------- Variables de paleta ---------- */
+$cm-navy: #0f172a;
+$cm-navy-hover: #1e293b;
+$cm-gold: #b88a1e;
+$cm-gold-hover: #9a7218;
+$cm-gold-soft: rgba(184, 138, 30, 0.10);
+$cm-bg: #f4f2ec;        /* gris cálido muy claro */
+$cm-bg-panel: #ffffff;
+$cm-text: #334155;
+$cm-text-muted: #64748b;
+$cm-text-inverse: #ffffff;
+$cm-border: #e4e0d8;
+$cm-border-focus: $cm-gold;
+$cm-transition: 180ms;
+$cm-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif; /* tipografía nativa de Odoo */
+
+/* Todo el bloque solo se activa cuando el body tiene .o-caramia-mode.
+   El JS lo añade únicamente si el menú raíz empieza con "CARAMIA_".
+   Las demás apps de Odoo no se ven afectadas. */
+body.o-caramia-mode {
+    background: $cm-bg;
+    color: $cm-text;
+    font-family: $cm-font-family;
+
+    /* ===== Navbar: solo logo + nombre de app (menús raíz) ===== */
+    .o_navbar {
+        background: $cm-navy !important;
+        color: $cm-text-inverse;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        transition: background $cm-transition ease;
+    }
+
+    /* Nombre de la app (raíz) */
+    .o_navbar .o_menu_brand {
+        color: $cm-text-inverse;
+        font-family: $cm-font-family;
+        font-weight: 500;
+        transition: color $cm-transition ease;
+    }
+
+    /* Ocultar secciones (hijos directos del menú raíz) en la navbar cuando
+       el modo Caramia está activo. Selector exacto del DOM: .o_menu_sections */
+    body.o-caramia-mode .o_navbar .o_menu_sections {
+        display: none !important;
+    }
+
+    /* App activa: blanco con línea inferior dorada */
+    .o_navbar .o_menu_brand.is-active,
+    .o_navbar .o_menu_brand.active,
+    .o_navbar [data-menu-xmlid].is-active {
+        background: $cm-text-inverse !important;
+        color: $cm-navy !important;
+        border-bottom: 3px solid $cm-gold !important;
+        transition: background $cm-transition ease, color $cm-transition ease,
+            border-color $cm-transition ease;
+    }
+
+    /* ===== Encabezado de página (debajo del control panel) ===== */
+    .o-caramia-header {
+        padding: 1.5rem 2rem 1rem 2rem;
+        background: $cm-bg-panel;
+        border-bottom: 1px solid $cm-border;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        transition: border-color $cm-transition ease;
+    }
+
+    .o-caramia-header__title {
+        margin: 0;
+        color: $cm-navy;
+        font-family: $cm-font-family; /* tipografía nativa de Odoo */
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        transition: color $cm-transition ease;
+    }
+
+    .o-caramia-header__description {
+        margin: 0;
+        color: $cm-text-muted;
+        font-family: $cm-font-family;
+        font-size: 0.95rem;
+        font-weight: 400;
+        line-height: 1.5;
+        transition: color $cm-transition ease;
+    }
+
+    .o-caramia-header__actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .o-caramia-header__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.5rem 1.1rem;
+        color: $cm-navy;
+        background: $cm-gold;
+        border: 1px solid $cm-gold;
+        border-radius: 0.5rem;
+        font-family: $cm-font-family;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background $cm-transition ease, border-color $cm-transition ease,
+            color $cm-transition ease, transform $cm-transition ease;
+    }
+
+    .o-caramia-header__button:hover {
+        background: $cm-gold-hover;
+        border-color: $cm-gold-hover;
+        color: $cm-text-inverse;
+        transform: translateY(-1px);
+    }
+
+    .o-caramia-header__button:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: 2px;
+    }
+
+    /* ===== Pestañas de sección (hijos directos del menú raíz) ===== */
+    .o-caramia-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        margin: 0 -1rem;
+        padding: 0 1rem 0.75rem 1rem;
+        scroll-behavior: smooth;
+    }
+
+    .o-caramia-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+    .o-caramia-tabs::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 3px;
+    }
+
+    .o-caramia-tab {
+        flex: 0 0 auto;
+        padding: 0.62rem 1.05rem;
+        color: $cm-text-muted;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        font-family: $cm-font-family;
+        font-size: 0.92rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: color $cm-transition ease, border-color $cm-transition ease,
+            background $cm-transition ease;
+    }
+
+    .o-caramia-tab:hover {
+        color: $cm-navy;
+        background: rgba($cm-navy, 0.04);
+        border-bottom-color: rgba($cm-gold, 0.3);
+    }
+
+    .o-caramia-tab:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: 2px;
+        border-bottom-color: $cm-gold;
+    }
+
+    .o-caramia-tab.is-active {
+        color: $cm-navy;
+        border-bottom-color: $cm-gold;
+        background: $cm-gold-soft;
+    }
+
+    .o-caramia-tab.is-active:hover {
+        border-bottom-color: $cm-gold;
+    }
+
+    /* Si la app solo tiene una sección, no se muestran pestañas. */
+    .o-caramia-tabs--single {
+        display: none !important;
+    }
+
+    /* ===== Respeto a prefers-reduced-motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+        .o-caramia-tab:hover {
+            background: transparent;
+        }
+        .o-caramia-header__button:hover {
+            transform: none;
+        }
+    }
+
+    /* ===== Pantallas pequeñas: pestañas con scroll horizontal ===== */
+    @media (max-width: 767.98px) {
+        .o-caramia-header {
+            padding: 1rem 1rem 0.75rem 1rem;
+        }
+        .o-caramia-header__title {
+            font-size: 1.35rem;
+        }
+        .o-caramia-tabs {
+            margin: 0 -0.5rem;
+            padding: 0 0.5rem 0.5rem 0.5rem;
+        }
+        .o-caramia-tab {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+/* Nota de diseño: el título y la descripción de este encabezado usan el nombre
+   del menú raíz (app). Cada vista conserva su propio título en el panel de
+   control, por lo tanto no hay duplicación. No se toca <list> ni <kanban>
+   (usa t-name="card"). No se usa :has() en ninguna regla. */

@@ -25,7 +25,7 @@ services:
       - AGENT_SECRET=${AGENT_SECRET}
       - FASTAPI_URL=http://fastapi_ai:8000
     ports:
-      - "8069:8069"
+      - "8090:8069"
     volumes:
       - ./config/odoo.conf:/etc/odoo/odoo.conf
       - ./custom_addons:/mnt/extra-addons
@@ -36,7 +36,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "8095:8000"
     depends_on:
       - odoo
       - redis

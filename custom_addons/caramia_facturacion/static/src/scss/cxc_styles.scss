@@ -1,0 +1,313 @@
+// ============================================================
+// PALETA CARAMIA (misma que producción)
+// ============================================================
+$cm-navy:          #14161c;
+$cm-gold:          #ebad33;
+$cm-gold-dark:     #c98f2e;
+$cm-green:         #2f7d4f;
+$cm-red:           #c0392b;
+$cm-gray:          #9aa0a6;
+$cm-bg:            #f9f9f9;
+$cm-surface:       #ffffff;
+$cm-surface-alt:   #f3f3f3;
+$cm-border:        #e5e0d5;
+$cm-text:          #14161c;
+$cm-muted:         #8b8d97;
+
+$cm-serif:         inherit;
+$cm-sans:          inherit;
+
+$cm-radius-sm:     6px;
+$cm-radius:        10px;
+$cm-radius-lg:     14px;
+
+$cm-shadow:        0 1px 2px rgba(15, 23, 42, .05), 0 8px 24px rgba(15, 23, 42, .04);
+$cm-shadow-hover:  0 2px 4px rgba(15, 23, 42, .08), 0 14px 32px rgba(15, 23, 42, .09);
+$cm-transition:    180ms ease;
+
+// ============================================================
+// SCOPE: solo vistas de facturación / cuentas por cobro
+// ============================================================
+.o_caramia_app {
+    .o_cam_facturacion_list,
+    .o_caramia_cxc_form {
+
+        // ============================================================
+        // FONDO DE PÁGINA
+        // ============================================================
+        .o_content {
+            background: $cm-bg;
+        }
+
+        // ============================================================
+        // CONTROL PANEL
+        // ============================================================
+        .o_control_panel {
+            background: $cm-bg;
+            border-bottom: 1px solid $cm-border;
+            padding: .45rem 1.5rem 0;
+
+            .o_cp_bottom,
+            .o_cp_top {
+                background: transparent;
+            }
+
+            .o_searchview {
+                border: 1px solid $cm-border;
+                border-radius: $cm-radius-sm;
+                background: $cm-surface;
+                box-shadow: none;
+            }
+
+            .o_searchview_facet {
+                border-radius: $cm-radius-sm;
+                background: $cm-surface-alt;
+            }
+
+            .o_searchview_dropdown_toggler {
+                border-color: $cm-border;
+                background: $cm-surface;
+            }
+
+            .o_cp_switch_buttons {
+                gap: .25rem;
+
+                .o_switch_view {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 2.25rem;
+                    min-height: 2rem;
+                    padding: .25rem .55rem;
+                    border: 1px solid $cm-border;
+                    border-radius: $cm-radius-sm;
+                    background: $cm-surface;
+                    color: $cm-navy;
+                    transition: background $cm-transition, color $cm-transition, border-color $cm-transition;
+
+                    &:hover {
+                        border-color: $cm-navy;
+                        color: $cm-navy;
+                    }
+
+                    &.active {
+                        background: $cm-navy !important;
+                        border-color: $cm-navy !important;
+                        color: #fff !important;
+                    }
+                }
+            }
+        }
+
+        // Botón Nuevo dorado
+        .o_list_button_add,
+        .o-kanban-button-new {
+            border-color: $cm-gold-dark;
+            background: $cm-gold-dark;
+            color: #fff;
+            font-family: $cm-sans;
+            font-weight: 600;
+
+            &:hover {
+                background: darken($cm-gold-dark, 7%);
+                border-color: darken($cm-gold-dark, 7%);
+                color: #fff;
+            }
+        }
+
+        // ============================================================
+        // VISTA LISTA
+        // ============================================================
+        .o_list_renderer {
+            padding: .35rem 1.5rem 1.5rem;
+            background: $cm-bg;
+        }
+
+        .o_list_table {
+            overflow: hidden;
+            border: 1px solid $cm-border;
+            border-radius: $cm-radius;
+            background: $cm-surface;
+        }
+
+        .o_list_table thead th {
+            border-bottom: 1px solid $cm-border;
+            background: $cm-surface-alt;
+            color: $cm-muted;
+            font-family: $cm-sans;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .o_list_table tbody tr {
+            transition: background $cm-transition;
+
+            &:hover {
+                background: #fbfaf7;
+            }
+        }
+
+        .o_data_cell {
+            border-color: $cm-border;
+            color: $cm-text;
+            font-family: $cm-sans;
+            font-size: .78rem;
+        }
+
+        .o_data_cell[name="name"],
+        .o_data_cell[name="name_cliente"] {
+            color: $cm-gold-dark;
+            font-weight: 700;
+            letter-spacing: .03em;
+        }
+
+        // ============================================================
+        // BADGES
+        // ============================================================
+        .o_field_badge {
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            font-family: $cm-sans;
+            font-size: .65rem;
+            font-weight: 700;
+        }
+
+        .o_field_badge.text-bg-info {
+            background: #ece8df !important;
+            color: $cm-muted !important;
+        }
+
+        .o_field_badge.text-bg-warning {
+            background: rgba($cm-gold, .14) !important;
+            color: $cm-gold-dark !important;
+        }
+
+        .o_field_badge.text-bg-success {
+            background: rgba($cm-green, .12) !important;
+            color: $cm-green !important;
+        }
+
+        .o_field_badge.text-bg-danger {
+            background: rgba($cm-red, .11) !important;
+            color: $cm-red !important;
+        }
+
+        // ============================================================
+        // PROGRESS BAR
+        // ============================================================
+        .o_progressbar {
+            gap: .4rem;
+            margin-top: .2rem;
+
+            .o_progress {
+                height: 6px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: #ece8df;
+            }
+
+            .o_progress > div {
+                border-radius: inherit;
+                background: $cm-gold !important;
+            }
+
+            .o_progressbar_value {
+                font-family: $cm-sans;
+                font-size: .65rem;
+                color: $cm-muted;
+            }
+        }
+
+        // ============================================================
+        // FORMULARIO CUENTA DE COBRO
+        // ============================================================
+        .o_form_sheet_bg {
+            background: $cm-bg;
+        }
+
+        .oe_title h1 {
+            font-family: $cm-serif;
+            font-weight: 600;
+            color: $cm-navy;
+        }
+
+        .o_group {
+            border: 1px solid $cm-border;
+            border-radius: $cm-radius;
+            background: $cm-surface;
+            padding: .75rem 1rem;
+            box-shadow: $cm-shadow;
+            margin-bottom: 1rem;
+        }
+
+        .o_group > .o_form_label,
+        .o_group .o_form_label {
+            color: $cm-muted;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .o_form_view .o_form_input,
+        .o_form_view .o_input {
+            border-color: $cm-border;
+            border-radius: $cm-radius-sm;
+
+            &:focus {
+                border-color: $cm-gold;
+                box-shadow: 0 0 0 2px rgba($cm-gold, .15);
+            }
+        }
+
+        .btn.oe_highlight {
+            background: $cm-gold-dark;
+            border-color: $cm-gold-dark;
+            color: #fff;
+            font-weight: 600;
+
+            &:hover {
+                background: darken($cm-gold-dark, 7%);
+                border-color: darken($cm-gold-dark, 7%);
+                color: #fff;
+            }
+        }
+
+        .o_notebook .nav-link {
+            font-weight: 600;
+            color: $cm-muted;
+
+            &:hover {
+                color: $cm-navy;
+                transform: translateY(-1px);
+            }
+
+            &.active {
+                color: $cm-navy;
+                border-bottom-color: $cm-gold;
+            }
+        }
+
+        .o_field_monetary, .fw-bold {
+            color: $cm-navy;
+        }
+    }
+}
+
+// ============================================================
+// ANIMACIONES REDUCED MOTION
+// ============================================================
+@media (prefers-reduced-motion: reduce) {
+    .o_caramia_app .o_cam_facturacion_list .o_list_table tbody tr,
+    .o_caramia_app .o_caramia_cxc_form .o_notebook .nav-link,
+    .o_caramia_app .o_switch_view,
+    .caramia-card {
+        transition: none !important;
+    }
+
+    .o_caramia_app .o_list_table tbody tr:hover {
+        transform: none;
+    }
+}

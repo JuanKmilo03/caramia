@@ -5,7 +5,7 @@
         <field name="name">cara.mia.cuenta.cobro.form</field>
         <field name="model">cara.mia.cuenta.cobro</field>
         <field name="arch" type="xml">
-            <form string="Cuenta de Cobro" create="0">
+            <form string="Cuenta de Cobro" create="0" class="o_caramia_cxc_form">
                 <header>
                     <button name="action_registrar_pago" string="Registrar Abono / Pago"
                         type="object"
@@ -13,6 +13,10 @@
                     <button name="action_anular" string="Anular Cuenta" type="object"
                         class="btn-danger"
                         invisible="estado not in ('vigente', 'vencida')" />
+                    <button name="action_enviar_recordatorio_whatsapp"
+                        string="Recordatorio WhatsApp" type="object"
+                        icon="fa-whatsapp"
+                        invisible="estado not in ('vigente', 'vencida') or saldo_pendiente &lt;= 0" />
                     <field name="estado" widget="statusbar"
                         statusbar_visible="vigente,vencida,saldada" />
                 </header>
@@ -65,6 +69,11 @@
                         <field name="fecha_anulacion" />
                         <field name="usuario_anulacion_id" />
                     </group>
+                    <group string="Recordatorio WhatsApp"
+                        invisible="estado not in ('vigente', 'vencida')">
+                        <field name="fecha_recordatorio_wa" />
+                        <field name="recordatorio_wa_estado" />
+                    </group>
                     <notebook>
                         <page string="Pagos y Abonos">
                             <field name="pago_ids" readonly="1">
@@ -94,7 +103,8 @@
         <field name="name">cara.mia.cuenta.cobro.list</field>
         <field name="model">cara.mia.cuenta.cobro</field>
         <field name="arch" type="xml">
-            <list string="Cuentas por Cobrar" limit="1000" create="0"
+            <list string="Cuentas por Cobrar" class="o_cam_facturacion_list caramia_facturacion_list"
+                limit="1000" create="0"
                 decoration-danger="estado == 'vencida'" decoration-warning="alerta_cobro">
                 <field name="name" />
                 <field name="cliente_id" />
@@ -106,6 +116,7 @@
                 <field name="saldo_pendiente" sum="Saldo pendiente" widget="monetary"
                     decoration-bf="1" />
                 <field name="dias_sin_abono" optional="show" />
+                <field name="fecha_recordatorio_wa" optional="hide" />
                 <field name="alerta_cobro" column_invisible="1" />
                 <field name="estado" widget="badge" decoration-danger="estado == 'vencida'"
                     decoration-info="estado == 'vigente'" />
@@ -114,11 +125,54 @@
         </field>
     </record>
 
+    <record id="view_cuenta_cobro_kanban" model="ir.ui.view">
+        <field name="name">cara.mia.cuenta.cobro.kanban</field>
+        <field name="model">cara.mia.cuenta.cobro</field>
+        <field name="arch" type="xml">
+            <kanban class="caramia_facturacion_kanban"
+                    default_group_by="estado"
+                    group_create="false"
+                    groups_draggable="false"
+                    records_draggable="true"
+                    quick_create="false"
+                    limit="30">
+                <field name="name"/>
+                <field name="cliente_id"/>
+                <field name="saldo_pendiente"/>
+                <field name="fecha_vencimiento"/>
+                <field name="estado"/>
+                <field name="alerta_cobro"/>
+                <field name="currency_id" invisible="1"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div class="caramia-card">
+                            <div class="caramia-card__top">
+                                <span class="caramia-card__code" t-out="record.name.value"/>
+                                <span t-if="record.alerta_cobro.raw_value" class="caramia-pill">
+                                    Sin abonos
+                                </span>
+                            </div>
+                            <div class="caramia-card__client" t-out="record.cliente_id.value"/>
+                            <div class="caramia-card__ref" t-out="record.saldo_pendiente.value"/>
+                            <div class="caramia-card__foot">
+                                <span class="caramia-card__pairs">
+                                    <span class="caramia-card__date" t-out="record.fecha_vencimiento.value"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="view_cuenta_cobro_historial_list" model="ir.ui.view">
         <field name="name">cara.mia.cuenta.cobro.historial.list</field>
         <field name="model">cara.mia.cuenta.cobro</field>
         <field name="arch" type="xml">
-            <list string="Historial de Pagos" limit="1000" create="0"
+            <list string="Historial de Pagos" class="o_cam_facturacion_list caramia_facturacion_list"
+                limit="1000" create="0"
                 decoration-muted="estado == 'anulada'">
                 <field name="name" />
                 <field name="cliente_id" />
@@ -198,7 +252,8 @@
         <field name="name">cara.mia.cliente.cartera.list</field>
         <field name="model">cara.mia.cliente</field>
         <field name="arch" type="xml">
-            <list string="Saldos por Cliente" js_class="cartera_list"
+            <list string="Saldos por Cliente" class="o_cam_facturacion_list caramia_facturacion_list"
+                js_class="cartera_list"
                 create="0" delete="0" import="0" default_order="nombre_cliente">
                 <field name="cliente_id" string="ID Cliente" />
                 <field name="nombre_cliente" string="Cliente" />
@@ -315,9 +370,15 @@
     <record id="action_cuentas_por_cobrar" model="ir.actions.act_window">
         <field name="name">Lista General de Cobros</field>
         <field name="res_model">cara.mia.cuenta.cobro</field>
-        <field name="view_mode">list,pivot,form</field>
+        <field name="view_mode">kanban,list,pivot,form</field>
         <field name="domain">[('estado', 'in', ('vigente', 'vencida'))]</field>
         <field name="search_view_id" ref="view_cuenta_cobro_search" />
+        <field name="view_ids"
+            eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_cuenta_cobro_kanban')}),
+        (0, 0, {'view_mode': 'list', 'view_id': ref('view_cuenta_cobro_list')}),
+        (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_cuenta_cobro_pivot')}),
+        (0, 0, {'view_mode': 'form', 'view_id': ref('view_cuenta_cobro_form')})]" />
     </record>
 
     <record id="action_historial_pagos" model="ir.actions.act_window">
@@ -348,8 +409,5 @@
         parent="menu_cara_mia_cobros" action="action_cuentas_por_cobrar" sequence="20" />
     <menuitem id="menu_historial_pagos" name="Historial de Pagos"
         parent="menu_cara_mia_cobros" action="action_historial_pagos" sequence="30" />
-    <menuitem id="menu_caramia_whatsapp_wizard" name="Recordatorios"
-        parent="menu_cara_mia_cobros" action="caramia_wsp.action_cara_mia_whatsapp_wizard"
-        sequence="40" />
 
 </odoo>

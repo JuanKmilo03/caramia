@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ====================================================================
+         Plantilla del componente de encabezado con pestañas (OWL).
+         Se registra como template global; el componente se monta desde JS
+         debajo del ControlPanel. No hay herencias QWeb aquí para evitar
+         errores de parsing en la carga de assets.
+         ==================================================================== -->
+    <template id="caramia_nav.HeaderTabs" name="Cara Mia · Encabezado con pestañas">
+        <t t-name="caramia_nav.HeaderTabs">
+            <header t-if="state.mode" class="o-caramia-header" role="banner">
+                <div class="o-caramia-header__content">
+                    <h1 class="o-caramia-header__title" t-esc="state.app?.name || ''"></h1>
+                    <p t-if="state.descripcion" class="o-caramia-header__description" t-esc="state.descripcion"></p>
+                </div>
+                <div class="o-caramia-header__actions">
+                    <button
+                        t-if="state.botonEtiqueta"
+                        class="o-caramia-header__button"
+                        t-on-click="onMainButtonClick"
+                        t-esc="state.botonEtiqueta"
+                    ></button>
+                </div>
+            </header>
+
+            <nav
+                t-if="state.mode and state.sections.length > 1"
+                class="o-caramia-tabs"
+                role="tablist"
+                aria-label="Secciones de la app"
+            >
+                <t t-foreach="state.sections" t-as="section" t-key="section.id">
+                    <button
+                        t-attf-class="o-caramia-tab {{ section.id === state.activeSectionId ? 'is-active' : '' }}"
+                        t-att-id="'caramia-tab-' + section.id"
+                        role="tab"
+                        t-att-aria-selected="section.id === state.activeSectionId"
+                        t-on-click="(ev) => onSectionClick(ev, section)"
+                        t-esc="section.name"
+                    ></button>
+                </t>
+            </nav>
+        </t>
+    </template>
+</odoo>

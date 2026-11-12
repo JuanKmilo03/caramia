@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <!-- ====================================================================
+         Lista horizontal de apps Caramia en la navbar.
+         Se inserta antes de .o_navbar_breadcrumbs (justo después del brand).
+         ==================================================================== -->
+    <t t-name="caramia_nav.AppSwitcher">
+        <nav
+            t-if="isCaramia"
+            class="o-caramia-apps"
+            aria-label="Aplicaciones Cara Mia"
+        >
+            <a
+                t-foreach="caramiaApps"
+                t-as="app"
+                t-key="app.id"
+                t-attf-class="o-caramia-app {{ app.id === currentAppId ? 'is-active' : '' }}"
+                t-att-href="appHref(app)"
+                t-att-aria-current="app.id === currentAppId ? 'page' : undefined"
+                t-on-click="(ev) => this.onAppClick(ev, app)"
+                t-esc="appLabel(app)"
+            />
+        </nav>
+    </t>
+
+    <!-- ====================================================================
+         Encabezado de página: título grande + descripción + botón, y las
+         pestañas de sección dentro de la misma tarjeta, debajo del título.
+         Se inserta dentro de web.ControlPanel, después de la fila principal
+         (migas de pan + buscador + Filtros/Agrupar/Favoritos).
+         ==================================================================== -->
+    <t t-name="caramia_nav.HeaderTabs">
+        <header
+            t-if="state.mode and !env.inDialog"
+            class="o-caramia-header"
+            role="banner"
+        >
+            <div class="o-caramia-header__top">
+                <div class="o-caramia-header__content">
+                    <h1 class="o-caramia-header__title" t-esc="state.appName" />
+                    <p
+                        t-if="state.descripcion"
+                        class="o-caramia-header__description"
+                        t-esc="state.descripcion"
+                    />
+                </div>
+                <div class="o-caramia-header__actions">
+                    <button
+                        t-if="state.botonEtiqueta and state.botonAccion"
+                        type="button"
+                        class="o-caramia-header__button"
+                        t-on-click="onMainButtonClick"
+                        t-esc="state.botonEtiqueta"
+                    />
+                </div>
+            </div>
+
+            <nav
+                t-if="state.sections.length > 1"
+                class="o-caramia-tabs"
+                role="tablist"
+                aria-label="Secciones de la aplicación"
+            >
+                <div
+                    t-foreach="state.sections"
+                    t-as="section"
+                    t-key="section.id"
+                    class="o-caramia-tabwrap"
+                    role="presentation"
+                >
+                    <button
+                        t-attf-class="o-caramia-tab {{ section.id === state.activeSectionId ? 'is-active' : '' }}"
+                        t-att-id="'caramia-tab-' + section.id"
+                        type="button"
+                        role="tab"
+                        t-att-aria-selected="section.id === state.activeSectionId"
+                        t-on-click="(ev) => this.onSectionClick(ev, section)"
+                        t-on-keydown="onTabKeydown"
+                    >
+                        <span t-esc="section.name" />
+                    </button>
+
+                    <!-- Nivel 3: la pestaña navega a la sección y el caret abre
+                         un Dropdown nativo de Odoo (portal + accesibilidad). -->
+                    <Dropdown
+                        t-if="section.children.length"
+                        menuClass="'o-caramia-tab__menu'"
+                    >
+                        <button
+                            type="button"
+                            class="o-caramia-tab__caret"
+                            aria-haspopup="true"
+                            t-att-aria-label="'Más opciones de ' + section.name"
+                        >
+                            ▾
+                        </button>
+                        <t t-set-slot="content">
+                            <t t-call="caramia_nav.TabMenuItems">
+                                <t t-set="items" t-value="section.children" />
+                                <t t-set="depth" t-value="0" />
+                            </t>
+                        </t>
+                    </Dropdown>
+                </div>
+            </nav>
+        </header>
+    </t>
+
+    <!-- Items recursivos del desplegable de nivel 3+ -->
+    <t t-name="caramia_nav.TabMenuItems">
+        <t t-foreach="items" t-as="item" t-key="item.id">
+            <div
+                t-if="item.children.length"
+                class="dropdown-header o-caramia-tab__group"
+                t-att-style="'padding-left:' + (depth * 12) + 'px'"
+                t-esc="item.name"
+            />
+            <t t-if="item.children.length">
+                <t t-call="caramia_nav.TabMenuItems">
+                    <t t-set="items" t-value="item.children" />
+                    <t t-set="depth" t-value="depth + 1" />
+                </t>
+            </t>
+            <DropdownItem
+                t-if="!item.children.length"
+                class="'o-caramia-tab__menu-item'"
+                onSelected="() => this.onMenuSelected(item)"
+                attrs="{ href: menuHref(item) }"
+            >
+                <span t-esc="item.name" />
+            </DropdownItem>
+        </t>
+    </t>
+
+    <!-- ====================================================================
+         Navbar: insertar el switcher de apps Caramia justo antes de
+         .o_navbar_breadcrumbs (después del brand). No se usa
+         hasclass('o_menu_brand') porque el brand tiene una clase dinámica.
+         ==================================================================== -->
+    <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
+            <CaramiaAppSwitcher apps="menuService.getApps()" currentApp="currentApp" />
+        </xpath>
+    </t>
+
+    <!-- ====================================================================
+         Ocultar las secciones de la navbar (incluidos desplegables) en las
+         apps Caramia. El método isCaramiaApp() se añade en app_switcher.
+         ==================================================================== -->
+    <t t-inherit="web.NavBar.SectionsMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_menu_sections')]" position="attributes">
+            <attribute name="t-if">!this.isCaramiaApp()</attribute>
+        </xpath>
+    </t>
+
+    <!-- ====================================================================
+         Insertar HeaderTabs encima de la fila principal del ControlPanel
+         (migas de pan + buscador + Filtros/Agrupar/Favoritos), de modo que
+         el encabezado quede arriba y el ControlPanel justo debajo de las
+         pestañas.
+         ==================================================================== -->
+    <t t-inherit="web.ControlPanel" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('o_control_panel_main')]" position="before">
+            <HeaderTabs />
+        </xpath>
+    </t>
+
+</templates>

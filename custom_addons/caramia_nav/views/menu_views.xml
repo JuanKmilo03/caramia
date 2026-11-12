@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    Campos x_caramia_* en ir.ui.menu para configurar el encabezado sin tocar JS:
+      * x_caramia_descripcion    : descripción del encabezado
+      * x_caramia_boton_etiqueta : etiqueta del botón principal
+      * x_caramia_boton_accion   : acción (XML ID), ID numérico o URL del botón
+
+    Se editan desde:
+      Ajustes > Técnico > Interfaz de Usuario > Elementos del menú
+      (acción base.grant_menu_access).
+
+    La vista base es base.edit_menu_access, confirmada en Odoo 18.0:
+      odoo/addons/base/views/ir_ui_menu_views.xml
+    -->
+    <record id="view_ir_ui_menu_caramia_form" model="ir.ui.view">
+        <field name="name">ir.ui.menu form (Cara Mia navegación)</field>
+        <field name="model">ir.ui.menu</field>
+        <field name="inherit_id" ref="base.edit_menu_access"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group name="grupo_caramia_nav" string="Cara Mia · Navegación">
+                    <field name="x_caramia_descripcion"/>
+                    <field name="x_caramia_boton_etiqueta"/>
+                    <field name="x_caramia_boton_accion"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

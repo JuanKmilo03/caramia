@@ -9,14 +9,13 @@
         'data/production_cron.xml',
         'views/production_tracking_views.xml',
         'views/production_tracking_dashboard.xml',
+        'views/dashboard_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'caramia_tracking/static/src/js/tracking_dashboard.js',
             'caramia_tracking/static/src/xml/tracking_dashboard.xml',
             'caramia_tracking/static/src/scss/tracking_dashboard.scss',
-            'caramia_tracking/static/src/js/dashboard_inicio.js',
-            'caramia_tracking/static/src/xml/dashboard_inicio.xml',
         ],
     },
     'installable': True,

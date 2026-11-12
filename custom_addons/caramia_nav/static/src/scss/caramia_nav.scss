@@ -1,0 +1,416 @@
+/* Fuente serif de marca, servida localmente (sin @import: Odoo concatena
+   los SCSS y un @import dejaría de estar al inicio del bundle). */
+@font-face {
+    font-family: "Source Serif 4";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/caramia_nav/static/src/fonts/source-serif-4-latin.woff2") format("woff2");
+}
+
+/* ==========================================================================
+   Cara Mia · Navegación y encabezado de apps
+   Paleta en variables SCSS (hex) para cambiar la paleta fácilmente.
+   Sin :has(). Selectores basados en el DOM real de Odoo 18.
+   ========================================================================== */
+
+/* ---------- Paleta ---------- */
+$cm-navy: #0f172a;
+$cm-navy-soft: #1e293b;
+$cm-gold: #b88a1e;
+$cm-gold-hover: #9a7218;
+$cm-gold-soft: rgba(184, 138, 30, 0.12);
+$cm-bg: #f4f2ec;          /* gris cálido muy claro */
+$cm-panel: #ffffff;
+$cm-text: #334155;
+$cm-text-muted: #64748b;
+$cm-text-inverse: #ffffff;
+$cm-border: #e4e0d8;
+$cm-shadow: rgba(15, 23, 42, 0.12);
+$cm-transition: 180ms;
+
+/* ---------- Tipografía ---------- */
+$cm-font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+$cm-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+/* ==========================================================================
+   Todo el bloque se activa solo cuando <body> tiene .o-caramia-mode.
+   El JS lo añade únicamente si el menú raíz empieza por "CARAMIA_".
+   Las demás apps de Odoo no se ven afectadas.
+   ========================================================================== */
+body.o-caramia-mode {
+    background-color: $cm-bg;
+
+    /* ======================================================================
+       Navbar: se ocultan el brand por defecto y las secciones (nivel 2),
+       porque el nombre de la app y las secciones viven en el encabezado.
+       Se conserva el estilo por defecto de Odoo (sin colores propios).
+       ====================================================================== */
+    .o_navbar .o_menu_brand {
+        display: none !important;
+    }
+
+    /* Las secciones ya no viven en la navbar: están en las pestañas. */
+    .o_navbar .o_menu_sections {
+        display: none !important;
+    }
+
+    /* ======================================================================
+       App switcher horizontal (solo apps CARAMIA_)
+       ====================================================================== */
+    .o-caramia-apps {
+        display: flex;
+        align-items: stretch;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 55vw;
+        height: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+    }
+
+    .o-caramia-apps::-webkit-scrollbar {
+        display: none;
+    }
+
+    .o-caramia-app {
+        display: inline-flex;
+        align-items: center;
+        flex: 0 0 auto;
+        padding: 0 0.9rem;
+        color: $cm-text;
+        font-family: $cm-font-sans;
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+        transition: color $cm-transition ease,
+            background-color $cm-transition ease,
+            border-color $cm-transition ease;
+    }
+
+    .o-caramia-app:hover,
+    .o-caramia-app:focus {
+        color: $cm-navy;
+        background-color: $cm-gold-soft;
+        text-decoration: none;
+    }
+
+    .o-caramia-app:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: -2px;
+    }
+
+    .o-caramia-app.is-active {
+        color: $cm-navy;
+        font-weight: 600;
+        border-bottom-color: $cm-gold;
+    }
+
+    /* ======================================================================
+       Encabezado de página (debajo del control panel)
+       ====================================================================== */
+    .o-caramia-header {
+        display: flex;
+        flex-direction: column;
+        background-color: $cm-panel;
+    }
+
+    .o-caramia-header__top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.1rem 1.25rem;
+    }
+
+    .o-caramia-header__content {
+        min-width: 0;
+    }
+
+    .o-caramia-header__title {
+        margin: 0;
+        color: $cm-navy;
+        font-family: $cm-font-serif;
+        font-size: clamp(1.65rem, 2.4vw, 2.15rem);
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+    }
+
+    .o-caramia-header__description {
+        max-width: 70ch;
+        margin: 0.4rem 0 0;
+        color: $cm-text-muted;
+        font-family: $cm-font-sans;
+        font-size: 0.95rem;
+        font-weight: 400;
+        line-height: 1.5;
+    }
+
+    .o-caramia-header__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-left: auto;
+    }
+
+    .o-caramia-header__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.55rem 1.1rem;
+        color: $cm-navy;
+        background-color: $cm-gold;
+        border: 1px solid $cm-gold;
+        border-radius: 0.5rem;
+        font-family: $cm-font-sans;
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.2;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color $cm-transition ease,
+            border-color $cm-transition ease, color $cm-transition ease,
+            transform $cm-transition ease;
+    }
+
+    .o-caramia-header__button:hover {
+        color: $cm-text-inverse;
+        background-color: $cm-gold-hover;
+        border-color: $cm-gold-hover;
+        transform: translateY(-1px);
+    }
+
+    .o-caramia-header__button:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: 2px;
+    }
+
+    /* ======================================================================
+       Pestañas de sección (hijos directos del menú raíz)
+       ====================================================================== */
+    .o-caramia-tabs {
+        display: flex;
+        align-items: stretch;
+        gap: 0.15rem;
+        padding: 0 0.75rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-top: 1px solid $cm-border;
+        background-color: rgba(244, 242, 236, 0.45);
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .o-caramia-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .o-caramia-tabs::-webkit-scrollbar-thumb {
+        background-color: rgba(15, 23, 42, 0.15);
+        border-radius: 3px;
+    }
+
+    .o-caramia-tabwrap {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        flex: 0 0 auto;
+    }
+
+    .o-caramia-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.68rem 1rem;
+        color: $cm-text-muted;
+        background-color: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        font-family: $cm-font-sans;
+        font-size: 0.94rem;
+        font-weight: 500;
+        line-height: 1.2;
+        white-space: nowrap;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color $cm-transition ease,
+            background-color $cm-transition ease,
+            border-color $cm-transition ease;
+    }
+
+    .o-caramia-tab:hover {
+        color: $cm-navy;
+        background-color: rgba(15, 23, 42, 0.04);
+        border-bottom-color: rgba(184, 138, 30, 0.35);
+    }
+
+    .o-caramia-tab:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: -2px;
+        border-bottom-color: $cm-gold;
+    }
+
+    .o-caramia-tab.is-active {
+        color: $cm-navy;
+        font-weight: 600;
+        background-color: $cm-gold-soft;
+        border-bottom-color: $cm-gold;
+    }
+
+    /* Caret del desplegable de nivel 3. Odoo añade .dropdown-toggle
+       al trigger; se anula el caret nativo para no duplicarlo. */
+    .o-caramia-tab__caret {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.45rem;
+        color: $cm-text-muted;
+        background-color: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        font-size: 0.7rem;
+        line-height: 1;
+        cursor: pointer;
+        transition: color $cm-transition ease,
+            background-color $cm-transition ease,
+            border-color $cm-transition ease;
+    }
+
+    .o-caramia-tab__caret::after {
+        display: none !important;
+        content: none !important;
+        border: 0 !important;
+    }
+
+    .o-caramia-tab__caret:hover,
+    .o-caramia-tab__caret[aria-expanded="true"] {
+        color: $cm-gold;
+        background-color: rgba(15, 23, 42, 0.04);
+        border-bottom-color: $cm-gold;
+    }
+
+    .o-caramia-tab__caret:focus-visible {
+        outline: 2px solid $cm-gold;
+        outline-offset: -2px;
+    }
+
+    /* El menú del Dropdown se portaliza a <body>, por eso el selector
+       parte de body.o-caramia-mode y no de .o-caramia-tabs. */
+    .o-caramia-tab__menu {
+        min-width: 15rem;
+        padding: 0.35rem;
+        background-color: $cm-panel;
+        border: 1px solid $cm-border;
+        border-radius: 0.55rem;
+        box-shadow: 0 12px 32px $cm-shadow;
+    }
+
+    .o-caramia-tab__menu-item {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        color: $cm-text;
+        border-radius: 0.35rem;
+        font-family: $cm-font-sans;
+        font-size: 0.9rem;
+        line-height: 1.3;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: color $cm-transition ease,
+            background-color $cm-transition ease;
+    }
+
+    .o-caramia-tab__menu-item:hover,
+    .o-caramia-tab__menu-item:focus {
+        color: $cm-navy;
+        background-color: $cm-gold-soft;
+        text-decoration: none;
+    }
+
+    .o-caramia-tab__group {
+        padding-top: 0.55rem;
+        padding-bottom: 0.35rem;
+        color: $cm-text-muted;
+        font-family: $cm-font-sans;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    /* ======================================================================
+       Fondo de la zona de contenido (la lista/kanban conserva su estilo)
+       ====================================================================== */
+    .o_action_manager {
+        background-color: $cm-bg;
+    }
+
+    /* ======================================================================
+       Pantallas pequeñas: pestañas y apps con scroll horizontal
+       ====================================================================== */
+    @media (max-width: 767.98px) {
+        .o-caramia-apps {
+            max-width: 100%;
+        }
+
+        .o-caramia-app {
+            padding: 0 0.7rem;
+            font-size: 0.85rem;
+        }
+
+        .o-caramia-header__top {
+            padding: 1rem;
+        }
+
+        .o-caramia-header__title {
+            font-size: 1.45rem;
+        }
+
+        .o-caramia-header__actions {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .o-caramia-header__button {
+            width: 100%;
+        }
+
+        .o-caramia-tabs {
+            padding: 0;
+        }
+
+        .o-caramia-tab {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.88rem;
+        }
+    }
+
+    /* ======================================================================
+       Respeta prefers-reduced-motion
+       ====================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+        .o-caramia-app,
+        .o-caramia-header,
+        .o-caramia-header__button,
+        .o-caramia-tab,
+        .o-caramia-tab__caret,
+        .o-caramia-tab__menu-item {
+            transition-duration: 0.01ms !important;
+        }
+
+        .o-caramia-header__button:hover {
+            transform: none;
+        }
+
+        .o-caramia-tabs {
+            scroll-behavior: auto;
+        }
+    }
+}

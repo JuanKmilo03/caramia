@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    Campos x_caramia_* en ir.ui.menu para configurar, sin tocar JS:
+      * x_caramia_descripcion : descripción corta del encabezado
+      * x_caramia_boton_etiqueta : etiqueta del botón principal
+      * x_caramia_boton_accion : acción o URL del botón principal
+
+    ⚠ ESTE ARCHIVO NO SE AUTO-CARGA (ver __manifest__.py).
+    Para activarlo, confirma el external ID correcto de la vista de formulario
+    de ir.ui.menu en tu Odoo 18 y reemplaza "web.menu_form_view" por ese ID.
+
+    Cómo encontrar el ID correcto:
+      Ajustes > Técnico > Interfaz de Usuario > Vistas
+      Buscar modelo: ir.ui.menu, tipo: Formulario
+      Copiar el "ID Externo" (External ID) y pegarlo como valor de ref="...".
+
+    Ejemplo una vez conocido el ID (supongamos que es web.menu_form_view):
+        <field name="inherit_id" ref="web.menu_form_view"/>
+    -->
+    <record id="view_ir_ui_menu_caramia_form" model="ir.ui.view">
+        <field name="name">ir.ui.menu form (Cara Mia campos)</field>
+        <field name="model">ir.ui.menu</field>
+        <!-- ⚠ CAMBIAR "web.menu_form_view" por el external ID real de tu build -->
+        <field name="inherit_id" ref="web.menu_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group name="grupo_caramia_nav" string="Cara Mia · Navegación">
+                    <field name="x_caramia_descripcion"/>
+                    <field name="x_caramia_boton_etiqueta"/>
+                    <field name="x_caramia_boton_accion"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
