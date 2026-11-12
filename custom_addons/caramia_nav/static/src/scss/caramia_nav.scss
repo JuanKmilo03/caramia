@@ -15,12 +15,12 @@
    ========================================================================== */
 
 /* ---------- Paleta ---------- */
-$cm-navy: #0f172a;
-$cm-navy-soft: #1e293b;
-$cm-gold: #b88a1e;
-$cm-gold-hover: #9a7218;
-$cm-gold-soft: rgba(184, 138, 30, 0.12);
-$cm-bg: #f4f2ec;          /* gris cálido muy claro */
+$cm-navy: #14161c;
+$cm-navy-soft: #1c1f28;
+$cm-gold: #ebad33;
+$cm-gold-hover: #c98f2e;
+$cm-gold-soft: rgba(235, 173, 51, 0.12);
+$cm-bg: #f3f0e7;          /* warm paper, igual que el login */
 $cm-panel: #ffffff;
 $cm-text: #334155;
 $cm-text-muted: #64748b;
@@ -114,10 +114,19 @@ body.o-caramia-mode {
     /* ======================================================================
        Encabezado de página (debajo del control panel)
        ====================================================================== */
+    /* El control panel y el área de contenido comparten el fondo de la página
+       para que no haya bandas de color distintas. */
+    .o_control_panel,
+    .o_content {
+        background-color: $cm-bg;
+    }
+
     .o-caramia-header {
         display: flex;
         flex-direction: column;
-        background-color: $cm-panel;
+        background-color: $cm-bg;
+        margin-left: -1rem;
+        margin-right: -1rem;
     }
 
     .o-caramia-header__top {
@@ -204,7 +213,7 @@ body.o-caramia-mode {
         overflow-x: auto;
         overflow-y: hidden;
         border-top: 1px solid $cm-border;
-        background-color: rgba(244, 242, 236, 0.45);
+        background-color: $cm-bg;
         scrollbar-width: thin;
         -webkit-overflow-scrolling: touch;
     }

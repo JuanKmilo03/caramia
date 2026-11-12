@@ -134,19 +134,9 @@
     </t>
 
     <!-- ====================================================================
-         Navbar: insertar el switcher de apps Caramia justo antes de
-         .o_navbar_breadcrumbs (después del brand). No se usa
-         hasclass('o_menu_brand') porque el brand tiene una clase dinámica.
-         ==================================================================== -->
-    <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
-        <xpath expr="//div[hasclass('o_navbar_breadcrumbs')]" position="before">
-            <CaramiaAppSwitcher apps="menuService.getApps()" currentApp="currentApp" />
-        </xpath>
-    </t>
-
-    <!-- ====================================================================
          Ocultar las secciones de la navbar (incluidos desplegables) en las
-         apps Caramia. El método isCaramiaApp() se añade en app_switcher.
+         apps Caramia: viven en las pestañas del encabezado.
+         Se conserva el menú de apps estándar (web_responsive / OCA).
          ==================================================================== -->
     <t t-inherit="web.NavBar.SectionsMenu" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o_menu_sections')]" position="attributes">
