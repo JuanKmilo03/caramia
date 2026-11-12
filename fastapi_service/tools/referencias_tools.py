@@ -19,27 +19,42 @@ HERRAMIENTAS_REFERENCIAS = [
         "type": "function",
         "function": {
             "name": "consultar_referencia",
-            "description": "Busca una referencia por su nombre y devuelve sus costos de producción, estado y precio sugerido.",
+            "description": "Busca una referencia por su nombre. Si no se indica nombre, devuelve todas las referencias existentes.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_modelo": {"type": "string", "description": "Nombre de la referencia a buscar"}
+                    "nombre_modelo": {"type": "string", "description": "Nombre de la referencia a buscar. Omitir para listar todas las referencias."}
                 },
-                "required": ["nombre_modelo"]
+                "required": []
             }
         }
     },
     {
         "type": "function",
         "function": {
-            "name": "editar_estado_referencia",
-            "description": "Cambia el estado de una referencia (activo/inactivo) o actualiza su precio sugerido.",
+            "name": "editar_referencia",
+            "description": "Edita una referencia. IMPORTANTE: Para cambiar las labores al 'precio sugerido 1' o 'precio sugerido 2', SOLO envía el parámetro 'tipo_tarifa_header' como '1' o '2', Odoo hará el resto automáticamente. NO preguntes por labores individuales a menos que el usuario pida precios 'manuales'.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "nombre_modelo": {"type": "string", "description": "Nombre de la referencia a editar"},
-                    "nuevo_estado": {"type": "string", "enum": ["activo", "inactivo"], "description": "Opcional. Activar o inactivar."},
-                    "nuevo_precio": {"type": "number", "description": "Opcional. Nuevo precio de venta sugerido."}
+                    "nombre_modelo": {
+                        "type": "string", 
+                        "description": "Nombre de la referencia a editar (ej: zapatico1)"
+                    },
+                    "tipo_tarifa_header": {
+                        "type": "string", 
+                        "enum": ["manual", "1", "2"], 
+                        "description": "Obligatorio si se cambian los precios de las labores. Usa '1' para sugerido 1, '2' para sugerido 2, o 'manual'. Al usar '1' o '2' NO necesitas enviar ni pedir los precios individuales de las labores."
+                    },
+                    "precio_venta_sugerido": {
+                        "type": "number", 
+                        "description": "Precio final de venta del zapato."
+                    },
+                    "nuevas_tarifas_labores": {
+                        "type": "object",
+                        "description": "SOLO usar si tipo_tarifa_header es 'manual'. Diccionario con los nombres de labor y sus precios. NUNCA lo pidas si el usuario quiere sugerido 1 o 2.",
+                        "additionalProperties": {"type": "number"}
+                    }
                 },
                 "required": ["nombre_modelo"]
             }
