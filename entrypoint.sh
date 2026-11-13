@@ -4,7 +4,7 @@ DB_PORT=${DB_PORT:-5432}
 DB_USER=${DB_USER:-caramia_db_user}
 DB_PASSWORD=${DB_PASSWORD:-$DB_PASSWORD}
 DB_NAME=${DB_NAME:-caramia_db}
-ADMIN_PASSWD=${ADMIN_PASSWD:-tu_clave_maestra_segura}
+ADMIN_PASSWD=${ADMIN_PASSWD:-admin}
 
 cat << EOF > /etc/odoo/odoo.conf
 [options]
