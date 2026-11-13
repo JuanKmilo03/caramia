@@ -51,10 +51,10 @@ body.o-caramia-mode {
         display: none !important;
     }
 
-    /* Las secciones ya no viven en la navbar: están en las pestañas. */
-    .o_navbar .o_menu_sections {
-        display: none !important;
-    }
+    /* Las secciones se ocultan en la navbar solo vía el template
+       (t-if="!this.isCaramiaApp()"). No se usa display:none aquí para
+       evitar que, si la clase .o-caramia-mode queda pegada, las apps
+       nativas de Odoo pierdan sus pestañas. */
 
     /* ======================================================================
        App switcher horizontal (solo apps CARAMIA_)
@@ -256,8 +256,8 @@ body.o-caramia-mode {
 
     .o-caramia-tab:hover {
         color: $cm-navy;
-        background-color: rgba(15, 23, 42, 0.04);
-        border-bottom-color: rgba(184, 138, 30, 0.35);
+        background-color: rgba(20, 22, 28, 0.04);
+        border-bottom-color: rgba(235, 173, 51, 0.35);
     }
 
     .o-caramia-tab:focus-visible {
@@ -269,7 +269,6 @@ body.o-caramia-mode {
     .o-caramia-tab.is-active {
         color: $cm-navy;
         font-weight: 600;
-        background-color: $cm-gold-soft;
         border-bottom-color: $cm-gold;
     }
 
@@ -279,17 +278,14 @@ body.o-caramia-mode {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0 0.45rem;
+        margin-left: 0.35rem;
         color: $cm-text-muted;
         background-color: transparent;
         border: 0;
-        border-bottom: 2px solid transparent;
         font-size: 0.7rem;
         line-height: 1;
         cursor: pointer;
-        transition: color $cm-transition ease,
-            background-color $cm-transition ease,
-            border-color $cm-transition ease;
+        transition: color $cm-transition ease;
     }
 
     .o-caramia-tab__caret::after {

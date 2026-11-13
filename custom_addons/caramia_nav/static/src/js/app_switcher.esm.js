@@ -72,7 +72,11 @@ export class CaramiaAppSwitcher extends Component {
 /* El template heredado de web.NavBar.SectionsMenu usa this.isCaramiaApp(). */
 patch(NavBar.prototype, {
     isCaramiaApp() {
-        return isCaramiaMenu(this.currentApp);
+        const caramia = isCaramiaMenu(this.currentApp);
+        /* Mantiene sincronizada la clase .o-caramia-mode en <body> con la
+           app activa, incluso si el componente invisible no se monta. */
+        document.body.classList.toggle("o-caramia-mode", caramia);
+        return caramia;
     },
 });
 

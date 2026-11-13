@@ -1,6 +1,6 @@
 {
     "name": "Cara Mia - Navegación y Encabezado de Apps",
-    "version": "18.0.1.0.6",
+    "version": "18.0.1.0.11",
     "category": "Web",
     "summary": "Navbar, encabezado de página y pestañas de sección personalizados para las apps de Caramia",
     "author": "Tu Equipo",

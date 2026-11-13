@@ -6,22 +6,7 @@
          Se inserta antes de .o_navbar_breadcrumbs (justo después del brand).
          ==================================================================== -->
     <t t-name="caramia_nav.AppSwitcher">
-        <nav
-            t-if="isCaramia"
-            class="o-caramia-apps"
-            aria-label="Aplicaciones Cara Mia"
-        >
-            <a
-                t-foreach="caramiaApps"
-                t-as="app"
-                t-key="app.id"
-                t-attf-class="o-caramia-app {{ app.id === currentAppId ? 'is-active' : '' }}"
-                t-att-href="appHref(app)"
-                t-att-aria-current="app.id === currentAppId ? 'page' : undefined"
-                t-on-click="(ev) => this.onAppClick(ev, app)"
-                t-esc="appLabel(app)"
-            />
-        </nav>
+        <!-- Componente invisible: solo mantiene .o-caramia-mode en <body>. -->
     </t>
 
     <!-- ====================================================================
@@ -68,40 +53,50 @@
                     t-key="section.id"
                     class="o-caramia-tabwrap"
                     role="presentation"
+                    t-on-mouseenter="() => this.onTabMouseEnter(section)"
+                    t-on-mouseleave="() => this.onTabMouseLeave()"
                 >
-                    <button
-                        t-attf-class="o-caramia-tab {{ section.id === state.activeSectionId ? 'is-active' : '' }}"
-                        t-att-id="'caramia-tab-' + section.id"
-                        type="button"
-                        role="tab"
-                        t-att-aria-selected="section.id === state.activeSectionId"
-                        t-on-click="(ev) => this.onSectionClick(ev, section)"
-                        t-on-keydown="onTabKeydown"
-                    >
-                        <span t-esc="section.name" />
-                    </button>
-
-                    <!-- Nivel 3: la pestaña navega a la sección y el caret abre
-                         un Dropdown nativo de Odoo (portal + accesibilidad). -->
-                    <Dropdown
-                        t-if="section.children.length"
-                        menuClass="'o-caramia-tab__menu'"
-                    >
-                        <button
-                            type="button"
-                            class="o-caramia-tab__caret"
-                            aria-haspopup="true"
-                            t-att-aria-label="'Más opciones de ' + section.name"
+                    <t t-if="section.children.length">
+                        <Dropdown
+                            state="dropdownState"
+                            manual="true"
+                            holdOnHover="true"
+                            menuClass="'o-caramia-tab__menu'"
+                            onOpened="() => this.onDropdownOpened()"
                         >
-                            ▾
-                        </button>
-                        <t t-set-slot="content">
-                            <t t-call="caramia_nav.TabMenuItems">
-                                <t t-set="items" t-value="section.children" />
-                                <t t-set="depth" t-value="0" />
+                            <button
+                                t-attf-class="o-caramia-tab {{ section.id === state.activeSectionId ? 'is-active' : '' }}"
+                                t-att-id="'caramia-tab-' + section.id"
+                                type="button"
+                                role="tab"
+                                t-att-aria-selected="section.id === state.activeSectionId"
+                                t-on-click="(ev) => this.onSectionClick(ev, section)"
+                                t-on-keydown="onTabKeydown"
+                            >
+                                <span t-esc="section.name" />
+                                <span class="o-caramia-tab__caret">▾</span>
+                            </button>
+                            <t t-set-slot="content">
+                                <t t-call="caramia_nav.TabMenuItems">
+                                    <t t-set="items" t-value="section.children" />
+                                    <t t-set="depth" t-value="0" />
+                                </t>
                             </t>
-                        </t>
-                    </Dropdown>
+                        </Dropdown>
+                    </t>
+                    <t t-else="">
+                        <button
+                            t-attf-class="o-caramia-tab {{ section.id === state.activeSectionId ? 'is-active' : '' }}"
+                            t-att-id="'caramia-tab-' + section.id"
+                            type="button"
+                            role="tab"
+                            t-att-aria-selected="section.id === state.activeSectionId"
+                            t-on-click="(ev) => this.onSectionClick(ev, section)"
+                            t-on-keydown="onTabKeydown"
+                        >
+                            <span t-esc="section.name" />
+                        </button>
+                    </t>
                 </div>
             </nav>
         </header>
@@ -136,7 +131,7 @@
     <!-- ====================================================================
          Ocultar las secciones de la navbar (incluidos desplegables) en las
          apps Caramia: viven en las pestañas del encabezado.
-         Se conserva el menú de apps estándar (web_responsive / OCA).
+         En apps nativas de Odoo las secciones se muestran normalmente.
          ==================================================================== -->
     <t t-inherit="web.NavBar.SectionsMenu" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o_menu_sections')]" position="attributes">

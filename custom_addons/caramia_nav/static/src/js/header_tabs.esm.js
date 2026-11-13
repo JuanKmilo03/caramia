@@ -18,6 +18,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { router } from "@web/core/browser/router";
 import { cleanMenuName, isCaramiaMenu, menuHref } from "@caramia_nav/js/utils.esm";
 
@@ -40,6 +41,8 @@ export class HeaderTabs extends Component {
             botonEtiqueta: "",
             botonAccion: "",
         });
+
+        this.dropdownState = useDropdownState();
 
         /* Refresca al navegar (cambio de acción) y al cambiar de app. */
         useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this._refresh());
@@ -206,6 +209,7 @@ export class HeaderTabs extends Component {
         }
         if (menu.actionID) {
             await this.menu.selectMenu(menu);
+            await this._refresh();
             return;
         }
         if (menu.actionPath) {
@@ -213,17 +217,57 @@ export class HeaderTabs extends Component {
         }
     }
 
-    /* Clic en una pestaña: navega si tiene acción; si solo agrupa, el caret
-       abre el desplegable nativo de Odoo. */
+    /* Clic en una pestaña: marca activa de inmediato (feedback visual) y
+       navega; el bus actualiza el estado real al terminar la navegación. */
     onSectionClick(ev, section) {
         ev.preventDefault();
         ev.stopPropagation();
+        if (section && section.id !== undefined) {
+            this.state.activeSectionId = section.id;
+        }
         this._navigate(section);
     }
 
     /* Clic en un hijo del desplegable de nivel 3+. */
     onMenuSelected(item) {
         this._navigate(item);
+    }
+
+    /* Hover: abre el desplegable al pasar el mouse y lo cierra al salir.
+       Se usa un retardo corto para permitir mover el cursor al menú. */
+    onTabMouseEnter(section) {
+        if (!section || !(section.children && section.children.length)) {
+            return;
+        }
+        clearTimeout(this._closeTimer);
+        this.dropdownState.open();
+    }
+
+    onTabMouseLeave() {
+        if (!this.dropdownState.isOpen) {
+            return;
+        }
+        clearTimeout(this._closeTimer);
+        this._closeTimer = setTimeout(() => {
+            const hovered = document.querySelector(".o-caramia-tab__menu:hover, .o_popover:hover");
+            if (hovered) {
+                return;
+            }
+            this.dropdownState.close();
+        }, 180);
+    }
+
+    onDropdownOpened() {
+        setTimeout(() => {
+            const pop = document.querySelector(".o-caramia-tab__menu, .o_popover");
+            if (pop && !pop._cmBound) {
+                pop._cmBound = true;
+                pop.addEventListener("mouseenter", () => clearTimeout(this._closeTimer));
+                pop.addEventListener("mouseleave", () => {
+                    this._closeTimer = setTimeout(() => this.dropdownState.close(), 150);
+                });
+            }
+        }, 0);
     }
 
     /* Teclado: flechas para moverse entre pestañas, Home/End. */

@@ -58,13 +58,13 @@
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button class="btn btn-secondary btn-sm"
                                                 t-att-class="chartPeriod === 'semana' ? 'active' : ''"
-                                                t-on-click="() => setChartPeriod('semana')">Sem</button>
+                                                t-on-click="() => this.setChartPeriod('semana')">Sem</button>
                                         <button class="btn btn-secondary btn-sm"
                                                 t-att-class="chartPeriod === 'mes' ? 'active' : ''"
-                                                t-on-click="() => setChartPeriod('mes')">Mes</button>
+                                                t-on-click="() => this.setChartPeriod('mes')">Mes</button>
                                         <button class="btn btn-secondary btn-sm"
                                                 t-att-class="chartPeriod === 'año' ? 'active' : ''"
-                                                t-on-click="() => setChartPeriod('año')">Año</button>
+                                                t-on-click="() => this.setChartPeriod('año')">Año</button>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-around align-items-end" style="height:100px">
